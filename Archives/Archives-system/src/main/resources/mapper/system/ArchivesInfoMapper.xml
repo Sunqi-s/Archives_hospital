@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.system.mapper.ArchivesInfoMapper">
+
+    <resultMap type="ArchivesInfo" id="ArchivesInfoResult">
+        <result property="id"    column="id"    />
+        <result property="code"    column="code"    />
+        <result property="fondsNumber"    column="fonds_number"    />
+        <result property="fondsName"    column="fonds_name"    />
+        <result property="retentionPeriod"    column="retention_period"    />
+        <result property="itemNumber"    column="item_number"    />
+        <result property="archiveNumber"    column="archive_number"    />
+        <result property="department"    column="department"    />
+        <result property="archivist"    column="archivist"    />
+        <result property="archiveDate"    column="archive_date"    />
+        <result property="remarks"    column="remarks"    />
+        <result property="archiveStatus"    column="archive_status"    />
+        <result property="fid"    column="fid"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="archiveCategoryCode"    column="archive_category_code"    />
+        <result property="year"    column="field1"    />
+        <result property="caseNumber"    column="field2"    />
+        <result property="responsibleParty"    column="field3"    />
+        <result property="securityLevel"    column="field4"    />
+        <result property="directoryNumber"    column="field5"    />
+        <result property="fileNumber"    column="field6"    />
+        <result property="documentDate"    column="field7"    />
+        <result property="pageCount"    column="field8"    />
+        <result property="archivesInput"    column="field9"    />
+        <result property="deptId"    column="field10"    />
+        <result property="searchInput"    column="field11"    />
+        <result property="employeeCode"    column="field12"    />
+        <result property="userAccount"    column="field13"    />
+        <result property="phoneNumber"    column="field14"    />
+        <result property="employeeStatus"    column="field15"    />
+        <result property="field16"    column="field16"    />
+        <result property="field17"    column="field17"    />
+        <result property="field18"    column="field18"    />
+        <result property="field19"    column="field19"    />
+        <result property="field20"    column="field20"    />
+        <result property="field21"    column="field21"    />
+        <result property="field22"    column="field22"    />
+        <result property="field23"    column="field23"    />
+        <result property="field24"    column="field24"    />
+        <result property="field25"    column="field25"    />
+        <result property="field26"    column="field26"    />
+        <result property="field27"    column="field27"    />
+        <result property="field28"    column="field28"    />
+        <result property="field29"    column="field29"    />
+        <result property="field30"    column="field30"    />
+        <association property="dept"  javaType="SysDept" resultMap="DeptResult"/>
+
+<!--        <association property="post" column="position_id" javaType="SysPost" resultMap="PostResult"/>-->
+    </resultMap>
+
+    <resultMap id="PostResult" type="SysPost">
+        <id property="postId" column="post_id"/>
+        <id property="postName" column="post_name"/>
+    </resultMap>
+
+    <resultMap id="DeptResult" type="SysDept">
+        <id property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+    </resultMap>
+
+    <sql id="selectArchivesInfoVo">
+        select id,
+               sys_dept.dept_name,
+               sys_dept.dept_id,
+               code,
+               fonds_number,
+               fonds_name,
+               retention_period,
+               item_number,
+               archive_number,
+               department,
+               archivist,
+               archive_date,
+               remarks,
+               archive_status,
+               fid,
+               archives_info.create_by,
+               archives_info.create_time,
+               archives_info.update_by,
+               archives_info.update_time,
+               archive_category_code,
+               field1,
+               field2,
+               field3,
+               field4,
+               field5,
+               field6,
+               field7,
+               field8,
+               field9,
+               field10,
+               field11,
+               field12,
+               field13,
+               field14,
+               field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30
+        FROM archives_info
+        LEFT JOIN sys_dept on field10 = sys_dept.dept_id
+    </sql>
+
+    <select id="selectArchivesInfoList" parameterType="ArchivesInfo" resultMap="ArchivesInfoResult">
+        <include refid="selectArchivesInfoVo"/>
+        <where>
+            <if test="code != null  and code != ''"> and code = #{code}</if>
+            <if test="fondsNumber != null  and fondsNumber != ''"> and fonds_number = #{fondsNumber}</if>
+            <if test="fondsName != null  and fondsName != ''"> and fonds_name like concat('%', #{fondsName}, '%')</if>
+            <if test="retentionPeriod != null  and retentionPeriod != ''"> and retention_period = #{retentionPeriod}</if>
+            <if test="itemNumber != null  and itemNumber != ''"> and item_number = #{itemNumber}</if>
+            <if test="archiveNumber != null  and archiveNumber != ''"> and archive_number = #{archiveNumber}</if>
+            <if test="department != null  and department != ''"> and department = #{department}</if>
+            <if test="archivist != null  and archivist != ''"> and archivist = #{archivist}</if>
+            <if test="archiveDate != null "> and archive_date = #{archiveDate}</if>
+            <if test="remarks != null  and remarks != ''"> and remarks = #{remarks}</if>
+            <if test="archiveStatus != null  and archiveStatus != ''"> and archive_status = #{archiveStatus}</if>
+            <if test="fid != null  and fid != ''"> and fid = #{fid}</if>
+            <if test="archiveCategoryCode != null  and archiveCategoryCode != ''"> and archive_category_code = #{archiveCategoryCode}</if>
+            <if test="year != null "> and field1 = #{year}</if>
+            <if test="caseNumber != null  and caseNumber != ''"> and field2 = #{caseNumber }</if>
+            <if test="responsibleParty != null  and responsibleParty != ''"> and field3 = #{responsibleParty}</if>
+            <if test="securityLevel != null  and securityLevel != ''"> and field4 = #{securityLevel}</if>
+            <if test="directoryNumber != null  and directoryNumber != ''"> and field5 = #{directoryNumber}</if>
+            <if test="fileNumber != null  and fileNumber != ''"> and field6 = #{fileNumber}</if>
+            <if test="documentDate != null "> and field7 = #{documentDate}</if>
+            <if test="pageCount != null "> and field8 = #{pageCount}</if>
+            <if test="archivesInput != null and archivesInput != ''">
+                AND (
+                id like concat('%', #{archivesInput}, '%')
+                OR code like concat('%', #{archivesInput}, '%')
+                OR fonds_number like concat('%', #{archivesInput}, '%')
+                OR fonds_name like concat('%', #{archivesInput}, '%')
+                OR retention_period like concat('%', #{archivesInput}, '%')
+                OR item_number like concat('%', #{archivesInput}, '%')
+                OR archive_number like concat('%', #{archivesInput}, '%')
+                OR department like concat('%', #{archivesInput}, '%')
+                OR archivist like concat('%', #{archivesInput}, '%')
+                OR remarks like concat('%', #{archivesInput}, '%')
+                OR field1 like concat('%', #{archivesInput}, '%')
+                OR field3 like concat('%', #{archivesInput}, '%')
+                OR field4 like concat('%', #{archivesInput}, '%')
+                OR field5 like concat('%', #{archivesInput}, '%')
+                OR field6 like concat('%', #{archivesInput}, '%')
+                OR field7 like concat('%', #{archivesInput}, '%')
+                OR field8 like concat('%', #{archivesInput}, '%')
+                OR dept_name like concat('%', #{archivesInput}, '%')
+                )
+            </if>
+
+            <if test="searchInput != null and searchInput != ''">
+                AND (
+                id like concat('%', #{searchInput}, '%')
+                OR field12 like concat('%', #{searchInput}, '%')
+                OR field13 like concat('%', #{searchInput}, '%')
+                OR field14 like concat('%', #{searchInput}, '%')
+                OR field15 like concat('%', #{searchInput}, '%')
+                OR archivist like concat('%', #{searchInput}, '%')
+                OR dept_name like concat('%', #{searchInput}, '%')
+                )
+            </if>
+            <if test="deptId != null and deptId != 0">
+                AND (field10 = #{deptId} OR field10 IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId}, ancestors) ))
+            </if>
+            <if test="employeeCode != null  and employeeCode != ''"> and field12 = #{employeeCode}</if>
+            <if test="userAccount != null  and userAccount != ''"> and field13 = #{userAccount}</if>
+            <if test="phoneNumber != null  and phoneNumber != ''"> and field14 = #{phoneNumber}</if>
+            <if test="employeeStatus != null  and employeeStatus != ''"> and field15 = #{employeeStatus}</if>
+        </where>
+    </select>
+
+    <select id="selectArchivesInfoById" parameterType="Long" resultMap="ArchivesInfoResult">
+        <include refid="selectArchivesInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertArchivesInfo" parameterType="ArchivesInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into archives_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null and code != ''">code,</if>
+            <if test="fondsNumber != null and fondsNumber != ''">fonds_number,</if>
+            <if test="fondsName != null and fondsName != ''">fonds_name,</if>
+            <if test="retentionPeriod != null and retentionPeriod != ''">retention_period,</if>
+            <if test="itemNumber != null">item_number,</if>
+            <if test="archiveNumber != null and archiveNumber != ''">archive_number,</if>
+            <if test="department != null and department != ''">department,</if>
+            <if test="archivist != null and archivist != ''">archivist,</if>
+            <if test="archiveDate != null">archive_date,</if>
+            <if test="remarks != null">remarks,</if>
+            <if test="archiveStatus != null">archive_status,</if>
+            <if test="fid != null">fid,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="archiveCategoryCode != null">archive_category_code,</if>
+            <if test="year != null">field1,</if>
+            <if test="caseNumber  != null and caseNumber  != ''">field2,</if>
+            <if test="responsibleParty != null">field3,</if>
+            <if test="securityLevel != null">field4,</if>
+            <if test="directoryNumber != null">field5,</if>
+            <if test="fileNumber != null">field6,</if>
+            <if test="documentDate != null">field7,</if>
+            <if test="pageCount != null">field8,</if>
+            <if test="deptId != null">field10,</if>
+            <if test="field16 != null">field16,</if>
+            <if test="field17 != null">field17,</if>
+            <if test="field18 != null">field18,</if>
+            <if test="field19 != null">field19,</if>
+            <if test="field20 != null">field20,</if>
+            <if test="field21 != null">field21,</if>
+            <if test="field22 != null">field22,</if>
+            <if test="field23 != null">field23,</if>
+            <if test="field24 != null">field24,</if>
+            <if test="field25 != null">field25,</if>
+            <if test="field26 != null">field26,</if>
+            <if test="field27 != null">field27,</if>
+            <if test="field28 != null">field28,</if>
+            <if test="field29 != null">field29,</if>
+            <if test="field30 != null">field30,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null and code != ''">#{code},</if>
+            <if test="fondsNumber != null and fondsNumber != ''">#{fondsNumber},</if>
+            <if test="fondsName != null and fondsName != ''">#{fondsName},</if>
+            <if test="retentionPeriod != null and retentionPeriod != ''">#{retentionPeriod},</if>
+            <if test="itemNumber != null">#{itemNumber},</if>
+            <if test="archiveNumber != null and archiveNumber != ''">#{archiveNumber},</if>
+            <if test="department != null and department != ''">#{department},</if>
+            <if test="archivist != null and archivist != ''">#{archivist},</if>
+            <if test="archiveDate != null">#{archiveDate},</if>
+            <if test="remarks != null">#{remarks},</if>
+            <if test="archiveStatus != null">#{archiveStatus},</if>
+            <if test="fid != null">#{fid},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="archiveCategoryCode != null">#{archiveCategoryCode},</if>
+            <if test="year != null">#{year},</if>
+            <if test="caseNumber  != null and caseNumber  != ''">#{caseNumber },</if>
+            <if test="responsibleParty != null">#{responsibleParty},</if>
+            <if test="securityLevel != null">#{securityLevel},</if>
+            <if test="directoryNumber != null">#{directoryNumber},</if>
+            <if test="fileNumber != null">#{fileNumber},</if>
+            <if test="documentDate != null">#{documentDate},</if>
+            <if test="pageCount != null">#{pageCount},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="field16 != null">#{field16},</if>
+            <if test="field17 != null">#{field17},</if>
+            <if test="field18 != null">#{field18},</if>
+            <if test="field19 != null">#{field19},</if>
+            <if test="field20 != null">#{field20},</if>
+            <if test="field21 != null">#{field21},</if>
+            <if test="field22 != null">#{field22},</if>
+            <if test="field23 != null">#{field23},</if>
+            <if test="field24 != null">#{field24},</if>
+            <if test="field25 != null">#{field25},</if>
+            <if test="field26 != null">#{field26},</if>
+            <if test="field27 != null">#{field27},</if>
+            <if test="field28 != null">#{field28},</if>
+            <if test="field29 != null">#{field29},</if>
+            <if test="field30 != null">#{field30},</if>
+         </trim>
+    </insert>
+
+    <update id="updateArchivesInfo" parameterType="ArchivesInfo">
+        update archives_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="code != null and code != ''">code = #{code},</if>
+            <if test="fondsNumber != null and fondsNumber != ''">fonds_number = #{fondsNumber},</if>
+            <if test="fondsName != null and fondsName != ''">fonds_name = #{fondsName},</if>
+            <if test="retentionPeriod != null and retentionPeriod != ''">retention_period = #{retentionPeriod},</if>
+            <if test="itemNumber != null">item_number = #{itemNumber},</if>
+            <if test="archiveNumber != null and archiveNumber != ''">archive_number = #{archiveNumber},</if>
+            <if test="department != null and department != ''">department = #{department},</if>
+            <if test="archivist != null and archivist != ''">archivist = #{archivist},</if>
+            <if test="archiveDate != null">archive_date = #{archiveDate},</if>
+            <if test="remarks != null">remarks = #{remarks},</if>
+            <if test="archiveStatus != null">archive_status = #{archiveStatus},</if>
+            <if test="fid != null">fid = #{fid},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="archiveCategoryCode != null">archive_category_code = #{archiveCategoryCode},</if>
+            <if test="year != null">field1 = #{year},</if>
+            <if test="caseNumber  != null and caseNumber  != ''">field2 = #{caseNumber },</if>
+            <if test="responsibleParty != null">field3 = #{responsibleParty},</if>
+            <if test="securityLevel != null">field4 = #{securityLevel},</if>
+            <if test="directoryNumber != null">field5 = #{directoryNumber},</if>
+            <if test="fileNumber != null">field6 = #{fileNumber},</if>
+            <if test="documentDate != null">field7 = #{documentDate},</if>
+            <if test="pageCount != null">field8 = #{pageCount},</if>
+            <if test="deptId != null">field10 = #{deptId},</if>
+            <if test="field16 != null">field16 = #{field16},</if>
+            <if test="field17 != null">field17 = #{field17},</if>
+            <if test="field18 != null">field18 = #{field18},</if>
+            <if test="field19 != null">field19 = #{field19},</if>
+            <if test="field20 != null">field20 = #{field20},</if>
+            <if test="field21 != null">field21 = #{field21},</if>
+            <if test="field22 != null">field22 = #{field22},</if>
+            <if test="field23 != null">field23 = #{field23},</if>
+            <if test="field24 != null">field24 = #{field24},</if>
+            <if test="field25 != null">field25 = #{field25},</if>
+            <if test="field26 != null">field26 = #{field26},</if>
+            <if test="field27 != null">field27 = #{field27},</if>
+            <if test="field28 != null">field28 = #{field28},</if>
+            <if test="field29 != null">field29 = #{field29},</if>
+            <if test="field30 != null">field30 = #{field30},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchivesInfoById" parameterType="Long">
+        delete from archives_info where id = #{id}
+    </delete>
+
+    <delete id="deleteArchivesInfoByIds" parameterType="String">
+        delete from archives_info where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
