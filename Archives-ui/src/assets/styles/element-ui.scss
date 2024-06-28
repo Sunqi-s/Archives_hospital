@@ -1,20 +1,280 @@
-// cover some element-ui styles
+.el-icon-search:before{
+  color: #FFFFFF;
+}
 
+.el-descriptions--medium.is-bordered .el-descriptions-item__cell {
+  padding: 10px;
+  width: 25%;
+  color: rgb(128, 120, 120);
+}
+.el-dialog__header {
+  padding: 20px;
+  padding-bottom: 10px;
+  background-color: #1C69DB;
+  height: 48px;
+}
+.el-dialog__title {
+  line-height: 24px;
+  font-size: 18px;
+  color: #ffffff;
+
+}
+.formStyle {
+   .el-form-item {
+       margin-bottom: 0px;
+     }
+}
+.el-icon-close:before {
+  content: "";
+  color: #ffffff;
+}
+.form-dady {
+  .el-form-item{
+    margin-bottom: 0;
+  }
+}
+.block{
+  margin-left: 500px;
+  margin-top: 30px;
+}
+.el-descriptions--medium.is-bordered .el-descriptions-item__cell {
+  padding: 10px;
+  width: 25%;
+}
+.table{
+  margin-top: 50px;
+}
+.el-drawer__header {
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  color: #727b77;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin-bottom: 32px;
+  padding: 20px;
+  padding-bottom: 0;
+  background-color: #1C69DB;
+}
+.el-drawer__header > :first-child {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  color: #ffffff;
+  margin-top: -19px;
+}
+.el-drawer__close-btn {
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: inherit;
+  background-color: transparent;
+  margin-top: -15px;
+}
+.demo-drawer__footer{
+  display: flex;
+  justify-content: center;
+}
+//-------------------------------------------全文检索页面------------------------------------------------------------------
+#app1 {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 200px;
+}
+.full_header{
+  font-size: 24px;
+  margin-top: -100px;
+  font-family: '黑体', sans-serif;
+}
+.full_p{
+  color: rgb(162, 159, 159);
+  font-size: 12px;
+  margin-left: 4px;
+}
+.full_input {
+  width: 40%;
+}
+
+.full_card {
+  margin-top: 30px;
+  width: 130%;
+}
+//--------------------------------热门检索页面---------------------------------------------------------------------------
+.hot_input{
+  width:100%;
+}
+.hot-card{
+  width: 99%;
+  height: 800px;
+  margin: 0 auto;
+}
+.hot_card{
+  padding: 0px 0px 0px 22px !important;
+  background-color: #1C69DB;
+}
+.el-input-group__append button.el-button, .el-input-group__append div.el-select .el-input__inner, .el-input-group__append div.el-select:hover .el-input__inner, .el-input-group__prepend button.el-button, .el-input-group__prepend div.el-select .el-input__inner, .el-input-group__prepend div.el-select:hover .el-input__inner {
+  border-color: transparent;
+  background-color: #1c69db;
+  color: inherit;
+  border-top: 0;
+  border-bottom: 0;}
+.hot-button {
+  background-color: #ffffff; /* 默认背景颜色 */
+  border-color: #ffffff; /* 默认边框颜色 */
+  margin-left: -20px;
+}
+.hot-button:hover,
+.hot-button:focus {
+  background-color: #ffffff; /* 悬停时的背景颜色 */
+  border-color: #ffffff; /* 悬停时的边框颜色 */
+}
+
+.hot-button:active {
+  background-color: #ffffff; /* 点击时的背景颜色 */
+  border-color: #ffffff; /* 点击时的边框颜色 */
+}
+//-------------------------------------------------------------------------------------
+.container {
+  border-collapse: collapse;
+  width: 100%; /* 表格宽度为父容器宽度的50% */
+}
+
+.year_input{
+  width: 20%;
+  height: 32px;
+}
+.tag {
+  margin: 5px;
+}
+.el-icon-search{
+  color: #1C69DB;
+}
+.document-input{
+  width: 350px;
+}
+.docu-input{
+  margin-left: 50px;
+  width: 350px;
+}
+.form-item {
+  margin-bottom: -3px; /* 增加el-form-item之间的间距 */
+  width: 100%;
+}
+.dianzi-item{
+  width: 457.75px;
+}
+.text-drawer{
+  margin-left: 40px;
+  text-align: left;
+  margin-top: 20px;
+
+  .upload-demo{
+    width: 500%;
+  }
+
+}
 .el-breadcrumb__inner,
 .el-breadcrumb__inner a {
   font-weight: 400 !important;
 }
+.el-upload-dragger {
+  background-color: #dcdfe6;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+}
+.el-upload__tip {
+  font-size: 12px;
+  color: #606266;
 
-.el-upload {
-  input[type="file"] {
-    display: none !important;
-  }
+}
+.el-upload-dragger .el-upload__text {
+  color: #606266;
+  font-size: 7px;
+  text-align: center;
 }
 
 .el-upload__input {
   display: none;
 }
 
+.el-descriptions--medium.is-bordered .el-descriptions-item__cell {
+  padding: 10px;
+  width: 25%;
+}
+
+.Senior-button{
+  display: inline-block;
+  // float: right;
+}
+.mb8{
+  margin-top: 30px;
+}
+
+选择归档人
+.titletop {
+ width: 100%;
+ height: 35px;
+ background-color: #1C69DB;
+ line-height: 36px;
+ padding-left: 20px;
+ margin: -60px 0 40px -20px;
+ font-size: 16px;
+}
+//归档人X
+.el-dialog__close {
+  color: #908e8e;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 22px;
+}
+//归档人左右布局
+.dialog-content {
+  display: flex;
+}
+//左侧卡片
+.left-card {
+  margin-right: 20px;
+  margin-left: 5px;
+  width: 35%;
+  height: 100vh;
+  box-shadow: 0 0 12px rgba(163, 162, 162, 0.878); /**上下左右都添加阴影*/
+}
+//右侧卡片
+.right-card {
+  flex: 1;
+  box-shadow: 0 0 12px rgba(163, 162, 162, 0.878); /**上下左右都添加阴影*/
+  position: relative;
+  right: -14px;
+}
+//左侧Tree
+.street-tree {
+  margin-top: 20px;
+}
+.tree-list {
+  margin-top: 20px;
+}
+
+
+//归档人搜索图标
+.search-icon-container {
+  position: relative;
+  border-radius: 4px;
+  right: -5px;
+  width: 24px; /**调整为适当的大小*/
+  background-color: #c7c7c7; /**灰色背景颜色*/
+  width: 60px; /**调整为适当的大小*/
+  height: 36px; /**调整为适当的大小*/
+}
+.search-icon-container:before {
+  content: "";
+  position: absolute;
+  right: 20px;
+  top: 500px;
+  transform: translateY(-50%);
+}
 .cell {
   .el-tag {
     margin-right: 0px;
@@ -46,13 +306,6 @@
   }
 }
 
-// to fixed https://github.com/ElemeFE/element/issues/2461
-.el-dialog {
-  transform: none;
-  left: 0;
-  position: relative;
-  margin: 0 auto;
-}
 
 // refine element ui upload
 .upload-container {
