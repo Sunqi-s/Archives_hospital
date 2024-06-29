@@ -37,7 +37,7 @@
     }
     .app-loading .app-loading-logo {
       display: block;
-      width: 90px;
+      width: 200px;
       margin: 0 auto 20px;
     }
     .app-loading .app-loading-dots {
@@ -111,6 +111,7 @@
 <body>
 <div id="app" class="app-loading">
   <div class="app-loading-wrap">
+    <img src="<%= require('@/assets/logo/logo_loading.png') %>" class="app-loading-logo" alt="Logo">
     <div class="app-loading-dots">
       <span class="dot dot-spin"><i></i><i></i><i></i><i></i></span>
     </div>
