@@ -41,7 +41,7 @@ export default {
   data() {
     return {
       // 顶部栏初始数
-      visibleNumber: 5,
+      visibleNumber: 8,
       // 当前激活菜单的 index
       currentIndex: undefined
     };
@@ -119,7 +119,7 @@ export default {
   methods: {
     // 根据宽度计算设置显示栏数
     setVisibleNumber() {
-      const width = document.body.getBoundingClientRect().width / 3;
+      const width = document.body.getBoundingClientRect().width / 2;
       this.visibleNumber = parseInt(width / 85);
     },
     // 菜单选择事件
