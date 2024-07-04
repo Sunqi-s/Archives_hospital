@@ -17,11 +17,11 @@
 
     <dependencies>
 
-        <!-- velocity代码生成使用模板 -->
+        <!-- velocity代码生成使用模板 ureport2依赖冲突 废弃
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-core</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- 通用工具-->
         <dependency>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.archive.mapper.ArchiveReportTemplatesMapper">
+
+    <resultMap type="ArchiveReportTemplates" id="ArchiveReportTemplatesResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="content"    column="content"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectArchiveReportTemplatesVo">
+        select id, name, content, create_by, create_time, update_by, update_time from archive_report_templates
+    </sql>
+
+    <select id="selectArchiveReportTemplatesList" parameterType="ArchiveReportTemplates" resultMap="ArchiveReportTemplatesResult">
+        <include refid="selectArchiveReportTemplatesVo"/>
+        <where>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectArchiveReportTemplatesById" parameterType="Long" resultMap="ArchiveReportTemplatesResult">
+        <include refid="selectArchiveReportTemplatesVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectArchiveReportTemplatesByName" parameterType="String" resultMap="ArchiveReportTemplatesResult">
+        <include refid="selectArchiveReportTemplatesVo"/>
+        where name = #{name}
+    </select>
+
+    <insert id="insertArchiveReportTemplates" parameterType="ArchiveReportTemplates" useGeneratedKeys="true" keyProperty="id">
+        insert into archive_report_templates
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="content != null">content,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="content != null">#{content},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateArchiveReportTemplates" parameterType="ArchiveReportTemplates">
+        update archive_report_templates
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveReportTemplatesById" parameterType="Long">
+        delete from archive_report_templates where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveReportTemplatesByIds" parameterType="String">
+        delete from archive_report_templates where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteArchiveReportTemplatesByName" parameterType="String">
+        delete from archive_report_templates where name = #{name}
+    </delete>
+</mapper>
