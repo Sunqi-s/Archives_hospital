@@ -185,23 +185,23 @@ export default {
     },
     /** 新增按钮操作 */
     handleAdd() {
-      this.$tab.openPage("新增表单", '/system/ureport/designer');
+      this.$tab.openPage("报表新增", '/system/biz-settings/designer');
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       const tpl_name = row.name; // 将 name 数组中的元素拼接成一个字符串
-      this.$tab.openPage("报表设计", "/system/ureport/designer/" + tpl_name);
+      this.$tab.openPage("设计报表", "/system/biz-settings/designer/" + tpl_name);
     },
     // 报表预览带参数
-    /*previewWithPrams(row) {
+   /* previewWithPrams(row) {
       const tpl_name = row.name;
-      const dates_list = Array.isArray(this.dates_list) ? this.dates_list.join(',') : this.dates_list;
-      this.$tab.openPage("打印预览", "/system/rpttemplates/preview/" + tpl_name + "/" + dates_list);
+      const ids = [8,9];
+      this.$tab.openPage("打印预览", "/system/biz-settings/preview/" + tpl_name, {ids:JSON.stringify(ids)});
     },*/
     // 报表预览
     preview(row) {
       const tpl_name = row.name;
-      this.$tab.openPage("打印预览", "/system/ureport/preview/" + tpl_name);
+      this.$tab.openPage("报表预览", "/system/biz-settings/preview/" + tpl_name);
     },
     /** 删除按钮操作 */
     handleDelete(row) {

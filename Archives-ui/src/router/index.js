@@ -41,35 +41,6 @@ export const constantRoutes = [
       }
     ]
   },
-
-  {
-    path: '/system/ureport',
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: 'designer', // 使用动态参数传递 table_name
-        component: (resolve) => require(['@/views/archive/rpttemplates/designer'], resolve),
-        hidden: true
-      },
-      {
-        path: 'designer/:tpl_name', // 使用动态参数传递 table_name
-        component: (resolve) => require(['@/views/archive/rpttemplates/designer'], resolve),
-        hidden: true
-      },
-      {
-        path: 'preview/:tpl_name/',
-        component: (resolve) => require(['@/views/archive/rpttemplates/preview/'], resolve),
-        hidden: true
-      },
-      {
-        path: 'preview/:tpl_name/:dates_list',
-        component: (resolve) => require(['@/views/archive/rpttemplates/preview/'], resolve),
-        hidden: true
-      },
-    ]
-  },
-
   {
     path: '/login',
     component: () => import('@/views/login'),
@@ -190,13 +161,7 @@ export const dynamicRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
       }
     ]
-  },
-  {
-    path: '/rpttemplates/designer',
-    component: () => import('@/views/index'),
-    hidden: true
-  },
-
+  }
 ]
 
 // 防止连续点击多次路由报错

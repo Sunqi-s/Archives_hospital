@@ -12,15 +12,15 @@ export default {
     return {
       showIframe: true,
       iframeSrc: '',
-      dates_list: [], // 示例数据，需要根据实际情况初始化
+      ids: [], // 示例数据，需要根据实际情况初始化
       tpl_name: '',
     };
   },
   methods: {
     openIframe() {
       let url = `/ureport/preview?&_u=mysql%3A${this.tpl_name}`;  // 报表名+参数去往对应页面
-      if(this.dates_list){
-        url +=`&id=${this.dates_list}`;
+      if(this.ids){
+        url +=`&id=${this.ids}`;
       }
       this.iframeSrc = url;
       this.showIframe = true;
@@ -29,8 +29,10 @@ export default {
     }
   },
   created() {
-    this.dates_list = this.$route.params.dates_list;
     this.tpl_name = this.$route.params.tpl_name;
+    if(this.$route.query.ids) {
+      this.ids = JSON.parse(this.$route.query.ids);
+    }
 // 直接在创建时打开预览
 setTimeout(() => {
   this.openIframe();
