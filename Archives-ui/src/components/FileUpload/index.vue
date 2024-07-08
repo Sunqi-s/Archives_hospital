@@ -6,6 +6,7 @@
       :before-upload="handleBeforeUpload"
       :file-list="fileList"
       :limit="limit"
+      drag
       :on-error="handleUploadError"
       :on-exceed="handleExceed"
       :on-success="handleUploadSuccess"
@@ -13,9 +14,10 @@
       :headers="headers"
       class="upload-file-uploader"
       ref="fileUpload"
+
     >
-      <!-- 上传按钮 -->
-      <el-button size="mini" type="primary">选取文件</el-button>
+      <i class="el-icon-upload"></i>
+      <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
       <!-- 上传提示 -->
       <div class="el-upload__tip" slot="tip" v-if="showTip">
         请上传
@@ -55,12 +57,12 @@ export default {
     // 大小限制(MB)
     fileSize: {
       type: Number,
-      default: 5,
+      default: 100,
     },
     // 文件类型, 例如['png', 'jpg', 'jpeg']
     fileType: {
       type: Array,
-      default: () => ["doc", "xls", "ppt", "txt", "pdf"],
+      default: () => ["doc", "xls", "ppt", "txt", "pdf", "xlsx","jpg","png","pdf","mp4"],
     },
     // 是否显示提示
     isShowTip: {
@@ -212,5 +214,27 @@ export default {
 }
 .ele-upload-list__item-content-action .el-link {
   margin-right: 10px;
+}
+.el-upload-dragger {
+  background-color: #ffffff;
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  box-sizing: border-box;
+  cursor: pointer;
+  overflow: hidden;
+  padding: var(--el-upload-dragger-padding-horizontal) var(--el-upload-dragger-padding-vertical);
+  position: relative;
+  text-align: center;
+}
+.el-upload-dragger {
+  background-color: var(--el-fill-color-blank);
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  box-sizing: border-box;
+  cursor: pointer;
+  overflow: hidden;
+  padding: var(--el-upload-dragger-padding-horizontal) var(--el-upload-dragger-padding-vertical);
+  position: relative;
+  text-align: center;
 }
 </style>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.system.mapper.SysOssMapper">
+
+    <resultMap type="SysOss" id="SysOssResult">
+        <result property="id"    column="id"    />
+        <result property="path"    column="path"    />
+        <result property="url"    column="url"    />
+        <result property="name"    column="name"    />
+        <result property="size"    column="size"    />
+        <result property="fid"    column="fid"    />
+        <result property="suffix"    column="suffix"    />
+        <result property="deleteFlg"    column="delete_flg"    />
+        <result property="deleteDate"    column="delete_date"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectSysOssVo">
+        select id, path, url, name, size, fid, suffix, delete_flg, delete_date, create_by, create_time, update_by, update_time from sys_oss
+    </sql>
+
+    <select id="selectSysOssList" parameterType="SysOss" resultMap="SysOssResult">
+        <include refid="selectSysOssVo"/>
+        <where>
+        </where>
+    </select>
+
+    <select id="selectSysOssById" parameterType="Long" resultMap="SysOssResult">
+        <include refid="selectSysOssVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertSysOss" parameterType="SysOss" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_oss
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="path != null">path,</if>
+            <if test="url != null">url,</if>
+            <if test="name != null">name,</if>
+            <if test="size != null">size,</if>
+            <if test="fid != null">fid,</if>
+            <if test="suffix != null">suffix,</if>
+            <if test="deleteFlg != null">delete_flg,</if>
+            <if test="deleteDate != null">delete_date,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="path != null">#{path},</if>
+            <if test="url != null">#{url},</if>
+            <if test="name != null">#{name},</if>
+            <if test="size != null">#{size},</if>
+            <if test="fid != null">#{fid},</if>
+            <if test="suffix != null">#{suffix},</if>
+            <if test="deleteFlg != null">#{deleteFlg},</if>
+            <if test="deleteDate != null">#{deleteDate},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysOss" parameterType="SysOss">
+        update sys_oss
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="path != null">path = #{path},</if>
+            <if test="url != null">url = #{url},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="size != null">size = #{size},</if>
+            <if test="fid != null">fid = #{fid},</if>
+            <if test="suffix != null">suffix = #{suffix},</if>
+            <if test="deleteFlg != null">delete_flg = #{deleteFlg},</if>
+            <if test="deleteDate != null">delete_date = #{deleteDate},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSysOssById" parameterType="Long">
+        delete from sys_oss where id = #{id}
+    </delete>
+
+    <delete id="deleteSysOssByIds" parameterType="String">
+        delete from sys_oss where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
