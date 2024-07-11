@@ -48,6 +48,15 @@ module.exports = {
         pathRewrite: {
           '^/ureport': '/ureport'
         }
+      },
+      // KKFileView服务器端口 反向代理到KKFilePreview服务器
+      '/preview': {
+        target: 'http://localhost:8012',
+        ws:false,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/preview': ''
+        }
       }
     },
     disableHostCheck: true
