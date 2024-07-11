@@ -87,6 +87,19 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
+  },
+  {
+    path: '/system/biz-settings/item-edit',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'index/:categoryId(\\d+)',
+        component: () => import('@/views/archive/category/editItem'),
+        name: 'GenEdit',
+        meta: { title: '修改分类字段', activeMenu: '/system/biz-settings/category' }
+      }
+    ]
   }
 ]
 

@@ -2,7 +2,7 @@ package com.archives.common.constant;
 
 /**
  * 代码生成通用常量
- * 
+ *
  * @author archives
  */
 public class GenConstants
@@ -45,15 +45,15 @@ public class GenConstants
             "bit", "bigint", "float", "double", "decimal" };
 
     /** 页面不需要编辑字段 */
-    public static final String[] COLUMNNAME_NOT_EDIT = { "id", "create_by", "create_time", "del_flag" };
+    public static final String[] COLUMNNAME_NOT_EDIT = { "id", "create_by", "create_time", "del_flag", "field" };
 
     /** 页面不需要显示的列表字段 */
     public static final String[] COLUMNNAME_NOT_LIST = { "id", "create_by", "create_time", "del_flag", "update_by",
-            "update_time" };
+            "update_time" , "field" };
 
     /** 页面不需要查询字段 */
     public static final String[] COLUMNNAME_NOT_QUERY = { "id", "create_by", "create_time", "del_flag", "update_by",
-            "update_time", "remark" };
+            "update_time", "remark" , "field" };
 
     /** Entity基类字段 */
     public static final String[] BASE_ENTITY = { "createBy", "createTime", "updateBy", "updateTime", "remark" };
