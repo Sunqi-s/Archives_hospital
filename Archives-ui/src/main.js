@@ -37,6 +37,8 @@ import DictTag from '@/components/DictTag'
 import VueMeta from 'vue-meta'
 // 字典数据组件
 import DictData from '@/components/DictData'
+// 文件预览组件
+import onlinePreview from "@/components/onlinePreview/index.vue";
 
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
@@ -55,6 +57,7 @@ Vue.component('Pagination', Pagination)
 Vue.component('RightToolbar', RightToolbar)
 Vue.component('Editor', Editor)
 Vue.component('FileUpload', FileUpload)
+Vue.component('onlinePreview', onlinePreview)
 Vue.component('ImageUpload', ImageUpload)
 Vue.component('ImagePreview', ImagePreview)
 

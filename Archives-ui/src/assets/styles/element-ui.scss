@@ -8,7 +8,7 @@
   color: rgb(128, 120, 120);
 }
 .el-dialog__header {
-  padding: 20px;
+  padding: 13px;
   padding-bottom: 10px;
   background-color: #1C69DB;
   height: 48px;
@@ -17,7 +17,6 @@
   line-height: 24px;
   font-size: 18px;
   color: #ffffff;
-
 }
 .formStyle {
    .el-form-item {
@@ -45,17 +44,14 @@
   margin-top: 50px;
 }
 .el-drawer__header {
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
   color: #727b77;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
   margin-bottom: 32px;
   padding: 20px;
   padding-bottom: 0;
   background-color: #1C69DB;
+  height: 35px;
 }
 .el-drawer__header > :first-child {
   -webkit-box-flex: 1;
@@ -180,7 +176,7 @@
   font-weight: 400 !important;
 }
 .el-upload-dragger {
-  background-color: #dcdfe6;
+  background-color: #f5f5f5;
   border: 1px dashed #d9d9d9;
   border-radius: 6px;
 }
@@ -191,8 +187,9 @@
 }
 .el-upload-dragger .el-upload__text {
   color: #606266;
-  font-size: 7px;
+  font-size: 16px;
   text-align: center;
+  //font-weight: bold;
 }
 
 .el-upload__input {
@@ -212,7 +209,7 @@
   margin-top: 30px;
 }
 
-选择归档人
+//选择归档人
 .titletop {
  width: 100%;
  height: 35px;

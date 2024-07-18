@@ -3,7 +3,7 @@ archives:
   # 名称
   name: Archives
   # 版本
-  version: 3.8.7
+  version: 1.0.0
   # 版权年份
   copyrightYear: 2024
   # 文件路径 示例（ Windows配置D:/archives/uploadPath，Linux配置 /home/archives/uploadPath）
@@ -57,9 +57,9 @@ spring:
   servlet:
     multipart:
       # 单个文件大小
-      max-file-size: 10MB
+      max-file-size: 100MB
       # 设置总上传的文件大小
-      max-request-size: 20MB
+      max-request-size: 500MB
   # 服务模块
   devtools:
     restart:

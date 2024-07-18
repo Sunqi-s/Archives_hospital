@@ -23,7 +23,7 @@ import com.archives.framework.config.ServerConfig;
 
 /**
  * 通用请求处理
- * 
+ *
  * @author archives
  */
 @RestController
@@ -39,7 +39,7 @@ public class CommonController
 
     /**
      * 通用下载请求
-     * 
+     *
      * @param fileName 文件名称
      * @param delete 是否删除
      */
@@ -83,6 +83,7 @@ public class CommonController
             String fileName = FileUploadUtils.upload(filePath, file);
             String url = serverConfig.getUrl() + fileName;
             AjaxResult ajax = AjaxResult.success();
+            ajax.put("size", file.getSize());
             ajax.put("url", url);
             ajax.put("fileName", fileName);
             ajax.put("newFileName", FileUtils.getName(fileName));

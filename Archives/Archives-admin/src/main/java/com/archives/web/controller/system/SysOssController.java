@@ -75,9 +75,9 @@ public class SysOssController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:oss:add')")
     @Log(title = "文件上传", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody SysOss sysOss)
+    public AjaxResult add(@RequestBody List<SysOss> sysOssList)
     {
-        return toAjax(sysOssService.insertSysOss(sysOss));
+        return toAjax(sysOssService.insertSysOssBatch(sysOssList));
     }
 
     /**

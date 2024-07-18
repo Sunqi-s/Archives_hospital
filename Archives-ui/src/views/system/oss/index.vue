@@ -26,7 +26,14 @@
 
     <el-table v-loading="loading" :data="ossList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="URL地址" align="center" prop="url" />
+      <el-table-column label="文件名" align="center" prop="name" width="400"/>
+      <el-table-column label="URL地址" align="center" prop="url" width="600" />
+      <el-table-column label="文件类型" align="center" prop="suffix" width="100"/>
+      <el-table-column label="文件大小" align="center" width="150">
+        <template slot-scope="scope">
+          <span>{{ formatSize(scope.row.size) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
@@ -53,7 +60,7 @@
     </el-table>
 
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
@@ -61,32 +68,38 @@
     />
 
     <!-- 添加或修改文件上传对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="" prop="url">
-          <file-upload v-model="form.url"/>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
-      </div>
+    <template>
+      <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body>
+        <el-form ref="form" :model="form"  >
+          <el-form-item label="" prop="url">
+            <file-upload
+              :limit="5"
+              :fileSize="1000"
+              :fileType="['doc', 'xls', 'ppt', 'txt', 'pdf', 'xlsx', 'jpg', 'png', 'pdf', 'mp4']"
+              v-model="form.uploadedFiles"
+              @input="handleFileUpload"
+            />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="submitForm">确 定</el-button>
+          <el-button @click="cancel">取 消</el-button>
+        </div>
+      </el-dialog>
+    </template>
+
+    <!-- 预览文件对话框 -->
+    <el-dialog :title="previewTitle" :visible.sync="previewVisible" fullscreen >
+      <onlinePreview v-if="previewVisible" :initialUrl="previewUrl" />
     </el-dialog>
   </div>
 </template>
 
 <script>
 import { listOss, delOss, addOss, updateOss } from "@/api/system/oss";
-import preview from "@/views/archive/rpttemplates/preview.vue";
-import {Base64} from "js-base64";
 
 export default {
   name: "Oss",
-  computed: {
-    preview() {
-      return preview
-    }
-  },
   data() {
     return {
       urls: [],
@@ -105,7 +118,7 @@ export default {
       // 文件上传表格数据
       ossList: [],
       // 弹出层标题
-      title: "",
+      title: "文件上传",
       // 是否显示弹出层
       open: false,
       // 查询参数
@@ -114,10 +127,15 @@ export default {
         pageSize: 10,
       },
       // 表单参数
-      form: {},
+      form: {
+        uploadedFiles: []
+      },
       // 表单校验
-      rules: {
-      }
+      rules: {},
+      // 预览对话框相关
+      previewVisible: false,
+      previewTitle: "文件预览",
+      previewUrl: "",
     };
   },
   created() {
@@ -140,42 +158,36 @@ export default {
     },
     // 表单重置
     reset() {
-      this.form = {
-        id: null,        path: null,        url: null,        name: null,        size: null,        fid: null,        suffix: null,        deleteFlg: null,        deleteDate: null,        createBy: null,        createTime: null,        updateBy: null,        updateTime: null      };
+      this.form = {uploadedFiles:[]};
       this.resetForm("form");
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id)
-      this.urls=selection.map(item => item.url)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
+      this.ids = selection.map(item => item.id);
+      this.urls = selection.map(item => item.url);
+      this.single = selection.length !== 1;
+      this.multiple = !selection.length;
     },
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加文件上传";
     },
     /** 提交按钮 */
     submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
           if (this.form.id != null) {
-            updateOss(this.form).then(response => {
+            updateOss(this.form.uploadedFiles).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
-            addOss(this.form).then(response => {
+            addOss(this.form.uploadedFiles).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
             });
           }
-        }
-      });
     },
     /** 删除按钮操作 */
     handleDelete(row) {
@@ -188,14 +200,49 @@ export default {
         this.$modal.msgSuccess("删除成功");
       }).catch(() => {});
     },
-
+    handleFileUpload(files) {
+      const filesArray = files.map(file => {
+        const suffix = file.name.substring(file.name.lastIndexOf('.') + 1);
+        return {
+          path: '',           // 文件路径
+          url: file.url,      // URL
+          name: this.getFileName(file.name),    // 文件名
+          size: file.size,    // 文件大小
+          fid: file.uid,      // 关联ID
+          suffix: suffix,     // 文件后缀
+        };
+      });
+      this.form.uploadedFiles = filesArray;
+    },
+    // 获取文件名称
+    getFileName(name) {
+      // 如果是url那么取最后的名字 如果不是直接返回
+      if (name.lastIndexOf("/") > -1) {
+        return name.slice(name.lastIndexOf("/") + 1);
+      } else {
+        return name;
+      }
+    },
     // 预览
     onlinePreview(row) {
-      const baseURL = process.env.VUE_APP_FILE_SERVER_BASE_URL;
-      const url = baseURL+row.url; //要预览文件的访问地址
-      this.$tab.openPage("文件预览", "/system/onlinePreview/" + encodeURIComponent(Base64.encode(url)));
+      this.previewUrl = row.url;
+      this.previewVisible = true;
     },
-
+    // 关闭预览
+    closePreview() {
+      this.previewVisible = false;
+      this.previewUrl = "";
+    },
+    //文件大小单位转换
+    formatSize(size) {
+      // 文件大小格式化，转换为KB或MB
+      const sizeInKB = size / 1024;
+      if (sizeInKB < 1024) {
+        return sizeInKB.toFixed(2) + ' KB';
+      } else {
+        return (sizeInKB / 1024).toFixed(2) + ' MB';
+      }
+    },
   }
 };
 </script>

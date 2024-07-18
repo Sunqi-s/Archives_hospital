@@ -14,7 +14,6 @@
       :headers="headers"
       class="upload-file-uploader"
       ref="fileUpload"
-
     >
       <i class="el-icon-upload"></i>
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -31,7 +30,7 @@
     <transition-group class="upload-file-list el-upload-list el-upload-list--text" name="el-fade-in-linear" tag="ul">
       <li :key="file.url" class="el-upload-list__item ele-upload-list__item-content" v-for="(file, index) in fileList">
         <el-link :href="`${baseUrl}${file.url}`" :underline="false" target="_blank">
-          <span class="el-icon-document"> {{ getFileName(file.name) }} </span>
+          <span class="el-icon-document"> {{ getFileName(file.name) }} ({{ getFileSize(file.size) }}) </span>
         </el-link>
         <div class="ele-upload-list__item-content-action">
           <el-link :underline="false" @click="handleDelete(index)" type="danger">删除</el-link>
@@ -62,13 +61,13 @@ export default {
     // 文件类型, 例如['png', 'jpg', 'jpeg']
     fileType: {
       type: Array,
-      default: () => ["doc", "xls", "ppt", "txt", "pdf", "xlsx","jpg","png","pdf","mp4"],
+      default: () => ["doc", "xls", "ppt", "txt", "pdf", "xlsx", "jpg", "png", "pdf", "mp4"],
     },
     // 是否显示提示
     isShowTip: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   data() {
     return {
@@ -92,7 +91,7 @@ export default {
           // 然后将数组转为对象数组
           this.fileList = list.map(item => {
             if (typeof item === "string") {
-              item = { name: item, url: item };
+              item = { name: item, url: item};
             }
             item.uid = item.uid || new Date().getTime() + temp++;
             return item;
@@ -145,11 +144,12 @@ export default {
     handleUploadError(err) {
       this.$modal.msgError("上传文件失败，请重试");
       this.$modal.closeLoading();
+      this.number--;
     },
     // 上传成功回调
     handleUploadSuccess(res, file) {
       if (res.code === 200) {
-        this.uploadList.push({ name: res.fileName, url: res.fileName });
+        this.uploadList.push({ name: res.fileName, url: res.fileName, size: res.size });
         this.uploadedSuccessfully();
       } else {
         this.number--;
@@ -162,7 +162,8 @@ export default {
     // 删除文件
     handleDelete(index) {
       this.fileList.splice(index, 1);
-      this.$emit("input", this.listToString(this.fileList));
+      //this.$emit("input", this.listToString(this.fileList));
+      this.$emit("input", this.fileList);
     },
     // 上传结束处理
     uploadedSuccessfully() {
@@ -170,7 +171,8 @@ export default {
         this.fileList = this.fileList.concat(this.uploadList);
         this.uploadList = [];
         this.number = 0;
-        this.$emit("input", this.listToString(this.fileList));
+        //this.$emit("input", this.listToString(this.fileList));
+        this.$emit("input", this.fileList);
         this.$modal.closeLoading();
       }
     },
@@ -183,6 +185,10 @@ export default {
         return name;
       }
     },
+    // 获取文件大小
+    getFileSize(size) {
+      return (size / 1024 / 1024).toFixed(2) + ' MB';
+    },
     // 对象转成指定字符串分隔
     listToString(list, separator) {
       let strs = "";
@@ -191,14 +197,17 @@ export default {
         strs += list[i].url + separator;
       }
       return strs != '' ? strs.substr(0, strs.length - 1) : '';
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style scoped lang="scss">
 .upload-file-uploader {
   margin-bottom: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .upload-file-list .el-upload-list__item {
   border: 1px solid #e4e7ed;
@@ -214,27 +223,5 @@ export default {
 }
 .ele-upload-list__item-content-action .el-link {
   margin-right: 10px;
-}
-.el-upload-dragger {
-  background-color: #ffffff;
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  box-sizing: border-box;
-  cursor: pointer;
-  overflow: hidden;
-  padding: var(--el-upload-dragger-padding-horizontal) var(--el-upload-dragger-padding-vertical);
-  position: relative;
-  text-align: center;
-}
-.el-upload-dragger {
-  background-color: var(--el-fill-color-blank);
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  box-sizing: border-box;
-  cursor: pointer;
-  overflow: hidden;
-  padding: var(--el-upload-dragger-padding-horizontal) var(--el-upload-dragger-padding-vertical);
-  position: relative;
-  text-align: center;
 }
 </style>

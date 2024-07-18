@@ -67,6 +67,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
+    <insert id="insertSysOssBatch" parameterType="java.util.List">
+        insert into sys_oss (path, url, name, size, fid, suffix, delete_flg, delete_date, create_by, create_time, update_by, update_time)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.path},
+            #{item.url},
+            #{item.name},
+            #{item.size},
+            #{item.fid},
+            #{item.suffix},
+            #{item.deleteFlg},
+            #{item.deleteDate},
+            #{item.createBy},
+            #{item.createTime},
+            #{item.updateBy},
+            #{item.updateTime}
+            )
+        </foreach>
+    </insert>
+
     <update id="updateSysOss" parameterType="SysOss">
         update sys_oss
         <trim prefix="SET" suffixOverrides=",">
