@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.archives.archive.mapper.ArchiveCategoryMapper">
 
     <resultMap type="ArchiveCategory" id="ArchiveCategoryResult">
         <result property="id"    column="id"    />
         <result property="name"    column="name"    />
         <result property="parentId"    column="parent_id"    />
+        <result property="parentName"    column="parent_name"    />
         <result property="level"    column="level"    />
         <result property="type"    column="type"    />
         <result property="isActive"    column="is_active"    />
@@ -19,16 +20,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectArchiveCategoryVo">
-        select id, name, parent_id, level, type, is_active, order_num, create_by, create_time, update_by, update_time from archive_category
+        select id, name, parent_id, parent_name, level, type, is_active, order_num, create_by, create_time, update_by, update_time from archive_category
     </sql>
 
     <select id="selectArchiveCategoryList" parameterType="ArchiveCategory" resultMap="ArchiveCategoryResult">
         <include refid="selectArchiveCategoryVo"/>
         <where>
             <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="parentId != null "> and parent_id = #{parentId}</if>
+            <if test="parentName != null  and parentName != ''"> and parent_name like concat('%', #{parentName}, '%')</if>
             <if test="level != null "> and level = #{level}</if>
             <if test="type != null "> and type = #{type}</if>
             <if test="isActive != null "> and is_active = #{isActive}</if>
+            <if test="orderNum != null "> and order_num = #{orderNum}</if>
         </where>
     </select>
 
@@ -42,6 +46,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="name != null and name != ''">name,</if>
             <if test="parentId != null">parent_id,</if>
+            <if test="parentName != null and parentName != ''">parent_name,</if>
             <if test="level != null">level,</if>
             <if test="type != null">type,</if>
             <if test="isActive != null">is_active,</if>
@@ -50,10 +55,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
-         </trim>
+        </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="name != null and name != ''">#{name},</if>
             <if test="parentId != null">#{parentId},</if>
+            <if test="parentName != null and parentName != ''">#{parentName},</if>
             <if test="level != null">#{level},</if>
             <if test="type != null">#{type},</if>
             <if test="isActive != null">#{isActive},</if>
@@ -62,7 +68,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
-         </trim>
+        </trim>
     </insert>
 
     <update id="updateArchiveCategory" parameterType="ArchiveCategory">
@@ -70,6 +76,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="SET" suffixOverrides=",">
             <if test="name != null and name != ''">name = #{name},</if>
             <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="parentName != null and parentName != ''">parent_name = #{parentName},</if>
             <if test="level != null">level = #{level},</if>
             <if test="type != null">type = #{type},</if>
             <if test="isActive != null">is_active = #{isActive},</if>

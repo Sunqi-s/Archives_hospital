@@ -84,8 +84,11 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
 
         // 判断档案类型
         if (ArchiveConstants.ARCHIVE_TYPE_LIBRARY.equals(archiveCategory.getType())) {
-            // 如果档案类型是"档案库"，插入档案项目信息
-            insertArchiveItemsForCategory(archiveCategory);
+            List<ArchiveItem>  archiveItemList = archiveItemMapper.selectArchiveItemListByCategoryId(archiveCategory.getId());
+            if(archiveItemList == null || archiveItemList.size()==0) {
+                // 如果档案类型是"档案库"，插入档案项目信息
+                insertArchiveItemsForCategory(archiveCategory);
+            }
         } else {
             // 如果档案类型是"档案节点"，删除档案项目信息
             deleteArchiveItemsForCategory(archiveCategory);

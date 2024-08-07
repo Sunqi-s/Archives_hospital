@@ -4,18 +4,18 @@
       <el-tab-pane label="字段信息" name="columnInfo">
         <el-table ref="dragTable" :data="columns" row-key="columnId" :max-height="tableHeight">
           <el-table-column label="序号" type="index" min-width="5%" class-name="allowDrag" />
-          <el-table-column label="字段列名" prop="columnName" min-width="10%" :show-overflow-tooltip="true" />
-          <el-table-column label="字段名称" min-width="10%">
+          <!--<el-table-column label="字段列名" prop="columnName" min-width="10%" :show-overflow-tooltip="true" />-->
+          <el-table-column label="字段名称" min-width="12%">
             <template slot-scope="scope">
               <el-input v-model="scope.row.itemName"></el-input>
             </template>
           </el-table-column>
-          <el-table-column label="字段类型" min-width="11%">
+          <el-table-column label="字段类型" min-width="15%">
             <template slot-scope="scope">
               <el-select v-model="scope.row.itemType">
+                <el-option label="整数 (Integer)" value="Integer" />
                 <el-option label="长整型数 (Long)" value="Long" />
                 <el-option label="文本 (String)" value="String" />
-                <el-option label="整数 (Integer)" value="Integer" />
                 <el-option label="小数 (Double)" value="Double" />
                 <el-option label="大数 (BigDecimal)" value="BigDecimal" />
                 <el-option label="日期时间 (Date)" value="Date" />
@@ -23,7 +23,12 @@
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column label="插入" min-width="5%">
+          <el-table-column label="最大长度" min-width="8%">
+            <template slot-scope="scope">
+              <el-input v-model="scope.row.columnLength"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column label="添加" min-width="5%">
             <template slot-scope="scope">
               <el-checkbox true-label="1" false-label="0" v-model="scope.row.isInsert"></el-checkbox>
             </template>
@@ -68,12 +73,10 @@
                 <el-option label="文本框" value="input" />
                 <el-option label="文本域" value="textarea" />
                 <el-option label="下拉框" value="select" />
+                <el-option label="树形下拉框" value="treeselect" />
                 <el-option label="单选框" value="radio" />
                 <el-option label="复选框" value="checkbox" />
                 <el-option label="日期控件" value="datetime" />
-                <el-option label="图片上传" value="imageUpload" />
-                <el-option label="文件上传" value="fileUpload" />
-                <el-option label="富文本控件" value="editor" />
               </el-select>
             </template>
           </el-table-column>
@@ -91,7 +94,7 @@
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column label="显示分组" min-width="10%">
+          <el-table-column label="显示分组" min-width="12%">
             <template slot-scope="scope">
               <el-select v-model="scope.row.htmlGroup">
                 <el-option label="第一组" value="1" />
@@ -138,7 +141,7 @@ export default {
       activeName: 'columnInfo',
       columns: [],
       dictOptions: [],
-      tableHeight: 500,
+      tableHeight: 600,
       footerVisible: false,
     };
   },

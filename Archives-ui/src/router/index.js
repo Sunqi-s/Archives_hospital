@@ -96,7 +96,7 @@ export const constantRoutes = [
       {
         path: 'index/:categoryId(\\d+)',
         component: () => import('@/views/archive/category/editItem'),
-        name: 'GenEdit',
+        name: 'itemEdit',
         meta: { title: '修改分类字段', activeMenu: '/system/biz-settings/category' }
       }
     ]

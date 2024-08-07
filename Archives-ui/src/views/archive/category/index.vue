@@ -119,7 +119,7 @@
           <el-input v-model="form.name" placeholder="请输入分类名称" />
         </el-form-item>
         <el-form-item label="上级分类" prop="parentId">
-          <treeselect v-model="form.parentId" :options="categoryOptions" :normalizer="normalizer" placeholder="请选择上级分类" />
+          <treeselect v-model="form.parentId" :options="categoryOptions" :normalizer="normalizer" placeholder="请选择上级分类" @input="updateParentName"/>
         </el-form-item>
         <el-form-item label="类别" prop="type">
           <el-radio-group v-model="form.type">
@@ -236,7 +236,7 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        id: null,        name: null,        parentId: null,        level: null,        type: 0,        isActive: 0,        orderNum: null,        createBy: null,        createTime: null,        updateBy: null,        updateTime: null      };
+        id: null,        name: null,        parentId: null,   parentName: null,      level: null,        type: 0,        isActive: 0,        orderNum: null,        createBy: null,        createTime: null,        updateBy: null,        updateTime: null      };
       this.resetForm("form");
     },
     /** 搜索按钮操作 */
@@ -248,14 +248,38 @@ export default {
       this.resetForm("queryForm");
       this.handleQuery();
     },
+    updateParentName(value) {
+      const node = this.findNode(this.categoryOptions, value);
+      if (node) {
+        this.form.parentName = node.name;
+      } else {
+        this.form.parentName = '顶级节点';
+      }
+    },
+    findNode(options, value) {
+      for (const option of options) {
+        if (option.id === value) {
+          return option;
+        }
+        if (option.children) {
+          const found = this.findNode(option.children, value);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
+    },
     /** 新增按钮操作 */
     handleAdd(row) {
       this.reset();
       this.getTreeselect();
       if (row != null && row.id) {
         this.form.parentId = row.id;
+        this.form.parentName = row.name;
       } else {
         this.form.parentId = 0;
+        this.form.parentName = '顶级节点';
       }
       this.open = true;
       this.title = "添加档案分类";
@@ -274,6 +298,7 @@ export default {
       this.getTreeselect();
       if (row != null) {
         this.form.parentId = row.parentId;
+        this.form.parentName = row.parentName;
       }
       getCategory(row.id).then(response => {
         this.form = response.data;

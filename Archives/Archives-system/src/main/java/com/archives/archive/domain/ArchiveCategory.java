@@ -7,9 +7,9 @@ import com.archives.common.core.domain.TreeEntity;
 
 /**
  * 档案分类对象 archive_category
- * 
+ *
  * @author 高小川
- * @date 2024-07-06
+ * @date 2024-07-13
  */
 public class ArchiveCategory extends TreeEntity
 {
@@ -26,56 +26,56 @@ public class ArchiveCategory extends TreeEntity
     @Excel(name = "分类层级")
     private Long level;
 
-    /** 类别 */
-    @Excel(name = "类别")
+    /** 类别：0档案节点，1档案库 */
+    @Excel(name = "类别：0档案节点，1档案库")
     private Integer type;
 
-    /** 显示状态 */
-    @Excel(name = "显示状态")
+    /** 显示状态：0显示，1隐藏 */
+    @Excel(name = "显示状态：0显示，1隐藏")
     private Integer isActive;
 
-    public void setId(Long id) 
+    public void setId(Long id)
     {
         this.id = id;
     }
 
-    public Long getId() 
+    public Long getId()
     {
         return id;
     }
-    public void setName(String name) 
+    public void setName(String name)
     {
         this.name = name;
     }
 
-    public String getName() 
+    public String getName()
     {
         return name;
     }
-    public void setLevel(Long level) 
+    public void setLevel(Long level)
     {
         this.level = level;
     }
 
-    public Long getLevel() 
+    public Long getLevel()
     {
         return level;
     }
-    public void setType(Integer type) 
+    public void setType(Integer type)
     {
         this.type = type;
     }
 
-    public Integer getType() 
+    public Integer getType()
     {
         return type;
     }
-    public void setIsActive(Integer isActive) 
+    public void setIsActive(Integer isActive)
     {
         this.isActive = isActive;
     }
 
-    public Integer getIsActive() 
+    public Integer getIsActive()
     {
         return isActive;
     }
@@ -83,17 +83,18 @@ public class ArchiveCategory extends TreeEntity
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("id", getId())
-            .append("name", getName())
-            .append("parentId", getParentId())
-            .append("level", getLevel())
-            .append("type", getType())
-            .append("isActive", getIsActive())
-            .append("orderNum", getOrderNum())
-            .append("createBy", getCreateBy())
-            .append("createTime", getCreateTime())
-            .append("updateBy", getUpdateBy())
-            .append("updateTime", getUpdateTime())
-            .toString();
+                .append("id", getId())
+                .append("name", getName())
+                .append("parentId", getParentId())
+                .append("parentName", getParentName())
+                .append("level", getLevel())
+                .append("type", getType())
+                .append("isActive", getIsActive())
+                .append("orderNum", getOrderNum())
+                .append("createBy", getCreateBy())
+                .append("createTime", getCreateTime())
+                .append("updateBy", getUpdateBy())
+                .append("updateTime", getUpdateTime())
+                .toString();
     }
 }

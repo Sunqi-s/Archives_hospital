@@ -22,6 +22,7 @@ public class ArchiveUtils
         // 设置默认类型
         item.setItemType(GenConstants.TYPE_STRING);
         item.setQueryType(GenConstants.QUERY_EQ);
+        item.setHtmlGroup("1");//画面显示默认分组都为第一组
 
         if (arraysContains(GenConstants.COLUMNTYPE_STR, dataType) || arraysContains(GenConstants.COLUMNTYPE_TEXT, dataType)) {
             // 字符串长度超过500设置为文本域
