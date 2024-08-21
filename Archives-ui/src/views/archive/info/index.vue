@@ -195,8 +195,8 @@
               <el-row>
                 <el-col :span="24">
                   <div>
-                    <el-button type="primary" plain icon="el-icon-upload" size="small" @click="handleUpload" v-if="notCheck">点击按钮上传</el-button>
-                    <el-button type="success" plain icon="el-icon-download" size="small" @click="handleBatchDownload" v-if="notInsert">批量下载</el-button>
+                    <el-button type="primary" plain icon="el-icon-upload" size="small" @click="handleUpload" v-if="notCheck()">点击按钮上传</el-button>
+                    <el-button type="success" plain icon="el-icon-download" size="small" @click="handleBatchDownload" v-if="notInsert()">批量下载</el-button>
                   </div>
                   <el-table :data="electronicFiles" style="width: 100%; margin-top: 10px;" @file-list-changed="handleFileListChanged">
                     <el-table-column prop="index" label="序号" width="50">
@@ -210,9 +210,9 @@
                     <el-table-column label="操作" width="120">
                       <template slot-scope="scope">
                         <div class="butten-column">
-                          <el-button @click="handleFileDownload(scope.row.url)" size="small" v-if="notInsert">下载</el-button>
-                          <el-button type="danger" @click="handleFileDelete(getIndex(scope.row))" size="small" v-if="notCheck">删除</el-button>
-                          <el-button type="success" @click="handleFilePreview(scope.row.url)" size="small" v-if="isCheck">预览</el-button>
+                          <el-button @click="handleFileDownload(scope.row.url)" size="small" v-if="notInsert()">下载</el-button>
+                          <el-button type="danger" @click="handleFileDelete(getIndex(scope.row))" size="small" v-if="notCheck()">删除</el-button>
+                          <el-button type="success" @click="handleFilePreview(scope.row.url)" size="small" v-if="isCheck()">预览</el-button>
                         </div>
                       </template>
                     </el-table-column>
@@ -225,9 +225,9 @@
         </div>
       </div>
       <div slot="footer" class="dialog1-footer">
-        <el-button type="primary" @click="submitForm" v-if="notCheck">确 定</el-button>
-        <el-button @click="cancel" v-if="notCheck">取 消</el-button>
-        <el-button @click="close" v-if="isCheck">关 闭</el-button>
+        <el-button type="primary" @click="submitForm" v-if="notCheck()">确 定</el-button>
+        <el-button @click="cancel" v-if="notCheck()">取 消</el-button>
+        <el-button @click="close" v-if="isCheck()">关 闭</el-button>
       </div>
     </el-dialog>
 
@@ -783,6 +783,7 @@ export default {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, '档案信息');
         XLSX.writeFile(wb, `archive_${new Date().getTime()}.xlsx`);
+        this.$refs['form'].resetFields();
       }
     },
     // 文件导出逻辑
