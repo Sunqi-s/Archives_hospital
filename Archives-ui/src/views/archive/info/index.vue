@@ -168,6 +168,10 @@
               <!--第2组项目-->
               <el-descriptions :column="2" size="medium" border>
                 <el-descriptions-item v-for="field in insertFieldsGroup2" :key="field.name" :label="field.label">
+                  <template slot="label">
+                    <span v-if="field.isRequired === '1'" class="required-label">{{ field.label }}</span>
+                    <span v-else>{{ field.label }}</span>
+                  </template>
                   <el-form-item :prop="field.name" class="form-item">
                     <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
                       <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
@@ -181,6 +185,10 @@
               <!--第3组项目-->
               <el-descriptions :column="2" size="medium" border>
                 <el-descriptions-item v-for="field in insertFieldsGroup3" :key="field.name" :label="field.label">
+                  <template slot="label">
+                    <span v-if="field.isRequired === '1'" class="required-label">{{ field.label }}</span>
+                    <span v-else>{{ field.label }}</span>
+                  </template>
                   <el-form-item :prop="field.name" class="form-item">
                     <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
                       <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
