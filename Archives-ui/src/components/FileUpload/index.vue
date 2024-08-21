@@ -7,11 +7,13 @@
       :file-list="fileList"
       :limit="limit"
       drag
+      :show-file-list="false"
       :on-error="handleUploadError"
       :on-exceed="handleExceed"
       :on-success="handleUploadSuccess"
-      :show-file-list="false"
+      :on-change="handleFileChange"
       :headers="headers"
+      :auto-upload="false"
       class="upload-file-uploader"
       ref="fileUpload"
     >
@@ -27,7 +29,7 @@
     </el-upload>
 
     <!-- 文件列表 -->
-    <transition-group class="upload-file-list el-upload-list el-upload-list--text" name="el-fade-in-linear" tag="ul">
+    <transition-group class="upload-file-list el-upload-list el-upload-list--text" name="el-fade-in-linear" tag="ul" v-if="showGroup === true">
       <li :key="file.url" class="el-upload-list__item ele-upload-list__item-content" v-for="(file, index) in fileList">
         <el-link :href="`${baseUrl}${file.url}`" :underline="false" target="_blank">
           <span class="el-icon-document"> {{ getFileName(file.name) }} ({{ getFileSize(file.size) }}) </span>
@@ -68,6 +70,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    showGroup:{
+      type: Boolean,
+      default: true,
+    }
   },
   data() {
     return {
@@ -148,15 +154,17 @@ export default {
     },
     // 上传成功回调
     handleUploadSuccess(res, file) {
-      if (res.code === 200) {
-        this.uploadList.push({ name: res.fileName, url: res.fileName, size: res.size });
-        this.uploadedSuccessfully();
-      } else {
-        this.number--;
-        this.$modal.closeLoading();
-        this.$modal.msgError(res.msg);
-        this.$refs.fileUpload.handleRemove(file);
-        this.uploadedSuccessfully();
+        if (res.code === 200) {
+          const fileNameParts = res.fileName.split('.');
+          const suffix = fileNameParts.length > 1 ? fileNameParts.pop() : '';
+          this.uploadList.push({ name: file.name, url: res.fileName, size: res.size ,suffix: suffix ,fid:'' ,deleteFlg:0});
+          this.uploadedSuccessfully();
+        } else {
+          this.number--;
+          this.$modal.closeLoading();
+          this.$modal.msgError(res.msg);
+          this.$refs.fileUpload.handleRemove(file);
+          this.uploadedSuccessfully();
       }
     },
     // 删除文件
@@ -169,10 +177,10 @@ export default {
     uploadedSuccessfully() {
       if (this.number > 0 && this.uploadList.length === this.number) {
         this.fileList = this.fileList.concat(this.uploadList);
-        this.uploadList = [];
         this.number = 0;
         //this.$emit("input", this.listToString(this.fileList));
-        this.$emit("input", this.fileList);
+        this.$emit("input", this.uploadList);
+        this.uploadList = [];
         this.$modal.closeLoading();
       }
     },
@@ -197,6 +205,30 @@ export default {
         strs += list[i].url + separator;
       }
       return strs != '' ? strs.substr(0, strs.length - 1) : '';
+    },
+
+    // 文件改变
+    handleFileChange(file) {
+      console.log(file)
+      if (file.response && file.response.url) {
+        const updatedFile = this.fileList.find(f => f.uid === file.uid) || file;
+        this.$emit("input", updatedFile);
+      } else {
+        file.deleteFig = 0;
+        this.$emit("input", file);
+      }
+    },
+    //手动上传文件
+    handleUpload() {
+        this.$refs.fileUpload.submit();
+    },
+    //删除文件列表后重新显示
+    deleteFileList(newFileList) {
+      this.fileList = newFileList;
+    },
+    //清空fileList
+    resetFileList() {
+      this.fileList = [];
     },
   },
 };

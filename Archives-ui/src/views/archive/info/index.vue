@@ -86,33 +86,53 @@
               v-hasPermi="['system:document:remove']"
             >删除</el-button>
           </el-col>
-          <!-- <el-col :span="1.5">
-             <el-button
-               type="warning"
-               icon="el-icon-download"
-               size="small"
-               @click="handleExport"
-               v-hasPermi="['system:document:export']"
-             >导出</el-button>
-           </el-col>-->
+          <el-col :span="1.5">
+            <el-button
+              type="warning"
+              icon="el-icon-download"
+              size="small"
+              @click="handleExport"
+              v-hasPermi="['system:document:export']"
+            >导出</el-button>
+          </el-col>
 
         </el-row>
 
         <!-- 动态生成的表格 -->
-        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange">
+        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'createTime', order: 'descending'}">
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
             v-for="field in listFields"
             :key="field.name"
             :prop="field.name"
             :label="field.label"
+            :sortable="true"
+            :width="field.width || '120px'"
           >
             <template slot-scope="scope">
-              <span v-html="scope.row[field.name]"></span>
+              <el-tooltip class="item" effect="dark" :content="String(scope.row[field.name])" placement="top">
+                <span class="truncate-text"  v-html="scope.row[field.name]"></span>
+              </el-tooltip>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="150" align="center">
+            <template slot-scope="scope">
+              <el-button type="text" size="small" @click="handleUpdate(scope.row)">
+                <i class="el-icon-edit">修改</i>
+              </el-button>
+              <el-button type="text" size="small" @click="handleDetail(scope.row)">
+                <i class="el-icon-s-management">查看</i>
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
-
+        <pagination
+          v-show="total>0"
+          :total="total"
+          :page.sync="queryParams.pageNum"
+          :limit.sync="queryParams.pageSize"
+          @pagination="getList"
+        />
       </el-col>
     </el-row>
 
@@ -135,7 +155,7 @@
                     <span v-else>{{ field.label }}</span>
                   </template>
                   <el-form-item :prop="field.name" class="form-item">
-                    <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)">
+                    <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
                       <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
                       <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
                       <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
@@ -149,7 +169,7 @@
               <el-descriptions :column="2" size="medium" border>
                 <el-descriptions-item v-for="field in insertFieldsGroup2" :key="field.name" :label="field.label">
                   <el-form-item :prop="field.name" class="form-item">
-                    <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)">
+                    <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
                       <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
                       <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
                       <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
@@ -162,7 +182,7 @@
               <el-descriptions :column="2" size="medium" border>
                 <el-descriptions-item v-for="field in insertFieldsGroup3" :key="field.name" :label="field.label">
                   <el-form-item :prop="field.name" class="form-item">
-                    <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)">
+                    <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
                       <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
                       <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
                       <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
@@ -175,18 +195,25 @@
               <el-row>
                 <el-col :span="24">
                   <div>
-                    <el-button type="primary" plain icon="el-icon-upload" size="small" @click="handleUpload">点击按钮上传</el-button>
-                    <el-button type="success" plain icon="el-icon-download" size="small" @click="handleBatchDownload">批量下载</el-button>
+                    <el-button type="primary" plain icon="el-icon-upload" size="small" @click="handleUpload" v-if="choice<2">点击按钮上传</el-button>
+                    <el-button type="success" plain icon="el-icon-download" size="small" @click="handleBatchDownload" v-if="choice>0">批量下载</el-button>
                   </div>
-                  <el-table :data="electronicFiles" style="width: 100%; margin-top: 10px;">
-                    <el-table-column prop="index" label="序号" width="50"></el-table-column>
-                    <el-table-column prop="fileName" label="文件名称"></el-table-column>
-                    <el-table-column prop="fileType" label="文件类型" width="120"></el-table-column>
-                    <el-table-column prop="fileSize" label="文件大小" width="120"></el-table-column>
+                  <el-table :data="electronicFiles" style="width: 100%; margin-top: 10px;" @file-list-changed="handleFileListChanged">
+                    <el-table-column prop="index" label="序号" width="50">
+                      <template slot-scope="scope">{{getIndex(scope.row)}}</template>
+                    </el-table-column>
+                    <el-table-column prop="name" label="文件名称"></el-table-column>
+                    <el-table-column prop="suffix" label="文件类型" width="120"></el-table-column>
+                    <el-table-column prop="fileSize" label="文件大小" width="120">
+                      <template slot-scope="scope">{{formatSize(scope.row.size)}}</template>
+                    </el-table-column>
                     <el-table-column label="操作" width="120">
                       <template slot-scope="scope">
-                        <el-button @click="handleFileDownload(scope.row)" size="small">下载</el-button>
-                        <el-button type="danger" @click="handleFileDelete(scope.row)" size="small">删除</el-button>
+                        <div class="butten-column">
+                          <el-button @click="handleFileDownload(scope.row.url)" size="small" v-if="choice>0">下载</el-button>
+                          <el-button type="danger" @click="handleFileDelete(getIndex(scope.row))" size="small" v-if="choice<2">删除</el-button>
+                          <el-button type="success" @click="handleFilePreview(scope.row.url)" size="small" v-if="choice===2">预览</el-button>
+                        </div>
                       </template>
                     </el-table-column>
                   </el-table>
@@ -198,11 +225,28 @@
         </div>
       </div>
       <div slot="footer" class="dialog1-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm" v-if="choice<2">确 定</el-button>
+        <el-button @click="cancel" v-if="choice<2">取 消</el-button>
+        <el-button @click="close" v-if="choice==2">关 闭</el-button>
       </div>
     </el-dialog>
 
+    <!--文件上传对话框-->
+    <el-dialog title="文件上传" :visible.sync="showDialog" :modal="false" append-to-body class="dialog-container">
+      <file-upload
+        :limit="5"
+        :fileSize="1000"
+        :fileType="['doc', 'xls', 'ppt', 'txt', 'pdf', 'xlsx', 'jpg', 'png', 'pdf', 'mp4']"
+        :show-group="false"
+        @input="handleFileUpload"
+        ref="upload"
+      />
+    </el-dialog>
+
+    <!--文件预览对话框-->
+    <el-dialog title="文件预览" :visible.sync="showPreview" fullscreen>
+      <onlinePreview v-if="showPreview" :initialUrl="previewUrl"/>
+    </el-dialog>
   </div>
 </template>
 
@@ -216,7 +260,8 @@ import { getDicts } from "@/api/system/dict/data";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import {  deptTreeSelect } from "@/api/system/user";
-
+import {addOss, delOss, listOss} from "@/api/system/oss";
+import * as XLSX from 'xlsx'
 export default {
   name: "Info",
   components: {
@@ -256,7 +301,17 @@ export default {
       single: true,// 非单个禁用
       multiple: true, // 非多个禁用
       form: {categoryId: null},
-      rules: {}
+      rules: {},
+      showDialog: false,
+      updatedFile: {},
+      ossParams: {},
+      savedFile:[],
+      index: 0,
+      selectedItems: [],
+      choice: 2,
+      //预览相关
+      showPreview: false,
+      previewUrl:"",
     };
   },
   created() {
@@ -334,7 +389,8 @@ export default {
         isInsert: field.isInsert,
         isEdit: field.isEdit,
         isRequired: field.isRequired,
-        dictType: field.dictType
+        dictType: field.dictType,
+        options: []
       };
 
       if (field.dictType) {
@@ -461,11 +517,19 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
+      this.choice = 0;
       this.title = this.parentCategoryName + '-' + this.categoryName;
     },
     // 取消按钮
     cancel() {
+      this.close()
+      this.$refs['form'].resetFields();
+      this.$refs.upload.resetFileList()
+    },
+    /** 对话框关闭操作 */
+    close() {
       this.open = false;
+      this.choice = 2;
       this.reset();
     },
     /** 对话框关闭操作 */
@@ -474,43 +538,155 @@ export default {
       // 例如，你可能想要显示一个确认对话框
       this.$confirm('确定要关闭这个对话框吗？')
         .then(() => {
+          this.choice = 2;
+          this.reset();
+          this.$refs['form'].resetFields();
           done(); // 当你想要关闭对话框时调用 done()
         })
         .catch(() => {});
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
+      this.choice = 1;
       this.reset();
       const id = row.id || this.ids
+      this.isQuery(id)
+      listOss(this.ossParams).then(res => {
+        this.electronicFiles = res.rows;
+        this.savedFile = Object.assign([],res.rows);
+      });
       getInfo(id).then(response => {
         this.form = response.data;
         this.open = true;
         this.title = "修改文书卷内录入";
       });
     },
+    //修改查询条件
+    isQuery(id) {
+      this.ossParams = {
+        fid: id,
+        deleteFlg: 0,
+      }
+    },
     reset() {
-
+      this.form = {categoryId: null};
+      this.electronicFiles = [];
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         this.form.categoryId = this.categoryId;
         if (valid) {
-          if (this.form.id != null) {
-            updateInfo(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
+          if (this.form.id != null && this.form.id != undefined) {
+            if (this.electronicFiles && this.electronicFiles.length > 0) {
+              for (let i = 0; i < this.electronicFiles.length; i++) {
+                const file = this.electronicFiles[i];
+                if (!file.fid || file.fid === undefined) {
+                  this.$refs.upload.handleUpload();
+                  break;
+                }
+              }
+            }
+              // 如果有文件需要上传，处理完文件后再更新信息
+              this.handleFileDeletion();
+              updateInfo(this.form).then(() => {
+                this.$modal.msgSuccess("修改成功");
+                this.$refs['form'].resetFields();
+                this.closeAndRefresh();
+              });
           } else {
-            addInfo(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
+            if (this.electronicFiles.length > 0) {
+              this.$refs.upload.handleUpload();
+            } else {
+              addInfo(this.form).then(() => {
+                this.$modal.msgSuccess("新增成功");
+                this.closeAndRefresh();
+                this.reset();
+              });
+            }
           }
         }
       });
+    },
+    handleFileDeletion() {
+      let delList = []
+      this.savedFile.forEach(sav => {
+        if (this.electronicFiles.indexOf(sav) === -1) {
+          delList.push(sav.id)
+        }
+      })
+      if(delList.length>0){
+        delOss(delList).then(() => {
+        this.$modal.msgSuccess("删除成功");
+      })
+      }
+    },
+    closeAndRefresh() {
+      this.open = false;
+    },
+    //文件上传
+    handleFileUpload(file) {
+      if (Array.isArray(file)) {
+        this.successUpload(file);
+      } else {
+        const fileName = file.name.split('.');
+        const suffix = fileName.length > 1 ? fileName.pop() : '';
+        const fileInfo = {
+          name: file.name,
+          size: file.size,
+          url: file.url,
+          suffix: suffix,
+          path: file.path,
+          percentage: file.percentage,
+          status: file.status,
+          uid: file.uid,
+          deleteFlg: 0,
+          raw: file.raw,
+        };
+        this.electronicFiles.push(fileInfo);
+      }
+    },
+    //上传服务器成功后回调
+    successUpload(response) {
+      if (this.form.id != null) {
+        this.updatedFile = response;
+        this.updatedFile.forEach(item => {
+          item.fid = this.form.id
+        })
+        addOss(this.updatedFile).then(() => {
+          this.$modal.msgSuccess("新增成功");
+          this.closeAndRefresh()
+          this.resetQuery()
+          this.reset()
+        });
+      } else {
+        addInfo(this.form).then(() => {
+          this.open = false;
+          this.query();
+          listInfo(this.queryParams).then(res => {
+            response.forEach(item => {
+              item.fid = res.rows[0].id;
+            });
+            this.updatedFile = response;
+            addOss(this.updatedFile).then(() => {
+              this.$modal.msgSuccess("新增成功");
+              this.$refs['form'].resetFields();
+              this.getList();
+              this.resetQuery()
+              this.reset()
+            });
+          });
+        });
+      }
+    },
+    //表单查询条件
+    query() {
+      this.queryParams = {
+        pageNum: 1,
+        pageSize: 10,
+        fondsNumber: this.form.fondsNumber,
+        fondsName: this.form.fondsName,
+      }
     },
     /** 删除按钮操作 */
     handleDelete(row) {
@@ -523,14 +699,13 @@ export default {
         this.$modal.msgSuccess("删除成功");
       }).catch(() => {});
     },
-    /** 电子文件信息上传操作 */
-    successUpload(response, file, fileList) {
-      // 上传成功后的处理逻辑
-      // 例如，更新表单数据或显示通知
-      console.log('上传成功：', response, file, fileList);
+    //当文件列表发生变化时
+    handleFileListChanged(newFileList) {
+      this.electronicFiles = newFileList;
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
+      this.selectedItems = selection;
       this.ids = selection.map(item => item.id)
       this.archiveNumbers = selection.map(item => item.archiveNumber)
       this.single = selection.length!==1
@@ -567,17 +742,116 @@ export default {
       });
     },
     handleUpload() {
-      // Handle file upload
+      this.showDialog = true;
     },
     handleBatchDownload() {
-      // Handle batch download
+      // 批量下载逻辑
+      if (this.electronicFiles.length < 1) {
+        this.$message.warning("请选择要下载的文件!");
+      } else {
+        let files = this.electronicFiles.map(item => {
+          return item.url;
+        });
+        let zipName = ['user']
+        this.$download.zip("/common/zip?files=" + files, zipName);
+      }
     },
-    handleFileDownload(file) {
-      // Handle individual file download
+    handleFileDownload(url) {
+      this.$download.resource(url);
     },
-    handleFileDelete(file) {
-      // Handle file deletion
-    }
+    handleFileDelete(index) {
+      this.electronicFiles.splice(index - 1, 1);
+      if (this.$refs.upload) {
+        this.$refs.upload.deleteFileList(this.electronicFiles);
+      }
+    },
+    //文件导出
+    exportToExcel(dataToExport) {
+      if (!Array.isArray(this.listFields)) {
+        return;
+      } else {
+        // 提取表头：使用 listFields 中的 label 作为表头
+        const headers = this.listFields.map(field => ({label: field.label}));
+        const data = dataToExport.map(item => {
+          let row = {};
+          this.listFields.forEach(field => {
+            row[field.label] = item[field.name];
+          });
+          return row;
+        });
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, '档案信息');
+        XLSX.writeFile(wb, `archive_${new Date().getTime()}.xlsx`);
+      }
+    },
+    // 文件导出逻辑
+    handleExport() {
+      let dataToExport
+      if (this.selectedItems.length > 0) {
+        dataToExport = this.selectedItems;
+        this.exportToExcel(dataToExport);
+      } else {
+        let ExportQueryParams = {
+          pageNum: 1,
+          pageSize: 10000000,
+          categoryId: null,
+          // archiveStatus: 0,
+          searchValue: ''
+        }
+        listInfo(ExportQueryParams).then(res => {
+          dataToExport = res.rows;
+          this.exportToExcel(dataToExport);
+        })
+      }
+    },
+    //文件查看
+    handleDetail(row) {
+      this.form = row
+      let newQuery = {
+        pageNum: 1,
+        pageSize: 10,
+        fid: row.id,
+        deleteFlg: 0
+      };
+      listOss(newQuery).then(res => {
+        this.electronicFiles = res.rows
+      })
+      this.choice = 2
+      this.open = true;
+      this.title = this.categoryName + '-' + row.field9;
+      this.title = "文书卷内详情";
+    },
+    //文件预览
+    handleFilePreview(url) {
+      this.previewUrl = url;
+      this.showPreview = true;
+    },
+    //获取索引
+    getIndex(file) {
+      return this.index = this.electronicFiles.indexOf(file) + 1;
+    },
+    //格式化文件大小
+    formatSize(size) {
+      const sizeInKB = size / 1024;
+      return sizeInKB < 1024
+        ? `${sizeInKB.toFixed(2)} KB`
+        : `${(sizeInKB / 1024).toFixed(2)} MB`;
+    },
+    //只读
+    isReadonly(field) {
+      // return this.choice === 2 || field.name === 'archiveNumber'
+      return this.choice === 2
+    },
+    isCheck(){
+      return this.choice === 2;
+    },
+    notCheck(){
+      return this.choice < 2;
+    },
+    notInsert(){
+      return this.choice > 0;
+    },
   }
 };
 
@@ -624,5 +898,25 @@ export default {
   content: '*';
   color: #F56C6C;
   margin-right: 4px;
+}
+.truncate-text {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%; /* Adjust as needed */
+}
+.item {
+  display: inline-block;
+}
+.butten-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items:center;
+}
+.butten-column button {
+  margin: 0;
+  padding: 10px;
 }
 </style>

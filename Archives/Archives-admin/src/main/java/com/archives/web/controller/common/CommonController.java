@@ -1,17 +1,27 @@
 package com.archives.web.controller.common;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.archives.common.core.domain.model.LoginUser;
+import com.archives.common.core.text.Convert;
+import com.archives.common.utils.SecurityUtils;
+import com.archives.common.utils.file.FileTypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.archives.common.config.ArchivesConfig;
 import com.archives.common.constant.Constants;
@@ -88,6 +98,7 @@ public class CommonController
             ajax.put("fileName", fileName);
             ajax.put("newFileName", FileUtils.getName(fileName));
             ajax.put("originalFilename", file.getOriginalFilename());
+            ajax.put("type", FileTypeUtils.getFileType(fileName));
             return ajax;
         }
         catch (Exception e)
@@ -160,5 +171,72 @@ public class CommonController
         {
             log.error("下载文件失败", e);
         }
+    }
+    /**
+     * 文件打包下载
+     * @param response
+     * @param files
+     */
+    @GetMapping ("/zip")
+    public void downloadZip(HttpServletResponse response, String files){
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        String zipname=loginUser.getUser().getDept().getDeptName();
+//        System.out.println("files:" + files);
+        String[] filesPsths = Convert.toStrArray(files);
+        ArrayList<String> filepaths = new ArrayList<>();
+        for (String filePath : filesPsths){
+            String path=ArchivesConfig.getProfile() + StringUtils.substringAfter(filePath, Constants.RESOURCE_PREFIX);
+//            System.out.println("path:" + path);
+            filepaths.add(path);
+        }
+//        System.out.println("filepaths:" + filepaths.toString());
+        try{
+        String encodedFileName = URLEncoder.encode(zipname + ".zip", StandardCharsets.UTF_8.toString()) .replace("+", "%20");
+        String fileName = zipname + ".zip";
+        response.setContentType("application/zip");
+        response.setHeader("content-disposition", "attachment;filename*=UTF-8''" + encodedFileName);
+
+        ZipOutputStream zos = null;
+        BufferedInputStream bis = null;
+        try{
+            zos = new ZipOutputStream(response.getOutputStream());
+            byte[] buf = new byte[8192];
+            int len;
+            for (String filePath : filepaths) {
+                File file = new File(filePath);
+                System.out.println("file:" + file);
+                System.out.println("====="+file.isFile());
+                if (!file.isFile()) {
+                    continue;
+                }
+                ZipEntry ze = new ZipEntry(file.getName());
+                zos.putNextEntry(ze);
+                bis = new BufferedInputStream(new FileInputStream(file));
+                while ((len = bis.read(buf)) > 0) {
+                    zos.write(buf, 0, len);
+                }
+                zos.closeEntry();
+            }
+            zos.closeEntry();
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }finally {
+            if(bis != null){
+                try{
+                    bis.close();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+            if(zos != null){
+                try{
+                    zos.close();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+        } catch (UnsupportedEncodingException e) { e.printStackTrace(); }
+
     }
 }
