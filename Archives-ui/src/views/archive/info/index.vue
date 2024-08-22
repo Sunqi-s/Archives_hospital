@@ -115,7 +115,7 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" align="center">
+          <el-table-column label="操作" width="150" align="center" fixed="right">
             <template slot-scope="scope">
               <el-button type="text" size="small" @click="handleUpdate(scope.row)">
                 <i class="el-icon-edit">修改</i>
@@ -249,6 +249,7 @@
         @input="handleFileUpload"
         ref="upload"
       />
+      <div class="center-button"><el-button @click="closeUpload" type="primary" >确 定</el-button></div>
     </el-dialog>
 
     <!--文件预览对话框-->
@@ -524,6 +525,9 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
+      try{
+        this.$refs['form'].resetFields();
+      }catch{}
       this.open = true;
       this.choice = 0;
       this.title = this.parentCategoryName + '-' + this.categoryName;
@@ -531,7 +535,6 @@ export default {
     // 取消按钮
     cancel() {
       this.close()
-      this.$refs['form'].resetFields();
       this.$refs.upload.resetFileList()
     },
     /** 对话框关闭操作 */
@@ -548,7 +551,6 @@ export default {
         .then(() => {
           this.choice = 2;
           this.reset();
-          this.$refs['form'].resetFields();
           done(); // 当你想要关闭对话框时调用 done()
         })
         .catch(() => {});
@@ -557,6 +559,9 @@ export default {
     handleUpdate(row) {
       this.choice = 1;
       this.reset();
+      try{
+        this.$refs['form'].resetFields();
+      }catch{}
       const id = row.id || this.ids
       this.isQuery(id)
       listOss(this.ossParams).then(res => {
@@ -599,7 +604,7 @@ export default {
               this.handleFileDeletion();
               updateInfo(this.form).then(() => {
                 this.$modal.msgSuccess("修改成功");
-                this.$refs['form'].resetFields();
+                this.getList();
                 this.closeAndRefresh();
               });
           } else {
@@ -678,7 +683,6 @@ export default {
             this.updatedFile = response;
             addOss(this.updatedFile).then(() => {
               this.$modal.msgSuccess("新增成功");
-              this.$refs['form'].resetFields();
               this.getList();
               this.resetQuery()
               this.reset()
@@ -752,6 +756,9 @@ export default {
     handleUpload() {
       this.showDialog = true;
     },
+    closeUpload(){
+      this.showDialog = false;
+    },
     handleBatchDownload() {
       // 批量下载逻辑
       if (this.electronicFiles.length < 1) {
@@ -791,7 +798,6 @@ export default {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, '档案信息');
         XLSX.writeFile(wb, `archive_${new Date().getTime()}.xlsx`);
-        this.$refs['form'].resetFields();
       }
     },
     // 文件导出逻辑
@@ -816,6 +822,9 @@ export default {
     },
     //文件查看
     handleDetail(row) {
+      try{
+        this.$refs['form'].resetFields();
+      }catch{}
       this.form = row
       let newQuery = {
         pageNum: 1,
@@ -903,7 +912,7 @@ export default {
   margin-top: 0 !important;
 }
 
-.required-label::before {
+.required-label::after {
   content: '*';
   color: #F56C6C;
   margin-right: 4px;
@@ -927,5 +936,9 @@ export default {
 .butten-column button {
   margin: 0;
   padding: 10px;
+}
+.center-button{
+  text-align: right;
+  margin-right: 10px;
 }
 </style>
