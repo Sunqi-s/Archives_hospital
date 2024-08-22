@@ -249,7 +249,7 @@
         @input="handleFileUpload"
         ref="upload"
       />
-      <div class="success-btn"><el-button @click="successClose()" type="primary" size="small">确定</el-button></div>
+      <div class="center-button"><el-button @click="closeUpload" type="primary" >确 定</el-button></div>
     </el-dialog>
 
     <!--文件预览对话框-->
@@ -524,10 +524,10 @@ export default {
     },
     /** 新增按钮操作 */
     handleAdd() {
+      this.reset();
       try{
         this.$refs['form'].resetFields();
       }catch{}
-      this.reset();
       this.open = true;
       this.choice = 0;
       this.title = this.parentCategoryName + '-' + this.categoryName;
@@ -561,7 +561,7 @@ export default {
       this.reset();
       try{
         this.$refs['form'].resetFields();
-      }catch {}
+      }catch{}
       const id = row.id || this.ids
       this.isQuery(id)
       listOss(this.ossParams).then(res => {
@@ -601,12 +601,12 @@ export default {
               }
             }
               // 如果有文件需要上传，处理完文件后再更新信息
-            this.handleFileDeletion();
-            updateInfo(this.form).then(() => {
-              this.$modal.msgSuccess("修改成功");
-              this.getList();
-              this.closeAndRefresh();
-            });
+              this.handleFileDeletion();
+              updateInfo(this.form).then(() => {
+                this.$modal.msgSuccess("修改成功");
+                this.getList();
+                this.closeAndRefresh();
+              });
           } else {
             if (this.electronicFiles.length > 0) {
               this.$refs.upload.handleUpload();
@@ -756,6 +756,9 @@ export default {
     handleUpload() {
       this.showDialog = true;
     },
+    closeUpload(){
+      this.showDialog = false;
+    },
     handleBatchDownload() {
       // 批量下载逻辑
       if (this.electronicFiles.length < 1) {
@@ -795,7 +798,6 @@ export default {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, '档案信息');
         XLSX.writeFile(wb, `archive_${new Date().getTime()}.xlsx`);
-        this.$refs['form'].resetFields();
       }
     },
     // 文件导出逻辑
@@ -868,9 +870,6 @@ export default {
     notInsert(){
       return this.choice > 0;
     },
-    successClose(){
-      this.showDialog = false;
-    }
   }
 };
 
@@ -938,8 +937,8 @@ export default {
   margin: 0;
   padding: 10px;
 }
-.success-btn {
-  margin-right: 10px;
+.center-button{
   text-align: right;
+  margin-right: 10px;
 }
 </style>
