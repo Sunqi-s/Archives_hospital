@@ -249,6 +249,7 @@
         @input="handleFileUpload"
         ref="upload"
       />
+      <div class="success-btn"><el-button @click="successClose()" type="primary" size="small">确定</el-button></div>
     </el-dialog>
 
     <!--文件预览对话框-->
@@ -523,6 +524,9 @@ export default {
     },
     /** 新增按钮操作 */
     handleAdd() {
+      try{
+        this.$refs['form'].resetFields();
+      }catch{}
       this.reset();
       this.open = true;
       this.choice = 0;
@@ -531,7 +535,6 @@ export default {
     // 取消按钮
     cancel() {
       this.close()
-      this.$refs['form'].resetFields();
       this.$refs.upload.resetFileList()
     },
     /** 对话框关闭操作 */
@@ -548,7 +551,6 @@ export default {
         .then(() => {
           this.choice = 2;
           this.reset();
-          this.$refs['form'].resetFields();
           done(); // 当你想要关闭对话框时调用 done()
         })
         .catch(() => {});
@@ -557,6 +559,9 @@ export default {
     handleUpdate(row) {
       this.choice = 1;
       this.reset();
+      try{
+        this.$refs['form'].resetFields();
+      }catch {}
       const id = row.id || this.ids
       this.isQuery(id)
       listOss(this.ossParams).then(res => {
@@ -596,12 +601,11 @@ export default {
               }
             }
               // 如果有文件需要上传，处理完文件后再更新信息
-              this.handleFileDeletion();
-              updateInfo(this.form).then(() => {
-                this.$modal.msgSuccess("修改成功");
-                this.$refs['form'].resetFields();
-                this.closeAndRefresh();
-              });
+            this.handleFileDeletion();
+            updateInfo(this.form).then(() => {
+              this.$modal.msgSuccess("修改成功");
+              this.closeAndRefresh();
+            });
           } else {
             if (this.electronicFiles.length > 0) {
               this.$refs.upload.handleUpload();
@@ -678,7 +682,6 @@ export default {
             this.updatedFile = response;
             addOss(this.updatedFile).then(() => {
               this.$modal.msgSuccess("新增成功");
-              this.$refs['form'].resetFields();
               this.getList();
               this.resetQuery()
               this.reset()
@@ -816,6 +819,9 @@ export default {
     },
     //文件查看
     handleDetail(row) {
+      try{
+        this.$refs['form'].resetFields();
+      }catch{}
       this.form = row
       let newQuery = {
         pageNum: 1,
@@ -861,6 +867,9 @@ export default {
     notInsert(){
       return this.choice > 0;
     },
+    successClose(){
+      this.showDialog = false;
+    }
   }
 };
 
@@ -903,7 +912,7 @@ export default {
   margin-top: 0 !important;
 }
 
-.required-label::before {
+.required-label::after {
   content: '*';
   color: #F56C6C;
   margin-right: 4px;
@@ -927,5 +936,9 @@ export default {
 .butten-column button {
   margin: 0;
   padding: 10px;
+}
+.success-btn {
+  margin-right: 10px;
+  text-align: right;
 }
 </style>
