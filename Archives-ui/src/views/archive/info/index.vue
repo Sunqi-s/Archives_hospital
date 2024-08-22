@@ -115,7 +115,7 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" align="center">
+          <el-table-column label="操作" width="150" align="center" fixed="right">
             <template slot-scope="scope">
               <el-button type="text" size="small" @click="handleUpdate(scope.row)">
                 <i class="el-icon-edit">修改</i>
@@ -604,6 +604,7 @@ export default {
             this.handleFileDeletion();
             updateInfo(this.form).then(() => {
               this.$modal.msgSuccess("修改成功");
+              this.getList();
               this.closeAndRefresh();
             });
           } else {
