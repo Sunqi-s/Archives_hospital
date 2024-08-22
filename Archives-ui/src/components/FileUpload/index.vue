@@ -7,7 +7,7 @@
       :file-list="fileList"
       :limit="limit"
       drag
-      :show-file-list="false"
+      :show-file-list="true"
       :on-error="handleUploadError"
       :on-exceed="handleExceed"
       :on-success="handleUploadSuccess"
