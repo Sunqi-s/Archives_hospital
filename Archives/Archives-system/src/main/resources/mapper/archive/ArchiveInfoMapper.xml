@@ -104,6 +104,7 @@
             <if test="field29 != null  and field29 != ''"> and field29 = #{field29}</if>
             <if test="field30 != null  and field30 != ''"> and field30 = #{field30}</if>
         </where>
+        order by id desc
     </select>
 
     <select id="selectArchiveInfoListByKeyword" parameterType="ArchiveInfo" resultMap="ArchiveInfoResult">
@@ -311,6 +312,17 @@
             <if test="field30 != null">field30 = #{field30},</if>
         </trim>
         where id = #{id}
+    </update>
+
+    <update id="updateArchiveStatusById" parameterType="Long">
+        update archive_info set archive_status = 1 where id = #{id}
+    </update>
+
+    <update id="updateArchiveStatusByIds">
+        update archive_info set archive_status = 1 where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
     </update>
 
     <delete id="deleteArchiveInfoById" parameterType="Long">

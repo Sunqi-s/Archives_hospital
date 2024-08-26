@@ -42,3 +42,11 @@ export function delInfo(id) {
     method: 'delete'
   })
 }
+
+//归档档案信息
+export function updatAarchiveStatus(id) {
+  return request({
+    url:'/archive/info/document/' + id,
+    method: 'put',
+  })
+}

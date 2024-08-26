@@ -144,6 +144,16 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         return archiveInfoMapper.updateArchiveInfo(archiveInfo);
     }
 
+    @Override
+    public int updateArchiveStatusByIds(Long[] ids) {
+        return archiveInfoMapper.updateArchiveStatusByIds(ids);
+    }
+
+    @Override
+    public int updateArchiveStatusById(Long id) {
+        return archiveInfoMapper.updateArchiveStatusById(id);
+    }
+
     /**
      * 批量删除档案信息
      *

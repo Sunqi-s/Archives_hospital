@@ -44,6 +44,20 @@ public interface IArchiveInfoService
     public int updateArchiveInfo(ArchiveInfo archiveInfo);
 
     /**
+     * 批量归档档案信息
+     *
+     * @param ids 需要归档的档案信息主键
+     *             归档状态为1
+     * @return 结果
+     */
+        public int updateArchiveStatusByIds(Long[] ids);
+    /**
+     * 归档档案信息
+     * @param id
+     * @return
+     */
+    public int updateArchiveStatusById(Long id);
+    /**
      * 批量删除档案信息
      *
      * @param ids 需要删除的档案信息主键集合

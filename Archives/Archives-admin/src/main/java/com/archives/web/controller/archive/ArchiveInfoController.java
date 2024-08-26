@@ -92,6 +92,16 @@ public class ArchiveInfoController extends BaseController
     }
 
     /**
+     * 归档档案信息
+     */
+    @PreAuthorize("@ss.hasPermi('archive:info:document')")
+    @PutMapping("/document/{ids}")
+    public AjaxResult document(@PathVariable Long[] ids)
+    {
+        return toAjax(archiveInfoService.updateArchiveStatusByIds(ids));
+    }
+
+    /**
      * 删除档案信息
      */
     @PreAuthorize("@ss.hasPermi('archive:info:remove')")

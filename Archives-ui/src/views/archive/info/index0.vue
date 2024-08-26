@@ -95,6 +95,15 @@
               v-hasPermi="['system:document:export']"
             >导出</el-button>
           </el-col>
+          <el-col :span="1.5">
+            <el-button
+              type="success"
+              icon="el-icon-s-flag"
+              size="small"
+              :disabled="multiple"
+              @click="handleDocument"
+            >归档</el-button>
+          </el-col>
 
         </el-row>
 
@@ -102,7 +111,7 @@
         <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" >
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
-            v-for="field in listFields"
+            v-for="field in sortedFields"
             :key="field.name"
             :prop="field.name"
             :label="field.label"
@@ -268,7 +277,7 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import { addInfo, delInfo, getInfo, listInfo, updateInfo } from "@/api/archive/info";
+import {addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo} from "@/api/archive/info";
 import { listCategory } from "@/api/archive/category";
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
@@ -332,6 +341,15 @@ export default {
   created() {
     this.getCategoryTreeList();
     this.getDeptTree();
+  },
+  computed:{
+    sortedFields(){
+      return this.listFields.sort((a,b)=>{
+        if(a.name === 'archiveStatus') return -1;
+        if(b,name === 'archiveStatus') return 1;
+        return 0;
+      });
+    }
   },
   methods: {
     mapHtmlType(htmlType) {
@@ -493,7 +511,8 @@ export default {
     resetQuery() {
       this.queryParams = {
         pageNum: 1,
-        pageSize: 10
+        pageSize: 10,
+        archiveStatus: 0,
       };
       this.queryFields.forEach(field => {
         this.$set(this.queryParams, field.name, '');
@@ -503,12 +522,17 @@ export default {
     /** 查询档案信息列表 */
     getList() {
       this.loading = true;
-      listInfo(this.queryParams).then(response => {
+      // 确保保留原有的查询参数，并更新分页信息
+      const params = {
+        ...this.queryParams, // 保留现有的查询参数
+        pageNum: this.queryParams.pageNum, // 当前页码
+        pageSize: this.queryParams.pageSize, // 每页显示条数
+        archiveStatus: 0 // 归档状态
+      };
+      listInfo(params).then(response => {
         if(this.queryParams.searchValue) {
-          console.log(response.rows)
           this.infoList = this.markMatches(response.rows);
         }else {
-          console.log(response.rows)
           this.infoList = response.rows;
         }
         this.total = response.total;
@@ -630,6 +654,7 @@ export default {
               this.getList();
               this.closeAndRefresh();
               this.reset();
+              this.$refs.fileUpload.resetFileList()
             })
 
           }
@@ -660,15 +685,6 @@ export default {
     clickShow(){
       this.$refs.fileUpload.confirm()
       this.showDialog = false
-    },
-    //表单查询条件
-    query() {
-      this.queryParams = {
-        pageNum: 1,
-        pageSize: 10,
-        fondsNumber: this.form.fondsNumber,
-        fondsName: this.form.fondsName,
-      }
     },
     /** 删除按钮操作 */
     handleDelete(row) {
@@ -722,9 +738,6 @@ export default {
     },
     handleUpload() {
       this.showDialog = true;
-    },
-    closeUpload(){
-      this.showDialog = false;
     },
     handleBatchDownload() {
       // 批量下载逻辑
@@ -781,7 +794,7 @@ export default {
           pageNum: 1,
           pageSize: 10000000,
           categoryId: null,
-          // archiveStatus: 0,
+          archiveStatus: 0,
           searchValue: ''
         }
         listInfo(ExportQueryParams).then(res => {
@@ -840,15 +853,23 @@ export default {
     getArchiveStatus(status){
       switch (status) {
         case 0:
-          return '收发文';
+          return '待归档';
         case 1:
-          return '未归档';
-        case 2:
           return '已归档';
         default:
           return '未知状态';
       }
-    }
+    },
+    handleDocument(row){
+      const ids = row.id || this.ids;
+      const archiveNumbers = row.archiveNumber || this.archiveNumbers;
+      this.$modal.confirm('是否确认归档档号为"' + archiveNumbers + '"的数据？').then(function() {
+        return updatAarchiveStatus(ids)
+      }).then(() => {
+        this.getList();
+        this.$modal.msgSuccess("归档成功");
+      }).catch(() => {});
+    },
   }
 };
 

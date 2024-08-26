@@ -52,6 +52,20 @@ public interface ArchiveInfoMapper
     public int updateArchiveInfo(ArchiveInfo archiveInfo);
 
     /**
+     * 批量归档档案信息
+     *
+     * @param ids 档案信息主键
+     * @return 结果
+     */
+    public int updateArchiveStatusByIds(Long[] ids);
+    /**
+     * 归档档案信息
+     * @param id
+     * @return
+     */
+    public int updateArchiveStatusById(Long id);
+
+    /**
      * 删除档案信息
      *
      * @param id 档案信息主键

@@ -250,9 +250,6 @@ export default {
     resetFileList() {
       this.fileList = [];
     },
-    mounted() {
-      this.fileList = [];
-    }
   }
 };
 </script>
