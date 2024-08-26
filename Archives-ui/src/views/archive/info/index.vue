@@ -99,7 +99,7 @@
         </el-row>
 
         <!-- 动态生成的表格 -->
-        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}">
+        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" >
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
             v-for="field in listFields"
@@ -110,7 +110,8 @@
             :width="field.width || '120px'"
           >
             <template slot-scope="scope">
-              <el-tooltip class="item" effect="dark" :content="String(scope.row[field.name])" placement="top">
+              <el-tooltip class="item" effect="dark" :content="field.name === 'archiveStatus' ? getArchiveStatus(scope.row.archiveStatus) : String(scope.row[field.name])" placement="top">
+                <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{ getArchiveStatus(scope.row.archiveStatus) }}</span>
                 <span class="truncate-text"  v-html="scope.row[field.name]"></span>
               </el-tooltip>
             </template>
@@ -164,7 +165,6 @@
                 </el-descriptions-item>
               </el-descriptions>
               <el-divider dashed v-if="insertFieldsGroup1.length"></el-divider>
-
               <!--第2组项目-->
               <el-descriptions :column="2" size="medium" border>
                 <el-descriptions-item v-for="field in insertFieldsGroup2" :key="field.name" :label="field.label">
@@ -505,8 +505,10 @@ export default {
       this.loading = true;
       listInfo(this.queryParams).then(response => {
         if(this.queryParams.searchValue) {
+          console.log(response.rows)
           this.infoList = this.markMatches(response.rows);
         }else {
+          console.log(response.rows)
           this.infoList = response.rows;
         }
         this.total = response.total;
@@ -605,6 +607,7 @@ export default {
             this.$modal.msgSuccess("修改成功");
             this.closeAndRefresh();
             this.reset();
+            this.getList();
             this.$refs.fileUpload.resetFileList();
           }else {
             if (this.form.sysOssList.length > 0) {
@@ -621,11 +624,14 @@ export default {
                 suffix:file.suffix,
               }))
               await this.$refs.fileUpload.handleUpload(sysOssList);
-              await addInfo(this.form);
+            }
+            addInfo(this.form).then(() => {
               this.$modal.msgSuccess("新增成功");
+              this.getList();
               this.closeAndRefresh();
               this.reset();
-            }
+            })
+
           }
         }
       });
@@ -830,6 +836,18 @@ export default {
     },
     isUpdate(){
       return this.choice === 1;
+    },
+    getArchiveStatus(status){
+      switch (status) {
+        case 0:
+          return '收发文';
+        case 1:
+          return '未归档';
+        case 2:
+          return '已归档';
+        default:
+          return '未知状态';
+      }
     }
   }
 };
