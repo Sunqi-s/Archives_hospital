@@ -66,7 +66,6 @@ export default {
 
 <style scoped>
 .file-style {
-  max-height: 500px;
-  overflow: auto;
+   overflow: auto;
 }
 </style>
