@@ -1,6 +1,9 @@
 package com.archives.archive.domain;
 
 import java.util.Date;
+import java.util.List;
+
+import com.archives.system.domain.SysOss;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -188,6 +191,8 @@ public class ArchiveInfo extends BaseEntity
     /** 备用字段30 */
     @Excel(name = "备用字段30")
     private String field30;
+
+    private List<SysOss> sysOssList;
 
     public void setId(Long id)
     {
@@ -576,6 +581,14 @@ public class ArchiveInfo extends BaseEntity
     public String getField30()
     {
         return field30;
+    }
+
+    public List<SysOss> getSysOssList() {
+        return sysOssList;
+    }
+
+    public void setSysOssList(List<SysOss> sysOssList) {
+        this.sysOssList = sysOssList;
     }
 
     @Override

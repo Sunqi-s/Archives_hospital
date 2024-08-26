@@ -1,7 +1,14 @@
 package com.archives.archive.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.archives.common.utils.DateUtils;
+import com.archives.system.domain.SysOss;
+import com.archives.system.mapper.SysOssMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.archives.archive.mapper.ArchiveInfoMapper;
@@ -20,6 +27,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Autowired
     private ArchiveInfoMapper archiveInfoMapper;
 
+    @Autowired
+    private SysOssMapper sysOssMapper;
+
     /**
      * 查询档案信息
      *
@@ -29,7 +39,14 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public ArchiveInfo selectArchiveInfoById(Long id)
     {
-        return archiveInfoMapper.selectArchiveInfoById(id);
+        ArchiveInfo archiveInfo = archiveInfoMapper.selectArchiveInfoById(id);
+        if (archiveInfo != null) {
+            SysOss sysOss = new SysOss();
+            sysOss.setFid(String.valueOf(id));
+            List<SysOss> sysOssList = sysOssMapper.selectSysOssList(sysOss);
+            archiveInfo.setSysOssList(sysOssList);
+        }
+        return archiveInfo;
     }
 
     /**
@@ -59,7 +76,15 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     public int insertArchiveInfo(ArchiveInfo archiveInfo)
     {
         archiveInfo.setCreateTime(DateUtils.getNowDate());
-        return archiveInfoMapper.insertArchiveInfo(archiveInfo);
+        int cnt = archiveInfoMapper.insertArchiveInfo(archiveInfo);
+        Long fid = archiveInfo.getId();
+        if(!archiveInfo.getSysOssList().isEmpty()) {
+            for(SysOss sysOss : archiveInfo.getSysOssList()) {
+                sysOss.setFid(String.valueOf(fid));
+                sysOssMapper.insertSysOss(sysOss);
+            }
+        }
+        return cnt;
     }
 
     /**
@@ -72,6 +97,50 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     public int updateArchiveInfo(ArchiveInfo archiveInfo)
     {
         archiveInfo.setUpdateTime(DateUtils.getNowDate());
+        Long fid = archiveInfo.getId();
+
+        SysOss sysOss = new SysOss();
+        sysOss.setFid(String.valueOf(fid));
+        // 获取数据库中的附件列表
+        List<SysOss> originalSysOssList = sysOssMapper.selectSysOssList(sysOss);
+
+        // 新附件列表
+        List<SysOss> newSysOssList = archiveInfo.getSysOssList();
+
+        // 将原附件列表转换为附件ID的集合
+        Set<Long> originalFileIds = originalSysOssList.stream()
+                .map(SysOss::getId)
+                .collect(Collectors.toSet());
+        System.out.println("originalFileIds: " + originalFileIds);
+
+        // 将新附件列表转换为附件ID的集合
+        Set<Long> newFileIds = newSysOssList.stream()
+                .map(SysOss::getId)
+                .collect(Collectors.toSet());
+        System.out.println("newFileIds: " + newFileIds);
+        // 找出需要删除的附件ID
+        Set<Long> idsToDelete = new HashSet<>(originalFileIds);
+        idsToDelete.removeAll(newFileIds);
+        System.out.println("idsToDelete: " + idsToDelete);
+
+        // 删除原有附件中不再存在于新列表的附件
+        if (!idsToDelete.isEmpty()) {
+            sysOssMapper.deleteSysOssByIds(new ArrayList<>(idsToDelete).toArray(new Long[0]));
+        }
+
+        // 找出需要添加的附件
+        Set<Long> idsToAdd = new HashSet<>(newFileIds);
+        idsToAdd.removeAll(originalFileIds);
+
+        // 插入新附件
+        for (SysOss newSysOss : newSysOssList) {
+            if (idsToAdd.contains(newSysOss.getId())) {
+                newSysOss.setFid(String.valueOf(fid));
+                sysOssMapper.insertSysOss(newSysOss);
+            }
+        }
+
+        // 更新归档信息
         return archiveInfoMapper.updateArchiveInfo(archiveInfo);
     }
 

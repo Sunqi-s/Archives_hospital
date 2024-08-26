@@ -7,13 +7,13 @@
       :file-list="fileList"
       :limit="limit"
       drag
-      :show-file-list="true"
+      :show-file-list="false"
       :on-error="handleUploadError"
       :on-exceed="handleExceed"
       :on-success="handleUploadSuccess"
-      :on-change="handleFileChange"
+      :on-change="handFileListChange"
       :headers="headers"
-      :auto-upload="false"
+      :auto-upload="autoUpload"
       class="upload-file-uploader"
       ref="fileUpload"
     >
@@ -29,8 +29,8 @@
     </el-upload>
 
     <!-- 文件列表 -->
-    <transition-group class="upload-file-list el-upload-list el-upload-list--text" name="el-fade-in-linear" tag="ul" v-if="showGroup === true">
-      <li :key="file.url" class="el-upload-list__item ele-upload-list__item-content" v-for="(file, index) in fileList">
+    <transition-group class="upload-file-list el-upload-list el-upload-list--text" name="el-fade-in-linear" tag="ul">
+      <li :key="file.uid" class="el-upload-list__item ele-upload-list__item-content" v-for="(file, index) in fileList">
         <el-link :href="`${baseUrl}${file.url}`" :underline="false" target="_blank">
           <span class="el-icon-document"> {{ getFileName(file.name) }} ({{ getFileSize(file.size) }}) </span>
         </el-link>
@@ -44,6 +44,7 @@
 
 <script>
 import { getToken } from "@/utils/auth";
+import axios from "axios";
 
 export default {
   name: "FileUpload",
@@ -70,7 +71,7 @@ export default {
       type: Boolean,
       default: true,
     },
-    showGroup:{
+    autoUpload:{
       type: Boolean,
       default: true,
     }
@@ -118,6 +119,32 @@ export default {
     },
   },
   methods: {
+    //手动上传文件
+    async handleUpload(sysOssList) {
+      this.uploadList = []
+      this.fileList = []
+      for (let file of sysOssList) {
+        if(this.handleBeforeUpload(file)){
+          const formData = new FormData();
+          formData.append(`file`, file.raw || file);
+          const response = await axios.post(this.uploadFileUrl, formData, {
+            headers: this.headers
+          })
+          try {
+            // 处理上传成功或失败逻辑
+            if (response.data.code === 200) {
+              // 上传成功后，不需要进一步处理数据库
+              this.handleUploadSuccess(response.data);
+              // this.$modal.msgSuccess("文件上传成功");
+            } else {
+              break;
+            }
+          } catch (error) {
+
+          }
+        }
+      }
+    },
     // 上传前校检格式和大小
     handleBeforeUpload(file) {
       // 校检文件类型
@@ -154,33 +181,31 @@ export default {
     },
     // 上传成功回调
     handleUploadSuccess(res, file) {
-        if (res.code === 200) {
-          const fileNameParts = res.fileName.split('.');
-          const suffix = fileNameParts.length > 1 ? fileNameParts.pop() : '';
-          this.uploadList.push({ name: file.name, url: res.fileName, size: res.size ,suffix: suffix ,fid:'' ,deleteFlg:0});
-          this.uploadedSuccessfully();
-        } else {
-          this.number--;
-          this.$modal.closeLoading();
-          this.$modal.msgError(res.msg);
-          this.$refs.fileUpload.handleRemove(file);
-          this.uploadedSuccessfully();
+      if (res.code === 200) {
+        this.uploadList.push({ name: res.originalFilename, url: res.fileName, size: res.size , suffix :res.type ,deleteFlg: 0 ,fid: ''});
+        this.uploadedSuccessfully();
+      } else {
+        this.number--;
+        this.$modal.closeLoading();
+        this.$modal.msgError(res.msg);
+        this.$refs.fileUpload.handleRemove(file);
+        this.uploadedSuccessfully();
       }
     },
     // 删除文件
     handleDelete(index) {
       this.fileList.splice(index, 1);
       //this.$emit("input", this.listToString(this.fileList));
-      this.$emit("input", this.fileList);
+      this.$emit("del", this.fileList);
     },
     // 上传结束处理
     uploadedSuccessfully() {
       if (this.number > 0 && this.uploadList.length === this.number) {
         this.fileList = this.fileList.concat(this.uploadList);
+        this.uploadList = [];
         this.number = 0;
         //this.$emit("input", this.listToString(this.fileList));
-        this.$emit("input", this.uploadList);
-        this.uploadList = [];
+        this.$emit("input", this.fileList);
         this.$modal.closeLoading();
       }
     },
@@ -208,29 +233,27 @@ export default {
     },
 
     // 文件改变
-    handleFileChange(file) {
-      console.log(file)
+    handFileListChange(file) {
       if (file.response && file.response.url) {
-        const updatedFile = this.fileList.find(f => f.uid === file.uid) || file;
-        this.$emit("input", updatedFile);
+
       } else {
-        file.deleteFig = 0;
-        this.$emit("input", file);
-      }
+        file.deleteFlg = 0;
+        this.fileList.push(file);
+        }
     },
-    //手动上传文件
-    handleUpload() {
-        this.$refs.fileUpload.submit();
-    },
-    //删除文件列表后重新显示
-    deleteFileList(newFileList) {
-      this.fileList = newFileList;
+    //将上传框中的fileList传到form中
+    confirm() {
+      this.$emit("info", this.fileList);
+      this.resetFileList()
     },
     //清空fileList
     resetFileList() {
       this.fileList = [];
     },
-  },
+    mounted() {
+      this.fileList = [];
+    }
+  }
 };
 </script>
 
