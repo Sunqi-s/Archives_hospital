@@ -99,7 +99,7 @@
         </el-row>
 
         <!-- 动态生成的表格 -->
-        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'createTime', order: 'descending'}">
+        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}">
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
             v-for="field in listFields"
@@ -206,20 +206,20 @@
                     <el-button type="primary" plain icon="el-icon-upload" size="small" @click="handleUpload" v-if="notCheck()">点击按钮上传</el-button>
                     <el-button type="success" plain icon="el-icon-download" size="small" @click="handleBatchDownload" v-if="notInsert()">批量下载</el-button>
                   </div>
-                  <el-table :data="electronicFiles" style="width: 100%; margin-top: 10px;" @file-list-changed="handleFileListChanged">
-                    <el-table-column prop="index" label="序号" width="50">
-                      <template slot-scope="scope">{{getIndex(scope.row)}}</template>
+                  <el-table :data="form.sysOssList" style="width: 100%; margin-top: 10px;" >
+                    <el-table-column type="index" label="序号" width="50">
+                      <template slot-scope="scope">{{getIndex(scope.$index)}}</template>
                     </el-table-column>
                     <el-table-column prop="name" label="文件名称"></el-table-column>
                     <el-table-column prop="suffix" label="文件类型" width="120"></el-table-column>
                     <el-table-column prop="fileSize" label="文件大小" width="120">
                       <template slot-scope="scope">{{formatSize(scope.row.size)}}</template>
                     </el-table-column>
-                    <el-table-column label="操作" width="120">
+                    <el-table-column label="操作" width="120" v-if="notInsert()">
                       <template slot-scope="scope">
                         <div class="butten-column">
                           <el-button @click="handleFileDownload(scope.row.url)" size="small" v-if="notInsert()">下载</el-button>
-                          <el-button type="danger" @click="handleFileDelete(getIndex(scope.row))" size="small" v-if="notCheck()">删除</el-button>
+                          <el-button type="danger" @click="handleFileDelete(scope.$index)" size="small" v-if="isUpdate()">删除</el-button>
                           <el-button type="success" @click="handleFilePreview(scope.row.url)" size="small" v-if="isCheck()">预览</el-button>
                         </div>
                       </template>
@@ -227,6 +227,25 @@
                   </el-table>
                 </el-col>
               </el-row>
+
+              <!--文件上传对话框-->
+              <el-dialog title="文件上传" :visible.sync="showDialog" width="800px" append-to-body class="dialog-container">
+                <el-form-item label="" prop="url">
+                  <file-upload
+                    :limit="5"
+                    :fileSize="1000"
+                    :fileType="['doc', 'xls', 'ppt', 'txt', 'pdf', 'xlsx', 'jpg', 'png', 'mp4']"
+                    :auto-upload="isAutoUpload"
+                    @input="returnFiles"
+                    @info="handleFileUpload"
+                    ref="fileUpload"
+                  />
+                </el-form-item>
+                <div slot="footer" class="dialog-footer">
+                  <el-button type="primary" @click="clickShow()">确 定</el-button>
+                  <el-button @click="cancelUpload">取 消</el-button>
+                </div>
+              </el-dialog>
 
             </el-form>
           </el-card>
@@ -239,19 +258,6 @@
       </div>
     </el-dialog>
 
-    <!--文件上传对话框-->
-    <el-dialog title="文件上传" :visible.sync="showDialog" :modal="false" append-to-body class="dialog-container">
-      <file-upload
-        :limit="5"
-        :fileSize="1000"
-        :fileType="['doc', 'xls', 'ppt', 'txt', 'pdf', 'xlsx', 'jpg', 'png', 'pdf', 'mp4']"
-        :show-group="false"
-        @input="handleFileUpload"
-        ref="upload"
-      />
-      <div class="center-button"><el-button @click="closeUpload" type="primary" >确 定</el-button></div>
-    </el-dialog>
-
     <!--文件预览对话框-->
     <el-dialog title="文件预览" :visible.sync="showPreview" fullscreen>
       <onlinePreview v-if="showPreview" :initialUrl="previewUrl"/>
@@ -262,14 +268,13 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import { listInfo, getInfo, delInfo, addInfo, updateInfo } from "@/api/archive/info";
+import { addInfo, delInfo, getInfo, listInfo, updateInfo } from "@/api/archive/info";
 import { listCategory } from "@/api/archive/category";
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import {  deptTreeSelect } from "@/api/system/user";
-import {addOss, delOss, listOss} from "@/api/system/oss";
 import * as XLSX from 'xlsx'
 export default {
   name: "Info",
@@ -309,18 +314,19 @@ export default {
       title: null,
       single: true,// 非单个禁用
       multiple: true, // 非多个禁用
-      form: {categoryId: null},
+      form: {categoryId: null, sysOssList: []},
       rules: {},
       showDialog: false,
-      updatedFile: {},
       ossParams: {},
-      savedFile:[],
-      index: 0,
       selectedItems: [],
       choice: 2,
       //预览相关
       showPreview: false,
       previewUrl:"",
+      //文件上传相关
+      isAutoUpload:false,
+      //文件修改相关
+      originalFile:-1
     };
   },
   created() {
@@ -535,7 +541,12 @@ export default {
     // 取消按钮
     cancel() {
       this.close()
-      this.$refs.upload.resetFileList()
+      this.$refs.fileUpload.resetFileList()
+    },
+    //上传取消按钮
+    cancelUpload(){
+      this.showDialog = false
+      this.$refs.fileUpload.resetFileList()
     },
     /** 对话框关闭操作 */
     close() {
@@ -563,14 +574,10 @@ export default {
         this.$refs['form'].resetFields();
       }catch{}
       const id = row.id || this.ids
-      this.isQuery(id)
-      listOss(this.ossParams).then(res => {
-        this.electronicFiles = res.rows;
-        this.savedFile = Object.assign([],res.rows);
-      });
       getInfo(id).then(response => {
         this.form = response.data;
         this.open = true;
+        this.originalFile = response.data.sysOssList.length
         this.title = "修改文书卷内录入";
       });
     },
@@ -582,114 +589,71 @@ export default {
       }
     },
     reset() {
-      this.form = {categoryId: null};
-      this.electronicFiles = [];
+      this.form = {categoryId: null , sysOssList: []};
     },
     /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
+     async submitForm() {
+      this.$refs["form"].validate(async valid => {
         this.form.categoryId = this.categoryId;
         if (valid) {
           if (this.form.id != null && this.form.id != undefined) {
-            if (this.electronicFiles && this.electronicFiles.length > 0) {
-              for (let i = 0; i < this.electronicFiles.length; i++) {
-                const file = this.electronicFiles[i];
-                if (!file.fid || file.fid === undefined) {
-                  this.$refs.upload.handleUpload();
-                  break;
-                }
-              }
+            const newSysOssList = this.form.sysOssList.slice(this.originalFile)
+            if (newSysOssList.length > 0) {
+              await this.$refs.fileUpload.handleUpload(newSysOssList);
             }
-              // 如果有文件需要上传，处理完文件后再更新信息
-              this.handleFileDeletion();
-              updateInfo(this.form).then(() => {
-                this.$modal.msgSuccess("修改成功");
-                this.getList();
-                this.closeAndRefresh();
-              });
-          } else {
-            if (this.electronicFiles.length > 0) {
-              this.$refs.upload.handleUpload();
-            } else {
-              addInfo(this.form).then(() => {
-                this.$modal.msgSuccess("新增成功");
-                this.closeAndRefresh();
-                this.reset();
-              });
+            updateInfo(this.form)
+            this.$modal.msgSuccess("修改成功");
+            this.closeAndRefresh();
+            this.reset();
+            this.$refs.fileUpload.resetFileList();
+          }else {
+            if (this.form.sysOssList.length > 0) {
+              const sysOssList = this.form.sysOssList.map(file => ({
+                deleteFlg:file.deleteFlg,
+                name: file.name,
+                percentage: file.percentage,
+                raw: file.raw,
+                size: file.size,
+                status: file.status,
+                uid: file.uid,
+                url: file.url,
+                fid: file.fid,
+                suffix:file.suffix,
+              }))
+              await this.$refs.fileUpload.handleUpload(sysOssList);
+              await addInfo(this.form);
+              this.$modal.msgSuccess("新增成功");
+              this.closeAndRefresh();
+              this.reset();
             }
           }
         }
       });
     },
-    handleFileDeletion() {
-      let delList = []
-      this.savedFile.forEach(sav => {
-        if (this.electronicFiles.indexOf(sav) === -1) {
-          delList.push(sav.id)
-        }
-      })
-      if(delList.length>0){
-        delOss(delList).then(() => {
-        this.$modal.msgSuccess("删除成功");
-      })
-      }
+    returnFiles(fileList){
+       if(this.originalFile > -1){
+         this.form.sysOssList = this.form.sysOssList.filter(item => item.url)
+         this.form.sysOssList.push(...fileList)
+         this.$refs.fileUpload.resetFileList();
+       }else {
+         this.form.sysOssList = fileList;
+       }
     },
+
     closeAndRefresh() {
       this.open = false;
     },
     //文件上传
-    handleFileUpload(file) {
-      if (Array.isArray(file)) {
-        this.successUpload(file);
-      } else {
-        const fileName = file.name.split('.');
-        const suffix = fileName.length > 1 ? fileName.pop() : '';
-        const fileInfo = {
-          name: file.name,
-          size: file.size,
-          url: file.url,
-          suffix: suffix,
-          path: file.path,
-          percentage: file.percentage,
-          status: file.status,
-          uid: file.uid,
-          deleteFlg: 0,
-          raw: file.raw,
-        };
-        this.electronicFiles.push(fileInfo);
-      }
+    handleFileUpload(fileList) {
+      fileList.forEach(file => {
+        const nameParts = file.name.split(".");
+        file.suffix = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+      })
+      this.form.sysOssList = this.form.sysOssList.concat(fileList)
     },
-    //上传服务器成功后回调
-    successUpload(response) {
-      if (this.form.id != null) {
-        this.updatedFile = response;
-        this.updatedFile.forEach(item => {
-          item.fid = this.form.id
-        })
-        addOss(this.updatedFile).then(() => {
-          this.$modal.msgSuccess("新增成功");
-          this.closeAndRefresh()
-          this.resetQuery()
-          this.reset()
-        });
-      } else {
-        addInfo(this.form).then(() => {
-          this.open = false;
-          this.query();
-          listInfo(this.queryParams).then(res => {
-            response.forEach(item => {
-              item.fid = res.rows[0].id;
-            });
-            this.updatedFile = response;
-            addOss(this.updatedFile).then(() => {
-              this.$modal.msgSuccess("新增成功");
-              this.getList();
-              this.resetQuery()
-              this.reset()
-            });
-          });
-        });
-      }
+    clickShow(){
+      this.$refs.fileUpload.confirm()
+      this.showDialog = false
     },
     //表单查询条件
     query() {
@@ -711,10 +675,7 @@ export default {
         this.$modal.msgSuccess("删除成功");
       }).catch(() => {});
     },
-    //当文件列表发生变化时
-    handleFileListChanged(newFileList) {
-      this.electronicFiles = newFileList;
-    },
+
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.selectedItems = selection;
@@ -761,23 +722,26 @@ export default {
     },
     handleBatchDownload() {
       // 批量下载逻辑
-      if (this.electronicFiles.length < 1) {
+      if (this.form.sysOssList.length < 1) {
         this.$message.warning("请选择要下载的文件!");
       } else {
-        let files = this.electronicFiles.map(item => {
+        let files = this.form.sysOssList.map(item => {
           return item.url;
         });
         let zipName = ['user']
         this.$download.zip("/common/zip?files=" + files, zipName);
       }
     },
+    // 文件下载
     handleFileDownload(url) {
       this.$download.resource(url);
     },
+    // 文件删除
     handleFileDelete(index) {
-      this.electronicFiles.splice(index - 1, 1);
-      if (this.$refs.upload) {
-        this.$refs.upload.deleteFileList(this.electronicFiles);
+      // 直接从 sysOssList 中删除文件
+      this.form.sysOssList.splice(index, 1);
+      if(index <= this.originalFile){
+        this.originalFile -= 1;
       }
     },
     //文件导出
@@ -825,20 +789,14 @@ export default {
       try{
         this.$refs['form'].resetFields();
       }catch{}
-      this.form = row
-      let newQuery = {
-        pageNum: 1,
-        pageSize: 10,
-        fid: row.id,
-        deleteFlg: 0
-      };
-      listOss(newQuery).then(res => {
-        this.electronicFiles = res.rows
-      })
-      this.choice = 2
-      this.open = true;
-      this.title = this.categoryName + '-' + row.field9;
-      this.title = "文书卷内详情";
+      const id = row.id || this.ids
+      getInfo(id).then(response => {
+        this.form = response.data;
+        this.open = true;
+        this.choice = 2
+        this.title = this.categoryName + '-' + row.field9;
+        this.title = "文书卷内详情";
+      });
     },
     //文件预览
     handleFilePreview(url) {
@@ -846,8 +804,8 @@ export default {
       this.showPreview = true;
     },
     //获取索引
-    getIndex(file) {
-      return this.index = this.electronicFiles.indexOf(file) + 1;
+    getIndex(index) {
+      return index + 1
     },
     //格式化文件大小
     formatSize(size) {
@@ -870,6 +828,9 @@ export default {
     notInsert(){
       return this.choice > 0;
     },
+    isUpdate(){
+      return this.choice === 1;
+    }
   }
 };
 
@@ -936,9 +897,5 @@ export default {
 .butten-column button {
   margin: 0;
   padding: 10px;
-}
-.center-button{
-  text-align: right;
-  margin-right: 10px;
 }
 </style>
