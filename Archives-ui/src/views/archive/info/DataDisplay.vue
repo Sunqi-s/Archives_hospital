@@ -2,28 +2,28 @@
   <div>
     <el-table :data="localPaginatedTableData" class="table" @selection-change="handleSelectionChange" border resizable>
       <!-- 新增的附件列 -->
-      <el-table-column label="附件" show-overflow-tooltip>
-        <template slot-scope="scope">
-          <el-button type="text" v-if="scope.row.sysOssList && scope.row.sysOssList.length > 0" @click="showAttachments(scope.row)">
-            <el-popover placement="left" width="200" trigger="hover">
-              <div v-for="(file, index) in scope.row.sysOssList" :key="index">
-                <a
-                  @click="handleFileClick(scope.row, file)"
-                  @mouseover="handleMouseOver"
-                  @mouseleave="handleMouseLeave"
-                  :class="{ 'hovered': localIsHovered }"
-                >
-                  {{ file.name }}
-                </a>
-              </div>
-              <el-button slot="reference" type="text" icon="el-icon-connection"></el-button>
-            </el-popover>
-          </el-button>
-          <el-tooltip content="暂无附件" placement="right" v-else>
-            <el-button type="text" icon="el-icon-folder-delete" style="color: saddlebrown"></el-button>
-          </el-tooltip>
-        </template>
-      </el-table-column>
+ <el-table-column label="附件" show-overflow-tooltip>
+  <template slot-scope="scope">
+    <el-button type="text" v-if="scope.row.sysOssList && scope.row.sysOssList.length > 0" @click="showAttachments(scope.row)">
+      <el-popover placement="left" width="200" trigger="hover">
+        <div v-for="(file, index) in scope.row.sysOssList" :key="index">
+          <a
+            @click="handleFileClick(scope.row, file)"
+            @mouseover="handleMouseOver"
+            @mouseleave="handleMouseLeave"
+            :class="{ 'hovered': localIsHovered }"
+          >
+            {{ file.name }}
+          </a>
+        </div>
+        <el-button slot="reference" type="text" icon="el-icon-connection"></el-button>
+      </el-popover>
+    </el-button>
+    <el-tooltip content="暂无附件" placement="right" v-else>
+      <el-button type="text" icon="el-icon-folder-delete" style="color: saddlebrown"></el-button>
+    </el-tooltip>
+  </template>
+</el-table-column>
 
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column
@@ -75,7 +75,7 @@ export default {
       type: Boolean,
       default: false
     },
-    previewTitle: String,
+    previewTitle: "文件预览",
   },
   data() {
     return {
@@ -106,7 +106,7 @@ export default {
     },
     getViolationMessage(validationErrors, field) {
       const violation = validationErrors.find(v => v.field === field);
-      return violation ? violation.message : '';
+      return violation ? violation.messssage : '';
     },
     showAttachments(row) {
       console.log('Attachments for row:', row);
