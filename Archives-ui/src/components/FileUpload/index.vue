@@ -128,7 +128,8 @@ export default {
           const formData = new FormData();
           formData.append(`file`, file.raw || file);
           const response = await axios.post(this.uploadFileUrl, formData, {
-            headers: this.headers
+            headers: this.headers,
+            timeout: 600000,
           })
           try {
             // 处理上传成功或失败逻辑
@@ -147,24 +148,8 @@ export default {
     },
     // 上传前校检格式和大小
     handleBeforeUpload(file) {
-      // 校检文件类型
-      if (this.fileType) {
-        const fileName = file.name.split('.');
-        const fileExt = fileName[fileName.length - 1];
-        const isTypeOk = this.fileType.indexOf(fileExt) >= 0;
-        if (!isTypeOk) {
-          this.$modal.msgError(`文件格式不正确, 请上传${this.fileType.join("/")}格式文件!`);
-          return false;
-        }
-      }
-      // 校检文件大小
-      if (this.fileSize) {
-        const isLt = file.size / 1024 / 1024 < this.fileSize;
-        if (!isLt) {
-          this.$modal.msgError(`上传文件大小不能超过 ${this.fileSize} MB!`);
-          return false;
-        }
-      }
+      this.checkFileType(file)
+      this.checkFileSize(file)
       this.$modal.loading("正在上传文件，请稍候...");
       this.number++;
       return true;
@@ -178,6 +163,30 @@ export default {
       this.$modal.msgError("上传文件失败，请重试");
       this.$modal.closeLoading();
       this.number--;
+    },
+    // 校检文件类型
+    checkFileType(file) {
+      if (this.fileType) {
+        const fileName = file.name.split('.');
+        const fileExt = fileName[fileName.length - 1];
+        const isTypeOk = this.fileType.indexOf(fileExt) >= 0;
+        if (!isTypeOk) {
+          this.$modal.msgError(`文件格式不正确, 请上传${this.fileType.join("/")}格式文件!`);
+          return false;
+        }
+      }
+      return true;
+    },
+    // 校检文件大小
+    checkFileSize(file) {
+      if (this.fileSize) {
+        const isLt = file.size / 1024 / 1024 < Number(this.fileSize);
+        if (!isLt) {
+          this.$modal.msgError(`上传文件大小不能超过 ${this.fileSize} MB!`);
+          return false;
+        }
+      }
+      return true;
     },
     // 上传成功回调
     handleUploadSuccess(res, file) {
@@ -243,7 +252,13 @@ export default {
     },
     //将上传框中的fileList传到form中
     confirm() {
-      this.$emit("info", this.fileList);
+      const newFileList = [];
+      for(let file of this.fileList){
+        if(this.checkFileType(file) && this.checkFileSize(file)){
+         newFileList.push(file)
+        }
+      }
+      this.$emit("info", newFileList);
       this.resetFileList()
     },
     //清空fileList
