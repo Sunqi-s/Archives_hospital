@@ -36,6 +36,7 @@
     <select id="selectArchiveItemList" parameterType="ArchiveItem" resultMap="ArchiveItemResult">
         <include refid="selectArchiveItemVo"/>
         <where>
+            <if test="categoryId != null  and categoryId != ''"> and category_id like concat('%', #{categoryId}, '%')</if>
             <if test="itemName != null  and itemName != ''"> and item_name like concat('%', #{itemName}, '%')</if>
             <if test="itemType != null  and itemType != ''"> and item_type = #{itemType}</if>
             <if test="columnName != null  and columnName != ''"> and column_name like concat('%', #{columnName}, '%')</if>
