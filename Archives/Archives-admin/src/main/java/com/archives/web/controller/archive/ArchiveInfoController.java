@@ -111,4 +111,17 @@ public class ArchiveInfoController extends BaseController
     {
         return toAjax(archiveInfoService.deleteArchiveInfoByIds(ids));
     }
+    /**
+     * 批量新增档案信息
+     */
+    @Log(title = "EXCEL导入", businessType = BusinessType.INSERT)
+    @PostMapping("/bulkAdd")
+    public AjaxResult bulkAdd(@RequestBody List<ArchiveInfo> archiveInfo)
+    {
+        List<ArchiveInfo> generatedIds = archiveInfoService.insertArchiveInfoList(archiveInfo);
+        System.out.println(archiveInfo);
+        return AjaxResult.success("操作成功", generatedIds);
+    }
+
+
 }

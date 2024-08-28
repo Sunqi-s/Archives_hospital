@@ -43,6 +43,15 @@ export function delInfo(id) {
   })
 }
 
+// 批量导入档案信息
+export function bulkAdd(data) {
+  return request({
+    url: '/archive/info/bulkAdd',
+    method: 'post',
+    data: data
+  })
+}
+
 //归档档案信息
 export function updatAarchiveStatus(id) {
   return request({
