@@ -72,4 +72,12 @@ public interface IArchiveInfoService
      * @return 结果
      */
     public int deleteArchiveInfoById(Long id);
+
+    /**
+     * 批量新增档案信息
+     *
+     * @param archiveInfo 档案信息
+     * @return 结果
+     */
+    public List<ArchiveInfo> insertArchiveInfoList(List<ArchiveInfo> archiveInfo);
 }

@@ -641,6 +641,7 @@ public class ArchiveInfo extends BaseEntity
             .append("field28", getField28())
             .append("field29", getField29())
             .append("field30", getField30())
+            .append("sysOssList", getSysOssList())
             .toString();
     }
 }

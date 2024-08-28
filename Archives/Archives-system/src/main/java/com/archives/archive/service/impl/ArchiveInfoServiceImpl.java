@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.archives.common.exception.ServiceException;
 import com.archives.common.utils.DateUtils;
 import com.archives.system.domain.SysOss;
 import com.archives.system.mapper.SysOssMapper;
@@ -177,4 +178,41 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     {
         return archiveInfoMapper.deleteArchiveInfoById(id);
     }
+
+/**
+ * 批量新增档案信息
+ *
+ * @param archiveInfoList 档案信息列表
+ * @return 影响的行数
+ */
+@Override
+public List<ArchiveInfo> insertArchiveInfoList(List<ArchiveInfo> archiveInfoList) {
+    if (archiveInfoList == null || archiveInfoList.isEmpty()) {
+        throw new ServiceException("导入用户数据不能为空！");
+    }
+
+    List<ArchiveInfo> insertedArchiveInfos = new ArrayList<>();
+    for (ArchiveInfo archiveInfo : archiveInfoList) {
+        archiveInfoMapper.insertArchiveInfo(archiveInfo);
+        insertedArchiveInfos.add(archiveInfo);
+    }
+
+    // 更新每个档案信息的文件列表中的fid
+    for (ArchiveInfo archiveInfo : insertedArchiveInfos) {
+        Long archiveId = archiveInfo.getId();
+        List<SysOss> sysOssList = archiveInfo.getSysOssList();
+        if (sysOssList != null) {
+            for (SysOss sysOss : sysOssList) {
+                sysOss.setFid(String.valueOf(archiveId));
+            }
+            // 循环插入文件列表
+            for (SysOss sysOss : sysOssList) {
+                sysOssMapper.insertSysOss(sysOss);
+            }
+        }
+    }
+
+    return insertedArchiveInfos;
+}
+
 }

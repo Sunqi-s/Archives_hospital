@@ -9,6 +9,15 @@ export function listItem(query) {
   })
 }
 
+export function listItemSuccess(query) {
+  return request({
+    url: '/archive/item/listSuccess',
+    method: 'get',
+    params: query
+  })
+}
+
+
 // 查询档案信息模板详细
 export function getItem(id) {
   return request({
