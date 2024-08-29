@@ -3,7 +3,7 @@
     <el-row :gutter="20">
       <!-- 档案分类树形结构 -->
       <el-col :span="4" :xs="24">
-        <file-tree :file-options="fileOptions" @node-click="handleNodeClick"></file-tree>
+        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false"></file-tree>
       </el-col>
 
       <!-- 未选择档案库时显示该画面 -->
@@ -76,11 +76,20 @@
               v-hasPermi="['system:document:export']"
             >导出</el-button>
           </el-col>
+          <el-col :span="1.5">
+            <el-button
+              type="success"
+              icon="el-icon-s-flag"
+              size="small"
+              :disabled="multiple"
+              @click="handleDocument"
+            >回档</el-button>
+          </el-col>
 
         </el-row>
 
         <!-- 动态生成的表格 -->
-        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" >
+        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" border>
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
             v-for="field in sortedFields"
@@ -89,10 +98,12 @@
             :label="field.label"
             :sortable="true"
             :width="field.width || '120px'"
+            :resizable="true"
           >
             <template slot-scope="scope">
-              <el-tooltip class="item" effect="dark" :content="field.name === 'archiveStatus' ? getArchiveStatus(scope.row.archiveStatus) : String(scope.row[field.name])" placement="top">
+              <el-tooltip class="item" effect="dark" :content="getTooltipContent(field.name, scope.row)" placement="top">
                 <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{ getArchiveStatus(scope.row.archiveStatus) }}</span>
+                <span class="truncate-text" v-else-if="field.name === 'department'">{{ getDepartmentName(scope.row.department) }}</span>
                 <span class="truncate-text"  v-html="scope.row[field.name]"></span>
               </el-tooltip>
             </template>
@@ -224,11 +235,13 @@ import {getDicts} from "@/api/system/dict/data";
 import {getItemByCategoryId} from "@/api/archive/item";
 import {listCategory} from "@/api/archive/category";
 import {deptTreeSelect} from "@/api/system/user";
-import {getInfo, listInfo} from "@/api/archive/info";
+import {getInfo, listInfo, updatAarchiveStatus} from "@/api/archive/info";
 import categoryTree from "@/views/archive/category/categoryTree.vue";
 import Treeselect from "@riophae/vue-treeselect";
 import {treeselect} from "@/api/system/menu";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
+import * as XLSX from "xlsx";
+import {getDept, listDept} from "@/api/system/dept";
 
 export default {
   name: "Resources",
@@ -276,12 +289,15 @@ export default {
       //文件上传相关
       isAutoUpload:false,
       //文件修改相关
-      originalFile:-1
+      originalFile:-1,
+      //部门列表
+      departmentMap:{}
     };
   },
   created() {
     this.getCategoryTreeList();
     this.getDeptTree();
+    this.loadDepartments();
   },
   computed:{
     sortedFields(){
@@ -501,6 +517,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
+      this.archiveNumbers = selection.map(item => item.archiveNumber)
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
@@ -532,13 +549,33 @@ export default {
           pageNum: 1,
           pageSize: 10000000,
           categoryId: null,
-          // archiveStatus: 0,
+          archiveStatus: 1,
           searchValue: ''
         }
         listInfo(ExportQueryParams).then(res => {
           dataToExport = res.rows;
           this.exportToExcel(dataToExport);
         })
+      }
+    },
+    //文件导出
+    exportToExcel(dataToExport) {
+      if (!Array.isArray(this.listFields)) {
+        return;
+      } else {
+        // 提取表头：使用 listFields 中的 label 作为表头
+        const headers = this.listFields.map(field => ({label: field.label}));
+        const data = dataToExport.map(item => {
+          let row = {};
+          this.listFields.forEach(field => {
+            row[field.label] = item[field.name];
+          });
+          return row;
+        });
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, '档案信息');
+        XLSX.writeFile(wb, `archive_${new Date().getTime()}.xlsx`);
       }
     },
     //文件查看
@@ -586,6 +623,15 @@ export default {
         ? `${sizeInKB.toFixed(2)} KB`
         : `${(sizeInKB / 1024).toFixed(2)} MB`;
     },
+    getTooltipContent(fieldName,row) {
+      if(fieldName === 'archiveStatus') {
+        return this.getArchiveStatus(row.archiveStatus);
+      }else if(fieldName === 'department') {
+        return this.getDepartmentName(row.department);
+      }else {
+        return this.getTexted(String(row[fieldName]));
+      }
+    },
     getArchiveStatus(status){
       switch (status) {
         case 0:
@@ -595,6 +641,31 @@ export default {
         default:
           return '未知状态';
       }
+    },
+    handleDocument(row){
+      const ids = row.id || this.ids;
+      const archiveNumbers = row.archiveNumber || this.archiveNumbers;
+      this.$modal.confirm('是否确认回档档号为"' + archiveNumbers + '"的数据？').then(function() {
+        return updatAarchiveStatus(ids)
+      }).then(() => {
+        this.getList();
+        this.$modal.msgSuccess("回档成功");
+      }).catch(() => {});
+    },
+    getTexted(name){
+      name = name.replace(/<\/?span[^>]*>/g, '');
+      return name;
+    },
+    getDepartmentName(department) {
+      return this.departmentMap[department] || '未知部门';
+    },
+    loadDepartments(){
+      listDept().then(response => {
+        this.departmentMap = response.data.reduce((map, dept) => {
+          map[dept.deptId] = dept.deptName;
+          return map;
+        }, {});
+      })
     }
   }
 };
