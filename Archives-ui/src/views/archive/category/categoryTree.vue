@@ -15,7 +15,7 @@
       :data="fileOptions"
       :props="fileProps"
       @node-click="handleNodeClick"
-      default-expand-all
+      :default-expand-all="defaultExpandAll"
       :filter-node-method="fileNode"
       ref="tree"
       class="file-style"
@@ -35,6 +35,10 @@ export default {
     fileOptions: {
       type: Array,
       required: true,
+    },
+    defaultExpandAll: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

@@ -104,7 +104,14 @@
             <if test="field29 != null  and field29 != ''"> and field29 = #{field29}</if>
             <if test="field30 != null  and field30 != ''"> and field30 = #{field30}</if>
         </where>
-        order by id desc
+        <choose>
+            <when test="archiveStatus != 1">
+                ORDER BY id DESC
+            </when>
+            <otherwise>
+                ORDER BY archive_date DESC
+            </otherwise>
+        </choose>
     </select>
 
     <select id="selectArchiveInfoListByKeyword" parameterType="ArchiveInfo" resultMap="ArchiveInfoResult">
@@ -319,7 +326,18 @@
     </update>
 
     <update id="updateArchiveStatusByIds">
-        update archive_info set archive_status = 1 where id in
+        UPDATE archive_info
+        SET
+        archive_date = CASE
+        WHEN archive_status = 0 THEN NOW() -- 修改归档时间
+        ELSE archive_date -- 保持原值
+        END,
+        archive_status = CASE
+        WHEN archive_status = 0 THEN 1
+        WHEN archive_status = 1 THEN 0
+        ELSE archive_status -- 不是0或1，保持原值
+        END
+        WHERE id IN
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>

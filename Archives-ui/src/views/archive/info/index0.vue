@@ -3,7 +3,7 @@
     <el-row :gutter="20">
       <!-- 档案分类树形结构 -->
       <el-col :span="4" :xs="24">
-        <file-tree :file-options="fileOptions" @node-click="handleNodeClick"></file-tree>
+        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false"></file-tree>
       </el-col>
 
       <!-- 未选择档案库时显示该画面 -->
@@ -108,7 +108,7 @@
         </el-row>
 
         <!-- 动态生成的表格 -->
-        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" >
+        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" border>
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
             v-for="field in sortedFields"
@@ -119,7 +119,7 @@
             :width="field.width || '120px'"
           >
             <template slot-scope="scope">
-              <el-tooltip class="item" effect="dark" :content="field.name === 'archiveStatus' ? getArchiveStatus(scope.row.archiveStatus) : String(scope.row[field.name])" placement="top">
+              <el-tooltip class="item" effect="dark" :content="field.name === 'archiveStatus' ? getArchiveStatus(scope.row.archiveStatus) : getTexted(String(scope.row[field.name]))" placement="top">
                 <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{ getArchiveStatus(scope.row.archiveStatus) }}</span>
                 <span class="truncate-text"  v-html="scope.row[field.name]"></span>
               </el-tooltip>
@@ -870,6 +870,10 @@ export default {
         this.$modal.msgSuccess("归档成功");
       }).catch(() => {});
     },
+    getTexted(name){
+      name = name.replace(/<\/?span[^>]*>/g, '');
+      return name;
+    }
   }
 };
 
