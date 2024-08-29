@@ -191,14 +191,11 @@ public List<ArchiveInfo> insertArchiveInfoList(List<ArchiveInfo> archiveInfoList
         throw new ServiceException("导入用户数据不能为空！");
     }
 
-    List<ArchiveInfo> insertedArchiveInfos = new ArrayList<>();
-    for (ArchiveInfo archiveInfo : archiveInfoList) {
-        archiveInfoMapper.insertArchiveInfo(archiveInfo);
-        insertedArchiveInfos.add(archiveInfo);
-    }
+    // 调用mapper里写好的批量插入方法
+    int rows = archiveInfoMapper.insertArchiveInfoList(archiveInfoList);
 
     // 更新每个档案信息的文件列表中的fid
-    for (ArchiveInfo archiveInfo : insertedArchiveInfos) {
+    for (ArchiveInfo archiveInfo : archiveInfoList) {
         Long archiveId = archiveInfo.getId();
         List<SysOss> sysOssList = archiveInfo.getSysOssList();
         if (sysOssList != null) {
@@ -212,7 +209,7 @@ public List<ArchiveInfo> insertArchiveInfoList(List<ArchiveInfo> archiveInfoList
         }
     }
 
-    return insertedArchiveInfos;
+    return archiveInfoList;
 }
 
 }
