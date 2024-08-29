@@ -261,6 +261,18 @@
         </trim>
     </insert>
 
+    <insert id="insertArchiveInfoList" parameterType="java.util.List">
+        INSERT INTO archive_info (
+        category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, archive_status, category_code, field1, field2, field3, field4, field5, field6, field7, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field24, field25, field26, field27, field28, field29, field30
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.categoryId}, #{item.fondsNumber}, #{item.fondsName}, #{item.retentionPeriod}, #{item.itemNumber}, #{item.archiveNumber}, #{item.department}, #{item.archiver}, #{item.archiveDate}, #{item.archiveStatus}, #{item.categoryCode}, #{item.field1}, #{item.field2}, #{item.field3}, #{item.field4}, #{item.field5}, #{item.field6}, #{item.field7}, #{item.field9}, #{item.field10}, #{item.field11}, #{item.field12}, #{item.field13}, #{item.field14}, #{item.field15}, #{item.field16}, #{item.field17}, #{item.field18}, #{item.field19}, #{item.field20}, #{item.field21}, #{item.field24}, #{item.field25}, #{item.field26}, #{item.field27}, #{item.field28}, #{item.field29}, #{item.field30}
+            )
+        </foreach>
+    </insert>
+
+
     <update id="updateArchiveInfo" parameterType="ArchiveInfo">
         update archive_info
         <trim prefix="SET" suffixOverrides=",">

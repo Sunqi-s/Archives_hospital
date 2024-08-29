@@ -373,7 +373,6 @@ export default {
     return {
       active: 0, // 当前步骤条的活动步骤
       tableData: [], // 表格数据
-      fileList: [],
       selectedRows: [], // 选中的行
       showAllData: true, // 是否显示所有数据
       currentPage: 1, // 当前页码
@@ -643,31 +642,34 @@ export default {
 
     // 提交数据到服务器
     submitData() {
-      const formattedData = this.tableData.map(row => {
-        const formattedRow = {...row};
-        if (formattedRow.archiveDate) {
-          const date = new Date(formattedRow.archiveDate);
-          if (!isNaN(date.getTime())) {
-            formattedRow.archiveDate = date.toISOString().split('T')[0];
-          }
-        }
-        return formattedRow;
-      });
-      bulkAdd(formattedData).then(response => {
-        if (!this.fileList.some(() => true)) {
+      const batchSize = 1000; // 每批次插入的数据量
+      const totalBatches = Math.ceil(this.tableData.length / batchSize);
+
+      const insertBatch = (batchIndex) => {
+        if (batchIndex >= totalBatches) {
           this.$message.success('数据插入成功');
-          this.content = formattedData.length; // 设置导入的记录数
+          this.content = this.tableData.length; // 设置导入的记录数
           this.active = 4; // 设置步骤条的活动步骤
           this.currentStep = 5;
+          return;
         }
-        if (this.fileList.some(() => true)) {
-          this.tableData = response.data;
-        }
-      }).catch(error => {
-        this.$message.error('数据插入失败');
-      });
-    },
 
+        const start = batchIndex * batchSize;
+        const end = Math.min(start + batchSize, this.tableData.length);
+        const batchData = this.tableData.slice(start, end);
+
+        bulkAdd(batchData).then(response => {
+          if (batchIndex === totalBatches - 1) {
+            this.tableData = response.data;
+          }
+          insertBatch(batchIndex + 1);
+        }).catch(error => {
+          this.$message.error('数据插入失败');
+        });
+      };
+
+      insertBatch(0);
+    },
     // 清除表单数据
     clearFormData() {
       this.tableData = []; // 清空表格数据
@@ -866,6 +868,7 @@ export default {
 
     // 处理上传到服务器成功事件
     handleUploadSuccess(response, file, fileList) {
+      console.log("成功responde",response);
       // 找到上传成功的文件在 upFileList 中的索引
       const index = this.upFileList.findIndex(upFile => upFile.name === file.name);
       if (index !== -1) {
