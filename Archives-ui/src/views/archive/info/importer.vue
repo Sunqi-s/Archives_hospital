@@ -425,13 +425,13 @@ export default {
       // 挂接文件列表的翻页
       currentTablePage: 1,
       tablePageSize: 50,
-
-
       //   挂接成功弹窗
       isAttachmentComplete: false,
 
       displayOutput:true,
       attach:false,
+      //  上传文件列表禁用案件
+      submitUploadButtonDisabled: false,
     };
   },
   computed: {
@@ -474,7 +474,7 @@ export default {
       return this.currentStep !== 1 ;
     },
     isSubmitUploadButtonDisabled() {
-      return this.currentStep !== 2;
+      return (this.currentStep !== 2)||this.submitUploadButtonDisabled;
     },
     isToggleDropdownDisabled() {
       return this.currentStep !== 3;
@@ -902,6 +902,8 @@ export default {
 
     // 批量上传文件
     async uploadFolderFiles() {
+      // 禁用上传按钮
+      this.submitUploadButtonDisabled=true;
       const batchSize = 5; // 每次上传的文件数量
       // 进度条服务
       const totalFiles = this.fileList.length;
@@ -916,6 +918,8 @@ export default {
         this.totalUploadProgress = Math.round((uploadedFiles / totalFiles) * 100);
       }
       this.$message.success('文件上传成功');
+      // 解除禁用上传按钮
+      this.submitUploadButtonDisabled=false;
       // 流程变化
       this.currentStep = 3;
     },
