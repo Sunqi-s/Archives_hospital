@@ -1,7 +1,13 @@
 <template>
-  <div class="app-container">
+  <el-row
+    v-loading="!isElCardBodyLoading"
+    element-loading-text="导入中，请稍候..."
+    element-loading-svg="<svg class='circular' viewBox='25 25 50 50'><circle class='path' cx='50' cy='50' r='20' fill='none' stroke-width='4' stroke-miterlimit='10'/></svg>"
+    element-loading-svg-view-box="0 0 100 100"
+  >
+    <el-row class="app-container">
 
-    <!-- 树组件 -->
+      <!-- 树组件 -->
     <el-row class="tree">
       <el-col :span="6" class="fixed-tree">
         <slot name="tree-selection">
@@ -13,7 +19,7 @@
       </el-col>
     </el-row>
     <!-- 主体 -->
-    <el-row class="el-card__body" >
+    <el-row class="el-card__body">
       <!-- 进度条 -->
       <el-row class="progressBar">
         <el-col :span="24">
@@ -52,7 +58,7 @@
               </el-button>
               <!-- 导入按钮 -->
               <el-button :type="isUploadDisabled ? 'success disabled' : 'success'"
-                         :disabled="isUploadDisabled || isButtonDisabled || !isDisplayOutput"
+                         :disabled="isUploadDisabled || isButtonDisabled || !isDisplayOutput "
                          @click="submitFileForm">
                 单导入EXCEL
               </el-button>
@@ -341,7 +347,8 @@
         </div>
       </el-dialog>
     </el-row>
-  </div>
+  </el-row>
+  </el-row>
 </template>
 
 <script>
@@ -425,13 +432,16 @@ export default {
       // 挂接文件列表的翻页
       currentTablePage: 1,
       tablePageSize: 50,
-
-
       //   挂接成功弹窗
       isAttachmentComplete: false,
 
       displayOutput:true,
       attach:false,
+      //  上传文件列表禁用案件
+      submitUploadButtonDisabled: false,
+      // 上传EXCEL按钮被点击，文件上传中
+      isSubmitDateTriggered: true,
+      fileList:[],
     };
   },
   computed: {
@@ -452,7 +462,7 @@ export default {
       return this.selectedNodeKey === null; // 如果没有选中的节点
     },
     isUploadDisabled() {
-      return this.tableData.length === 0 || this.tableData.some(row => row.validationErrors && row.validationErrors.length > 0);
+      return this.tableData.length === 0 || this.tableData.some(row => row.validationErrors && row.validationErrors.length > 0) ;
     },
     filteredTableData() {
       return this.showAllData ? this.tableData : this.tableData.filter(row => row.validationErrors.length > 0); // 根据是否显示所有数据过滤表格数据
@@ -474,13 +484,16 @@ export default {
       return this.currentStep !== 1 ;
     },
     isSubmitUploadButtonDisabled() {
-      return this.currentStep !== 2;
+      return (this.currentStep !== 2)||this.submitUploadButtonDisabled;
     },
     isToggleDropdownDisabled() {
       return this.currentStep !== 3;
     },
     isAutoAttachDisabled() {
       return this.currentStep !== 4;
+    },
+    isElCardBodyLoading() {
+      return this.isSubmitDateTriggered === true;
     },
 
   },
@@ -553,6 +566,7 @@ export default {
     },
     // 上传EXCEL处理文件变化事件
     handleFileChange(file) {
+      this.isSubmitDateTriggered = false;
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = new Uint8Array(e.target.result);
@@ -587,6 +601,7 @@ export default {
             }
           }
         });
+        this.isSubmitDateTriggered = true;
         return rowData;
       });
       this.showOn = 1; // 显示标志
@@ -637,15 +652,18 @@ export default {
 
     // 导入文件表单和文件挂接列表
     submitFileForm() {
+      this.isSubmitDateTriggered = false;
+
       this.submitData(); // 提交数据
     },
 
-    // 提交数据到服务器
-    submitData() {
+// 提交数据到服务器
+    async submitData() {
+      console.log("this.isElCardBodyLoading", this.isElCardBodyLoading);
       const batchSize = 1000; // 每批次插入的数据量
       const totalBatches = Math.ceil(this.tableData.length / batchSize);
 
-      const insertBatch = (batchIndex) => {
+      const insertBatch = async (batchIndex) => {
         if (batchIndex >= totalBatches) {
           this.$message.success('数据插入成功');
           this.content = this.tableData.length; // 设置导入的记录数
@@ -658,17 +676,19 @@ export default {
         const end = Math.min(start + batchSize, this.tableData.length);
         const batchData = this.tableData.slice(start, end);
 
-        bulkAdd(batchData).then(response => {
+        try {
+          const response = await bulkAdd(batchData);
           if (batchIndex === totalBatches - 1) {
             this.tableData = response.data;
           }
-          insertBatch(batchIndex + 1);
-        }).catch(error => {
+          await insertBatch(batchIndex + 1);
+        } catch (error) {
           this.$message.error('数据插入失败');
-        });
+        }
       };
 
-      insertBatch(0);
+      await insertBatch(0);
+      this.isSubmitDateTriggered = true;
     },
     // 清除表单数据
     clearFormData() {
@@ -902,6 +922,8 @@ export default {
 
     // 批量上传文件
     async uploadFolderFiles() {
+      // 禁用上传按钮
+      this.submitUploadButtonDisabled=true;
       const batchSize = 5; // 每次上传的文件数量
       // 进度条服务
       const totalFiles = this.fileList.length;
@@ -916,6 +938,8 @@ export default {
         this.totalUploadProgress = Math.round((uploadedFiles / totalFiles) * 100);
       }
       this.$message.success('文件上传成功');
+      // 解除禁用上传按钮
+      this.submitUploadButtonDisabled=false;
       // 流程变化
       this.currentStep = 3;
     },
@@ -1232,6 +1256,7 @@ export default {
   align-items: center;
   height: 100%; /* 需要根据实际情况调整 */
 }
+
 
 @keyframes fadeIn {
   0% {
