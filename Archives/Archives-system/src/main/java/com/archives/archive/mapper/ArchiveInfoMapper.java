@@ -43,6 +43,15 @@ public interface ArchiveInfoMapper
      */
     public int insertArchiveInfo(ArchiveInfo archiveInfo);
 
+
+    /**
+     * 批量新增档案信息
+     *
+     * @param archiveInfoList 档案信息列表
+     * @return 影响的行数
+     */
+    public int insertArchiveInfoList(List<ArchiveInfo> archiveInfoList);
+
     /**
      * 修改档案信息
      *
