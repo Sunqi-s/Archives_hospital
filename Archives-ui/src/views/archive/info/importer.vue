@@ -363,6 +363,7 @@ import {getToken} from "@/utils/auth";
 import JSZip from 'jszip';
 import axios from "axios";
 import {white} from "chalk";
+import {addImportLog , getImportLog , updateImportLog} from "@/api/archive/importLog";
 
 
 
@@ -442,6 +443,12 @@ export default {
       // 上传EXCEL按钮被点击，文件上传中
       isSubmitDateTriggered: true,
       fileList:[],
+      logQueryParams: {
+        status: 'pending',                 // 初始状态为 pending
+        infoProcessedRecords: 0,         // info 表的已处理记录数初始化为 0
+        ossProcessedRecords: 0,          // oss 表的已处理记录数初始化为 0
+        startTime: new Date().toLocaleString(), // 返回包含日期和时间的字符串
+      },
     };
   },
   computed: {
@@ -529,6 +536,7 @@ export default {
     },
     // 获取项目列表并设置列信息
     getItemList() {
+      console.log(this.logQueryParams);
       listItemSuccess(this.itemQueryParams).then(response => {
         this.itemList = response.data; // 获取项目列表数据
         this.columnList = [];
@@ -657,30 +665,54 @@ export default {
       this.submitData(); // 提交数据
     },
 
-// 提交数据到服务器
-    async submitData() {
-      console.log("this.isElCardBodyLoading", this.isElCardBodyLoading);
-      const batchSize = 1000; // 每批次插入的数据量
-      const totalBatches = Math.ceil(this.tableData.length / batchSize);
+
+    // 批量上传数据
+    async batchInsertData(data) {
+      // 写入Log表，创建任务号
+      const batchSize = 250; // 每批次插入的数据量
+      addImportLog(this.logQueryParams).then(response => {
+        this.logQueryParams.id = response.data.id;
+        console.log("Log表数据", response);
+        console.log("导入信息的任务号", this.logQueryParams.id);
+      }).catch(error => {
+      });
+
+      const totalBatches = Math.ceil(data.length / batchSize);
 
       const insertBatch = async (batchIndex) => {
         if (batchIndex >= totalBatches) {
+
+          // 更新log表
           this.$message.success('数据插入成功');
-          this.content = this.tableData.length; // 设置导入的记录数
+          this.content = data.length; // 设置导入的记录数
           this.active = 4; // 设置步骤条的活动步骤
           this.currentStep = 5;
+          this.isSubmitDateTriggered = true;
           return;
         }
 
         const start = batchIndex * batchSize;
-        const end = Math.min(start + batchSize, this.tableData.length);
-        const batchData = this.tableData.slice(start, end);
+        const end = Math.min(start + batchSize, data.length);
+        const batchData = data.slice(start, end);
+
+        // 统计当前批次中所有项的 sysOssList 长度总和
+        const ossProcessedRecordsInBatch = batchData.reduce((sum, item) => {
+          return sum + (item.sysOssList ? item.sysOssList.length : 0);
+        }, 0);
 
         try {
           const response = await bulkAdd(batchData);
           if (batchIndex === totalBatches - 1) {
             this.tableData = response.data;
           }
+          // 更新Log表状态和已处理记录数
+          this.logQueryParams.status = 'processing';
+          this.logQueryParams.infoProcessedRecords += batchData.length;
+          this.logQueryParams.ossProcessedRecords += ossProcessedRecordsInBatch;
+          console.log("batchData.length：", batchData.length);
+          console.log("ossProcessedRecordsInBatch：", ossProcessedRecordsInBatch);
+          await updateImportLog(this.logQueryParams);
+
           await insertBatch(batchIndex + 1);
         } catch (error) {
           this.$message.error('数据插入失败');
@@ -688,8 +720,13 @@ export default {
       };
 
       await insertBatch(0);
-      this.isSubmitDateTriggered = true;
     },
+    // 提交数据到服务器
+    async submitData() {
+      console.log("this.isElCardBodyLoading", this.isElCardBodyLoading);
+      await this.batchInsertData.call(this, this.tableData);
+    },
+
     // 清除表单数据
     clearFormData() {
       this.tableData = []; // 清空表格数据
@@ -842,7 +879,7 @@ export default {
     },
 
     // 批量挂接
-    autoAttach() {
+    async autoAttach() {
       this.attach=true;
       this.startAttachment();
       const formattedData = this.tableData.map(row => {
@@ -855,27 +892,18 @@ export default {
         }
         // 匹配文件列表到对应的档案对象，去掉文件名后缀
         formattedRow.sysOssList = this.upFileList.filter(file => this.removeFileExtension(file.name) === formattedRow.archiveNumber);
+        console.log("formattedRow",formattedRow);
         return formattedRow;
       });
       // 提交数据到服务器
-      bulkAdd(formattedData).then(response => {
-        if (response.data.some(() => true)) {
-          this.$message.success('数据插入成功');
-
-          // 初始化 tableData 并确保 validationErrors 被正确初始化
-          this.tableData = response.data.map(item => ({
-            ...item,
-            validationErrors: item.validationErrors || []
-          }));
-
-          this.content = formattedData.length; // 设置导入的记录数
+      await this.batchInsertData.call(this, formattedData);
           this.active = 4; // 设置步骤条的活动步骤
           this.currentStep = 5;
           this.currentStep = 6;
           this.isAttachmentComplete=true;
-        }
+      this.logQueryParams.status = 'completed';
+      updateImportLog(this.logQueryParams).then(response => {
       }).catch(error => {
-        this.$message.error('数据插入失败');
       });
     },
 
