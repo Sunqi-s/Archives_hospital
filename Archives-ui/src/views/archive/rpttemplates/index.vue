@@ -81,6 +81,13 @@
             @click="preview(scope.row)"
             v-hasPermi="['archive:rpttemplates:remove']"
           >预览</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-s-platform"
+            @click="handleRelation(scope.row)"
+            v-hasPermi="['archive:rpttemplates:remove']"
+          >关联</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -93,6 +100,10 @@
       @pagination="getList"
     />
 
+    <el-dialog title="关联模板" :visible.sync="open" width="30%" :before-close="cancel">
+      <el-cascader v-model="option" :options="options" :show-all-levels="false"></el-cascader>
+      <el-button @click="save" type="primary">确定</el-button>
+    </el-dialog>
 
   </div>
 
@@ -101,6 +112,8 @@
 
 <script>
 import { listRpttemplates, delRpttemplates} from "@/api/archive/rpttemplates";
+import {listCategory} from "@/api/archive/category";
+import {addRelation} from "@/api/archive/relation";
 export default {
   name: "Rpttemplates",
   data() {
@@ -132,10 +145,41 @@ export default {
       },
       // 表单参数
       form: {},
+      // 弹出层表单参数
+      options: [],
+      option:0,
+      //
+      relation:{}
     };
   },
   created() {
     this.getList();
+    listCategory().then(response => {
+      this.options = response.data.map(item => {
+        return{
+          value: item.id,
+          label: item.name,
+          parentId: item.parentId,
+        }
+      })
+      const x = [];
+      for (let i = 0; i < this.options.length; i++) {
+        if(this.options[i].parentId===0){
+          this.options[i].children = [];
+          x.push(this.options[i])
+        }
+      }
+      for (let j = 0; j < this.options.length; j++) {
+        if (this.options[j].parentId !== 0) {
+          for (let k = 0; k < x.length; k++) {
+            if (x[k].value === this.options[j].parentId) {
+              x[k].children.push(this.options[j])
+            }
+          }
+        }
+      }
+      this.options = x;
+    })
   },
   methods: {
     /** 查询报表设计列表 */
@@ -218,6 +262,24 @@ export default {
       this.download('archive/rpttemplates/export', {
         ...this.queryParams
       }, `rpttemplates_${new Date().getTime()}.xlsx`)
+    },
+    // 关联按钮操作
+    handleRelation(row){
+      this.open=true;
+      this.relation.reportId=row.id
+    },
+    // 保存关联模板
+    save(){
+      this.option = this.option.slice(-1);
+      this.relation.categoryId=this.option[0]
+      addRelation(this.relation).then(response=>{
+        if(response===200){
+          this.$message.success("关联成功")
+        }else{
+          this.$message.error("关联失败,报表或档案类型已有关联")
+        }
+        this.open=false;
+      })
     }
   }
 };

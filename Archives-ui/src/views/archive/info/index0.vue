@@ -104,11 +104,21 @@
               @click="handleDocument"
             >归档</el-button>
           </el-col>
+          <el-col :span="1.5">
+            <el-button
+              type="success"
+              icon="el-icon-s-flag"
+              size="small"
+              :disabled="multiple"
+              @click="handlePrint"
+            >打印</el-button>
+          </el-col>
 
         </el-row>
 
         <!-- 动态生成的表格 -->
-        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" border>
+        <div class="fixed-table-container">
+        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="440" ref="dynamicTable" border>
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
             v-for="field in sortedFields"
@@ -126,7 +136,7 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" align="center" fixed="right">
+          <el-table-column label="操作" width="150" align="center" fixed="right" height="440">
             <template slot-scope="scope">
               <el-button type="text" size="small" @click="handleUpdate(scope.row)">
                 <i class="el-icon-edit">修改</i>
@@ -142,8 +152,9 @@
           :total="total"
           :page.sync="queryParams.pageNum"
           :limit.sync="queryParams.pageSize"
-          @pagination="getList"
+          @pagination="handleNextPage"
         />
+        </div>
       </el-col>
     </el-row>
 
@@ -287,6 +298,7 @@ import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import {  deptTreeSelect } from "@/api/system/user";
 import * as XLSX from 'xlsx'
 import {listDept} from "@/api/system/dept";
+import {pointRelation} from "@/api/archive/relation";
 export default {
   name: "Info",
   components: {
@@ -339,7 +351,9 @@ export default {
       //文件修改相关
       originalFile:-1,
       //部门列表
-      departmentMap:{}
+      departmentMap:{},
+      //选中的数组
+      savedids:[],
     };
   },
   created() {
@@ -542,6 +556,9 @@ export default {
         }
         this.total = response.total;
         this.loading = false;
+        this.$nextTick(() => {
+          this.$refs.dynamicTable.doLayout();// 重新计算表格布局
+        })
       });
     },
     markMatches(data) {
@@ -632,13 +649,14 @@ export default {
             if (newSysOssList.length > 0) {
               await this.$refs.fileUpload.handleUpload(newSysOssList);
             }
-            updateInfo(this.form)
-            this.$modal.msgSuccess("修改成功");
-            this.closeAndRefresh();
-            this.reset();
-            this.getList();
-            this.$refs.fileUpload.resetFileList();
-          }else {
+            updateInfo(this.form).then(() => {
+              this.$modal.msgSuccess("修改成功");
+              this.closeAndRefresh();
+              this.reset();
+              this.getList();
+              this.$refs.fileUpload.resetFileList();
+            })
+          } else {
             if (this.form.sysOssList.length > 0) {
               const sysOssList = this.form.sysOssList.map(file => ({
                 deleteFlg:file.deleteFlg,
@@ -898,6 +916,23 @@ export default {
           return map;
         }, {});
       })
+    },
+    handlePrint() {
+      if (this.selectedItems.length > 0) {
+        pointRelation(this.selectedItems[0].categoryId).then(response => {
+          const tpl_name = response.name;
+          this.savedids= this.savedids.concat(this.ids);
+          const ids = this.savedids.join(',');
+          const pageIndex = 1;     // 页码
+          const renderOption = 1;  // 渲染选项
+          const  url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
+          window.location.href = url;
+        })
+      }
+    },
+    handleNextPage(){
+      this.savedids = this.savedids.concat(this.ids);
+      this.getList();
     }
   }
 };
@@ -965,5 +1000,12 @@ export default {
 .butten-column button {
   margin: 0;
   padding: 10px;
+}
+.fixed-table-container {
+  top: 200px;
+  width: 1000px;
+  height: 500px;
+  overflow: auto;
+  position: fixed;
 }
 </style>

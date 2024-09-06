@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.archive.mapper.ArchiveReportRelationMapper">
+    
+    <resultMap type="ArchiveReportRelation" id="ArchiveReportRelationResult">
+        <result property="id"    column="id"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="reportId"    column="report_id"    />
+    </resultMap>
+
+    <sql id="selectArchiveReportRelationVo">
+        select id, category_id, report_id from archive_report_relation
+    </sql>
+
+    <select id="selectArchiveReportRelationList" parameterType="ArchiveReportRelation" resultMap="ArchiveReportRelationResult">
+        <include refid="selectArchiveReportRelationVo"/>
+        <where>  
+            <if test="categoryId != null "> or category_id = #{categoryId}</if>
+            <if test="reportId != null "> or report_id = #{reportId}</if>
+        </where>
+    </select>
+    
+    <select id="selectArchiveReportRelationById" parameterType="Long" resultMap="ArchiveReportRelationResult">
+        <include refid="selectArchiveReportRelationVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectArchiveReportRelationByCategoryId" parameterType="Long" resultMap="ArchiveReportRelationResult">
+        <include refid="selectArchiveReportRelationVo"/>
+        where category_id = #{categoryId}
+    </select>
+
+
+    <insert id="insertArchiveReportRelation" parameterType="ArchiveReportRelation" useGeneratedKeys="true" keyProperty="id">
+        insert into archive_report_relation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="categoryId != null">category_id,</if>
+            <if test="reportId != null">report_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="reportId != null">#{reportId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateArchiveReportRelation" parameterType="ArchiveReportRelation">
+        update archive_report_relation
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="reportId != null">report_id = #{reportId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveReportRelationById" parameterType="Long">
+        delete from archive_report_relation where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveReportRelationByIds" parameterType="String">
+        delete from archive_report_relation where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
