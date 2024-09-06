@@ -192,6 +192,10 @@ public class ArchiveInfo extends BaseEntity
     @Excel(name = "备用字段30")
     private String field30;
 
+    /** 附件 */
+    @Excel(name = "附件")
+    private int ossStatus;
+
     private List<SysOss> sysOssList;
 
     public void setId(Long id)
@@ -591,6 +595,14 @@ public class ArchiveInfo extends BaseEntity
         this.sysOssList = sysOssList;
     }
 
+    public int getOssStatus() {
+        return ossStatus;
+    }
+
+    public void setOssStatus(int ossStatus) {
+        this.ossStatus = ossStatus;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -642,6 +654,7 @@ public class ArchiveInfo extends BaseEntity
             .append("field29", getField29())
             .append("field30", getField30())
             .append("sysOssList", getSysOssList())
+            .append("ossStatus", getOssStatus())
             .toString();
     }
 }

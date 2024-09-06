@@ -2,6 +2,8 @@ package com.archives.archive.mapper;
 
 import java.util.List;
 import com.archives.archive.domain.ArchiveInfo;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 档案信息Mapper接口
@@ -9,6 +11,7 @@ import com.archives.archive.domain.ArchiveInfo;
  * @author 高小川
  * @date 2024-07-11
  */
+@Mapper
 public interface ArchiveInfoMapper
 {
     /**
@@ -89,4 +92,10 @@ public interface ArchiveInfoMapper
      * @return 结果
      */
     public int deleteArchiveInfoByIds(Long[] ids);
+    /**
+     * 添加附件状态
+     * @param id
+     * @return
+     */
+    public int insertOssStatus(@Param("ossStatus") int ossStatus, @Param("id") Long id);
 }

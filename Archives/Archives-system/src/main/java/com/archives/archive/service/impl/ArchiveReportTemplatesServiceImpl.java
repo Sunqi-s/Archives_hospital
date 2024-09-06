@@ -1,6 +1,8 @@
 package com.archives.archive.service.impl;
 
 import java.util.List;
+import com.archives.archive.domain.ArchiveReportRelation;
+import com.archives.archive.mapper.ArchiveReportRelationMapper;
 import com.archives.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ public class ArchiveReportTemplatesServiceImpl implements IArchiveReportTemplate
 {
     @Autowired
     private ArchiveReportTemplatesMapper archiveReportTemplatesMapper;
+    @Autowired
+    private ArchiveReportRelationMapper archiveReportRelationMapper;
 
     /**
      * 查询报表设计
@@ -89,9 +93,25 @@ public class ArchiveReportTemplatesServiceImpl implements IArchiveReportTemplate
      * @return 结果
      */
     @Override
-    public int deleteArchiveReportTemplatesByIds(Long[] ids)
-    {
-        return archiveReportTemplatesMapper.deleteArchiveReportTemplatesByIds(ids);
+    public int deleteArchiveReportTemplatesByIds(Long[] ids) {
+        List<ArchiveReportRelation> relationsDeleted = null;
+        Long[] relationIds = new Long[ids.length];
+        for (Long id : ids) {
+            ArchiveReportRelation archiveReportRelation = new ArchiveReportRelation();
+            archiveReportRelation.setReportId(id);
+            relationsDeleted = archiveReportRelationMapper.selectArchiveReportRelationList(archiveReportRelation);
+            for (int i = 0; i < relationsDeleted.size(); i++) {
+                relationIds[i] = relationsDeleted.get(i).getId();
+            }
+        }
+        int relationsDeletede = 0;
+        if (relationIds[0] != null) {
+            relationsDeletede = archiveReportRelationMapper.deleteArchiveReportRelationByIds(relationIds);
+        }else {
+            relationsDeletede = 1;
+        }
+        int templatesDeleted = archiveReportTemplatesMapper.deleteArchiveReportTemplatesByIds(ids);
+        return (templatesDeleted > 0 && relationsDeletede > 0) ? 1 : 0;
     }
 
     /**

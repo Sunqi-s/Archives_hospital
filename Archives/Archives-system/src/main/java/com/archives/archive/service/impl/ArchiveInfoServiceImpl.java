@@ -90,11 +90,17 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         archiveInfo.setCreateTime(DateUtils.getNowDate());
         int cnt = archiveInfoMapper.insertArchiveInfo(archiveInfo);
         Long fid = archiveInfo.getId();
+        int ossStatus = archiveInfo.getOssStatus();
         if(!archiveInfo.getSysOssList().isEmpty()) {
+            ossStatus = 1;
             for(SysOss sysOss : archiveInfo.getSysOssList()) {
                 sysOss.setFid(String.valueOf(fid));
                 sysOssMapper.insertSysOss(sysOss);
             }
+            archiveInfoMapper.insertOssStatus(ossStatus, fid);
+        }else {
+            ossStatus = 2;
+            archiveInfoMapper.insertOssStatus(ossStatus, fid);
         }
         return cnt;
     }
@@ -152,6 +158,18 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             }
         }
 
+        // 更新oss状态
+        SysOss sysOss1 = new SysOss();
+        sysOss1.setFid(String.valueOf(fid));
+        List<SysOss> sysOssList1 = sysOssMapper.selectSysOssList(sysOss1);
+        int length = sysOssList1.size();
+        if(length > 0) {
+            int ossStatus = 1;
+            archiveInfo.setOssStatus(ossStatus);
+        }else {
+            int ossStatus = 2;
+            archiveInfo.setOssStatus(ossStatus);
+        }
         // 更新归档信息
         return archiveInfoMapper.updateArchiveInfo(archiveInfo);
     }

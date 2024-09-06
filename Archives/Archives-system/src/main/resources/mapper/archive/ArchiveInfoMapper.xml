@@ -52,10 +52,11 @@
         <result property="field28"    column="field28"    />
         <result property="field29"    column="field29"    />
         <result property="field30"    column="field30"    />
+        <result property="ossStatus"  column="oss_status" />
     </resultMap>
 
     <sql id="selectArchiveInfoVo">
-        select id, category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, remarks, archive_status, create_by, create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30 from archive_info
+        select id, category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, remarks, archive_status, create_by, create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status from archive_info
     </sql>
 
     <select id="selectArchiveInfoList" parameterType="ArchiveInfo" resultMap="ArchiveInfoResult">
@@ -103,6 +104,7 @@
             <if test="field28 != null  and field28 != ''"> and field28 = #{field28}</if>
             <if test="field29 != null  and field29 != ''"> and field29 = #{field29}</if>
             <if test="field30 != null  and field30 != ''"> and field30 = #{field30}</if>
+            <if test="ossStatus != null and ossStatus != ''">and oss_status = #{ossStatus}</if>
         </where>
         <choose>
             <when test="archiveStatus != 1">
@@ -158,7 +160,8 @@
                         field27,
                         field28,
                         field29,
-                        field30
+                        field30,
+                        oss_status
                   ) LIKE CONCAT('%', #{searchValue}, '%')
         </where>
     </select>
@@ -279,6 +282,10 @@
         </foreach>
     </insert>
 
+    <update id="insertOssStatus">
+        update archive_info set oss_status = #{ossStatus} where id = #{id}
+    </update>
+
 
     <update id="updateArchiveInfo" parameterType="ArchiveInfo">
         update archive_info
@@ -329,6 +336,7 @@
             <if test="field28 != null">field28 = #{field28},</if>
             <if test="field29 != null">field29 = #{field29},</if>
             <if test="field30 != null">field30 = #{field30},</if>
+            <if test="ossStatus != null">oss_status = #{ossStatus},</if>
         </trim>
         where id = #{id}
     </update>

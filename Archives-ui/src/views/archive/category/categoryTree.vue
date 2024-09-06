@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="file-style">
     <!-- 搜索输入框 -->
     <el-input
       v-model="searchText"
@@ -18,8 +18,15 @@
       :default-expand-all="defaultExpandAll"
       :filter-node-method="fileNode"
       ref="tree"
-      class="file-style"
-    ></el-tree>
+    >
+      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span>
+          <i class="el-icon-document" v-if="data.parentId!==0"></i>
+          <i class="el-icon-folder" v-else></i>
+          {{ data.label }}
+        </span>
+      </span>
+    </el-tree>
     <!-- 骨架屏加载效果 -->
     <el-skeleton v-else :rows="5" animated></el-skeleton>
   </div>
