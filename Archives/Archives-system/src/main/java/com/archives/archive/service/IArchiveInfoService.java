@@ -1,6 +1,8 @@
 package com.archives.archive.service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import com.archives.archive.domain.ArchiveInfo;
 
 /**
@@ -79,5 +81,5 @@ public interface IArchiveInfoService
      * @param archiveInfo 档案信息
      * @return 结果
      */
-    public List<ArchiveInfo> insertArchiveInfoList(List<ArchiveInfo> archiveInfo);
+    public CompletableFuture<List<ArchiveInfo>> insertArchiveInfoList(List<ArchiveInfo> archiveInfo);
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import com.archives.common.exception.ServiceException;
@@ -16,6 +18,7 @@ import com.archives.archive.mapper.ArchiveInfoMapper;
 import com.archives.archive.domain.ArchiveInfo;
 import com.archives.archive.service.IArchiveInfoService;
 
+import java.util.concurrent.CompletableFuture;
 /**
  * 档案信息Service业务层处理
  *
@@ -30,6 +33,14 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Autowired
     private SysOssMapper sysOssMapper;
+
+    @Autowired
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
+
+    public ArchiveInfoServiceImpl(ArchiveInfoMapper archiveInfoMapper, SysOssMapper sysOssMapper) {
+        this.archiveInfoMapper = archiveInfoMapper;
+        this.sysOssMapper = sysOssMapper;
+    }
 
     /**
      * 查询档案信息
@@ -179,37 +190,39 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         return archiveInfoMapper.deleteArchiveInfoById(id);
     }
 
-/**
- * 批量新增档案信息
- *
- * @param archiveInfoList 档案信息列表
- * @return 影响的行数
- */
-@Override
-public List<ArchiveInfo> insertArchiveInfoList(List<ArchiveInfo> archiveInfoList) {
-    if (archiveInfoList == null || archiveInfoList.isEmpty()) {
-        throw new ServiceException("导入用户数据不能为空！");
-    }
-
-    // 调用mapper里写好的批量插入方法
-    int rows = archiveInfoMapper.insertArchiveInfoList(archiveInfoList);
-
-    // 更新每个档案信息的文件列表中的fid
-    for (ArchiveInfo archiveInfo : archiveInfoList) {
-        Long archiveId = archiveInfo.getId();
-        List<SysOss> sysOssList = archiveInfo.getSysOssList();
-        if (sysOssList != null) {
-            for (SysOss sysOss : sysOssList) {
-                sysOss.setFid(String.valueOf(archiveId));
+    /**
+     * 批量新增档案信息
+     *
+     * @param archiveInfoList 档案信息列表
+     * @return 影响的行数
+     */
+    @Override
+    public CompletableFuture<List<ArchiveInfo>> insertArchiveInfoList(List<ArchiveInfo> archiveInfoList) {
+        return CompletableFuture.supplyAsync(() -> {
+            if (archiveInfoList == null || archiveInfoList.isEmpty()) {
+                throw new ServiceException("导入用户数据不能为空！");
             }
-            // 循环插入文件列表
-            for (SysOss sysOss : sysOssList) {
-                sysOssMapper.insertSysOss(sysOss);
-            }
-        }
-    }
 
-    return archiveInfoList;
+            // 调用mapper里写好的批量插入方法
+            int rows = archiveInfoMapper.insertArchiveInfoList(archiveInfoList);
+
+            // 更新每个档案信息的文件列表中的fid
+            for (ArchiveInfo archiveInfo : archiveInfoList) {
+                Long archiveId = archiveInfo.getId();
+                List<SysOss> sysOssList = archiveInfo.getSysOssList();
+                if (sysOssList != null) {
+                    for (SysOss sysOss : sysOssList) {
+                        sysOss.setFid(String.valueOf(archiveId));
+                    }
+                    // 循环插入文件列表
+                    for (SysOss sysOss : sysOssList) {
+                        sysOssMapper.insertSysOss(sysOss);
+                    }
+                }
+            }
+
+            return archiveInfoList;
+        }, executorService);
+    }
 }
 
-}

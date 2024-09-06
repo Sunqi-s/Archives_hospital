@@ -1,6 +1,7 @@
 package com.archives.web.controller.archive;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,10 +119,14 @@ public class ArchiveInfoController extends BaseController
     @PostMapping("/bulkAdd")
     public AjaxResult bulkAdd(@RequestBody List<ArchiveInfo> archiveInfo)
     {
-        List<ArchiveInfo> generatedIds = archiveInfoService.insertArchiveInfoList(archiveInfo);
-        System.out.println(archiveInfo);
-        return AjaxResult.success("操作成功", generatedIds);
+        try {
+            CompletableFuture<List<ArchiveInfo>> future = archiveInfoService.insertArchiveInfoList(archiveInfo);
+            List<ArchiveInfo> generatedIds = future.get(); // 等待异步操作完成并获取结果
+            return AjaxResult.success("操作成功", generatedIds);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error("操作失败: " + e.getMessage());
+        }
     }
-
 
 }
