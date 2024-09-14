@@ -25,11 +25,11 @@ public class ArchiveImportLog extends BaseEntity
     private String status;
 
     /** info的插入数 */
-    @Excel(name = "info的插入数")
+    @Excel(name = "info的完成插入数")
     private Long infoProcessedRecords;
 
     /** oss表的插入数 */
-    @Excel(name = "oss表的插入数")
+    @Excel(name = "oss表的完成插入数")
     private Long ossProcessedRecords;
 
     /** 开始时间 */
@@ -45,6 +45,12 @@ public class ArchiveImportLog extends BaseEntity
     /** 错误信息（可为空） */
     @Excel(name = "错误信息", readConverterExp = "可=为空")
     private String errorMessage;
+
+    @Excel(name = "info表的插入数")
+    private Long infoImportRecords;
+
+    @Excel(name = "oss表的插入数")
+    private Long ossImportRecords;
 
     public void setId(Long id)
     {
@@ -110,6 +116,22 @@ public class ArchiveImportLog extends BaseEntity
         return errorMessage;
     }
 
+    public Long getInfoImportRecords() {
+        return infoImportRecords;
+    }
+
+    public void setInfoImportRecords(Long infoImpoertRecords) {
+        this.infoImportRecords = infoImpoertRecords;
+    }
+
+    public Long getOssImportRecords() {
+        return ossImportRecords;
+    }
+
+    public void setOssImportRecords(Long ossImpoertRecords) {
+        this.ossImportRecords = ossImpoertRecords;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -124,6 +146,8 @@ public class ArchiveImportLog extends BaseEntity
             .append("createTime", getCreateTime())
             .append("updateBy", getUpdateBy())
             .append("updateTime", getUpdateTime())
+            .append("infoImportRecords", getInfoImportRecords())
+            .append("ossImportRecords", getOssImportRecords())
             .toString();
     }
 }

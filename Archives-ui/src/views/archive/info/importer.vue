@@ -8,16 +8,9 @@
     <el-row class="app-container">
 
       <!-- 树组件 -->
-    <el-row class="tree">
-      <el-col :span="6" class="fixed-tree">
-        <slot name="tree-selection">
-          <TreeSelection :categoryTree="categoryTree"
-                         :defaultProps="defaultProps"
-                         :selectedNodeKey="selectedNodeKey"
-                         @node-click="handleNodeClick" />
-        </slot>
+      <el-col :span="4" :xs="24">
+        <file-tree :file-options="categoryTree" @node-click="handleNodeClick" :default-expand-all="false" :isDisabled="isExcel"></file-tree>
       </el-col>
-    </el-row>
     <!-- 主体 -->
     <el-row class="el-card__body">
       <!-- 进度条 -->
@@ -27,7 +20,7 @@
             <el-steps :active="active" finish-status="success">
               <el-step v-if="isCategory" title="选择左侧档案类型"></el-step>
               <el-step v-if="!isCategory" :title="`当前分类: ${categoryName}`"></el-step>
-              <el-step title="下载模板,选择文件,处理错误"></el-step>
+              <el-step title="上传文件"></el-step>
               <el-step title="导入"></el-step>
               <el-step title="完成"></el-step>
             </el-steps>
@@ -107,7 +100,8 @@
             </div>
             <div class="text-center">
               <el-icon class="el-icon-success success-icon"></el-icon>
-              <p class="success-message">此次共导入 {{ content }} 条记录。</p>
+              <p class="success-message">此次共导入 {{ importLog.infoImportRecords }} 条记录。
+              成功挂接 {{importLog.ossProcessedRecords}} 条记录。</p>
               <el-button type="primary" @click="look" size="medium" class="reset-button">查看结果</el-button>
               <el-button type="primary" @click="reset" size="medium" class="reset-button">再次导入</el-button>
             </div>
@@ -116,94 +110,25 @@
       </el-row>
 
       <!-- 文件夹挂接弹出页 -->
-      <el-dialog title="文件挂接流程" :visible.sync="batchAttachmentDialogVisible" width="80%">
-
-        <el-row :gutter="20" style="height: 70vh;">
-          <!-- 左侧处理流程 -->
-          <el-col :span="6" style="display: flex; flex-direction: column; height: 100%;">
-            <div v-for="(step, index) in steps" :key="index"
-                 :style="{
-                   backgroundColor: getStepColor(index),
-                   color: '#fff',
-                   flex: 1,
-                   display: 'flex',
-                   alignItems: 'center',
-                   marginBottom: index < steps.length - 1 ? '2px' : '0',
-                   paddingLeft: '10px',
-                   position: 'relative',
-                   transition: 'background-color 0.5s ease',
-                 }">
-              <!-- 序号 -->
-              <span :style="{
-                      fontSize: '80px',
-                      opacity: '0.9',
-                      flex: '0 0 30%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }">{{ index + 1 }}</span>
-              <!-- 步骤标题 -->
-              <span :style="{
-                      fontSize: '22px',
-                      flex: '0 0 55%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }">{{ step.title }}</span>
-
-              <!-- 完成标志 -->
-              <div v-if="index < currentStep - 1"
-                   :style="{
-                      position: 'absolute',
-                      top: '0',
-                      left: '0',
-                      width: '0',
-                      height: '0',
-                      borderLeft: '30px solid white',
-                      borderBottom: '30px solid transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }">
-                <span :style="{
-                        width: '8px',
-                        height: '16px',
-                        borderBottom: '4px solid ' + getStepColor(index),
-                        borderRight: '4px solid ' + getStepColor(index),
-                        position: 'absolute',
-                        left: '-25px',
-                        top: '2px',
-                        transform: 'rotate(45deg)',
-                      }"></span>
-              </div>
-
-              <!-- 等待中的标志 -->
-              <div v-else-if="index >= currentStep"
-                   :style="{
-                      position: 'absolute',
-                      top: '0',
-                      left: '0',
-                      width: '0',
-                      height: '0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }">
-                <span :style="{
-                        width: '16px',
-                        height: '16px',
-                        backgroundColor: 'white',
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        left: '5px',
-                        top: '5px',
-                      }"></span>
-              </div>
-            </div>
+      <el-dialog
+        class="el-dialog"
+        title="文件挂接流程"
+        :visible.sync="batchAttachmentDialogVisible"
+        :modal-append-to-body="false"
+      >
+        <el-row :gutter="20">
+          <!-- 上面处理流程步骤条 -->
+          <el-col :span="24" style="text-align: center; padding-bottom: 20px;">
+            <el-steps :active="currentStep" simple >
+              <el-step title="选择文件" icon="el-icon-edit" ></el-step>
+              <el-step title="文件上传" icon="el-icon-upload" ></el-step>
+              <el-step title="文件挂接" icon="el-icon-picture" ></el-step>
+              <el-step title="挂接完成" icon="el-icon-picture" ></el-step>
+            </el-steps>
           </el-col>
 
           <!-- 中间按钮区 -->
-          <el-col :span="2" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <el-col :span="10" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <!-- 上传需要挂载的文件 -->
             <el-upload
               class="upload-demo"
@@ -213,111 +138,44 @@
               :file-list="fileList"
               :show-file-list="false"
               :auto-upload="false"
-              multiple
               :on-success="handleUploadSuccess"
               :on-error="handleUploadError"
+              list-type="picture-card"
               ref="upload"
+              :disabled="isFileListDisabled"
+              v-if="currentStep !== 3"
             >
-              <el-button type="primary" :disabled="isSelectFileDisabled">选择文件</el-button>
+              <i v-if="fileList.length === 0 && currentStep !== 3" class="el-icon-plus upload-icon"></i>
+              <img v-if="fileList.length > 0 && currentStep !== 3" class="upload-image" src="@/assets/images/压缩包.jpg" alt="Uploaded File" style="width: 140px; height: 140px;"/>
             </el-upload>
-
-            <el-button type="success" @click="submitUpload" :disabled="isSubmitUploadButtonDisabled" style="margin-top: 10px;">开始上传</el-button>
-
-            <div class="file-info" style="margin-top: 10px; position: relative;">
-              <!-- 设置挂接规则按钮 -->
-              <el-button type="primary" @click="toggleDropdownVisibility" :disabled="isToggleDropdownDisabled" plain>挂接规则</el-button>
-
-              <!-- 设置挂接挂接则列表 -->
-              <div v-if="isDropdownVisible" class="dropdown-menu" style="position: absolute; top: 100%; left: 0; z-index: 1000; background: white; border: 1px solid #ccc; padding: 10px; max-height: 300px; overflow-y: auto;">
-                <div v-for="item in itemList" :key="item.columnName" @click="chooseItem(item)" style="padding: 5px; cursor: pointer;">
-                  {{ item.itemName }}
-                </div>
-              </div>
+          </el-col>
+          <!-- 自定义文件展示 -->
+          <div>
+            <div v-for="(file, index) in filteredFileList" :key="index" class="file-item" v-if="currentStep <3">
+              <!-- 图标显示 -->
+              <i class="el-icon-document" style="font-size: 24px"></i>
+              <!-- 文件名显示 -->
+              <span style="font-size: 24px">{{ file.name }}</span>
             </div>
-
+          </div>
+          <div style="margin-top: 10px;">
+            <el-button type="success" @click="submitUpload" style="margin-top: 10px;" v-if="currentStep === 1">开始上传</el-button>
+            <el-button type="danger" @click="resetAttachment" v-if="currentStep === 1" style="margin-top: 10px;">文件重置</el-button>
             <!-- 开始挂接按钮 -->
-            <el-button type="primary" @click="autoAttach" :disabled="isAutoAttachDisabled" style="margin-top: 10px;">开始挂接</el-button>
-
-            <!-- 重置挂接按钮 -->
-            <el-button type="warning" @click="resetAttachment" style="margin-top: 10px;margin-right: 10px">重置挂接</el-button>
-          </el-col>
-
-          <!-- 右侧内容 -->
-          <el-col :span="16" style="height: 100%;">
-            <el-row v-if="currentStep < 2" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
-              <img :src="require('@/assets/images/lock.png')" alt="Lock Image">
+            <el-button type="primary" @click="autoAttach" style="margin-top: 10px;" v-if="currentStep === 2">开始挂接</el-button>
+          </div>
+          <div v-if="currentStep === 3">
+            <el-row>
+              <el-col :sm="12" :lg="6" style="margin-left: 37%; margin-top: -50px; margin-bottom: -20px">
+                <el-result icon="success" title="挂接完成" subTitle="请关闭此页面"></el-result>
+              </el-col>
             </el-row>
-
-            <el-row v-if="currentStep === 2||currentStep === 4 " class="table-container">
-              <el-table
-                :data="currentPageData"
-                style="width: 100%; margin-top: 0px; overflow-x: auto;"
-              >
-                <el-table-column label="序号" type="index"></el-table-column>
-                <el-table-column prop="status" label="状态"></el-table-column>
-                <el-table-column prop="name" label="文件名"></el-table-column>
-                <el-table-column label="大小" :formatter="formatFileSize"></el-table-column>
-                <el-table-column label="操作">
-                  <template slot-scope="scope">
-                    <el-button type="danger" @click="removeFile(scope.$index)">删除</el-button>
-                  </template>
-                </el-table-column>
-              </el-table>
-
-              <el-pagination
-                @size-change="onPageSizeChange"
-                @current-change="onPageChange"
-                :current-page="currentTablePage"
-                :page-sizes="[50, 100, 200]"
-                :page-size="tablePageSize"
-                layout="total, sizes, prev, pager, next, jumper"
-                :total="tableData.length"
-              ></el-pagination>
-            </el-row>
-
-            <div v-if="currentStep === 3" class="confirmRuleButton" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-              <el-table :data="rulesList" style="width: 100%; margin-top: 0;">
-                <el-table-column type="index" label="序号"></el-table-column>
-                <el-table-column prop="itemName" label="字段"></el-table-column>
-                <el-table-column label="前缀">
-                  <template slot-scope="scope">
-                    <el-input v-if="scope.row.isEditing" v-model="scope.row.prefix" placeholder="请输入前缀"></el-input>
-                    <span v-else>{{ scope.row.prefix }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="后缀">
-                  <template slot-scope="scope">
-                    <el-input v-if="scope.row.isEditing" v-model="scope.row.suffix" placeholder="请输入后缀"></el-input>
-                    <span v-else>{{ scope.row.suffix }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="操作">
-                  <template slot-scope="scope">
-                    <el-button v-if="!scope.row.isEditing" @click="editRule(scope.row)" type="primary" size="small">修改</el-button>
-                    <el-button v-if="scope.row.isEditing" @click="saveRule(scope.row)" type="success" size="small">保存</el-button>
-                    <el-button @click="deleteRule(scope.$index)" type="danger" size="small">删除</el-button>
-                  </template>
-                </el-table-column>
-              </el-table>
-              <el-button @click="confirmRules" type="primary" style="margin-top: 10px;">确定规则</el-button>
-            </div>
-
-<!--            <div v-if="isAttachmentComplete" class="unique-container">-->
-            <div v-if="isAttachmentComplete" class="unique-container">
-              <div class="completion-message-wrapper">
-                <div class="completion-message">
-                  <el-icon class="el-icon-success success-icon" style="font-size: 64px; color: #fff;"></el-icon>
-                  <div class="success-message">文件挂接完成，您可以关闭当前页面。</div>
-                </div>
-              </div>
-            </div>
-
-          </el-col>
+          </div>
         </el-row>
         <div style="height: 1px;margin-top: 10px">
           <!-- 解压缩进度条 -->
           <el-progress
-            v-if="currentStep<2"
+            v-if="circleStep === 0"
             :text-inside="true"
             :stroke-width="20"
             :percentage="progress"
@@ -327,7 +185,7 @@
           </el-progress>
           <!-- 上传进度条 -->
           <el-progress
-            v-if="currentStep>1 && currentStep<4"
+            v-if="circleStep === 1"
             :text-inside="true"
             :stroke-width="20"
             :percentage="totalUploadProgress"
@@ -356,20 +214,19 @@ import { listCategory } from "@/api/archive/category";
 import { listItemSuccess} from "@/api/archive/item";
 import * as XLSX from 'xlsx';
 import { bulkAdd } from "@/api/archive/info";
-import TreeSelection from "@/views/archive/info/TreeSelection.vue";
 import DataDisplay from "@/views/archive/info/DataDisplay.vue";
 import FileUploadStep from "@/views/archive/info/FileUploadStep.vue";
 import {getToken} from "@/utils/auth";
 import JSZip from 'jszip';
 import axios from "axios";
-import {white} from "chalk";
 import {addImportLog , getImportLog , updateImportLog} from "@/api/archive/importLog";
-
-
+import {addOss} from "@/api/system/oss";
+import Treeselect from "@riophae/vue-treeselect";
+import categoryTree from "@/views/archive/category/categoryTree.vue";
 
 export default {
   components: {
-    TreeSelection,
+    'file-tree': categoryTree, Treeselect,
     FileUploadStep,
     DataDisplay
   },
@@ -390,8 +247,6 @@ export default {
       attachmentProgress: 0,
       zipLoading : false,
       uploadFiles:[],
-      isDropdownVisible: false,
-      selectedProperty: '',
       categoryList: [], // 分类列表
       categoryTree: [], // 分类树
       itemList: [], // 项目列表
@@ -408,7 +263,6 @@ export default {
         label: 'name'
       },
       selectedNodeKey: null, // 选中的节点Key
-      content: 0, // 导入的记录数
       resetOn: 0, // 重置标志
       showOn: 0, // 显示标志
       categoryName: 0,
@@ -420,16 +274,8 @@ export default {
 
       progress : 0,
       totalUploadProgress: 0, // 初始化总上传进度
-
-      steps: [
-        { title: '开始选择文件' },
-        { title: '进行文件上传' },
-        { title: '添加挂接规则' },
-        { title: '开始挂接附件' },
-        { title: '挂接导入完成' },
-      ],
       // 挂接步骤
-      currentStep: 1,
+      currentStep: 0,
       // 挂接文件列表的翻页
       currentTablePage: 1,
       tablePageSize: 50,
@@ -447,8 +293,14 @@ export default {
         status: 'pending',                 // 初始状态为 pending
         infoProcessedRecords: 0,         // info 表的已处理记录数初始化为 0
         ossProcessedRecords: 0,          // oss 表的已处理记录数初始化为 0
+        infoImportRecords: 0,            // info 表的待导入记录数初始化为 0
+        ossImportRecords: 0,             // oss 表的待导入记录数初始化为 0
         startTime: new Date().toLocaleString(), // 返回包含日期和时间的字符串
       },
+      ossList:[],
+      circleStep:0,
+      filteredFileList:[],
+      importLog:{}
     };
   },
   computed: {
@@ -482,27 +334,39 @@ export default {
     toggleButtonType() {
       return this.showAllData ? 'danger' : 'success'; // 切换按钮类型
     },
-    currentPageData() {
-      const start = (this.currentTablePage - 1) * this.tablePageSize;
-      const end = this.currentTablePage * this.tablePageSize;
-      return this.upFileList.slice(start, end);
-    },
-    isSelectFileDisabled() {
-      return this.currentStep !== 1 ;
-    },
-    isSubmitUploadButtonDisabled() {
-      return (this.currentStep !== 2)||this.submitUploadButtonDisabled;
-    },
-    isToggleDropdownDisabled() {
-      return this.currentStep !== 3;
-    },
-    isAutoAttachDisabled() {
-      return this.currentStep !== 4;
-    },
+
     isElCardBodyLoading() {
       return this.isSubmitDateTriggered === true;
     },
+    formatTableData() {
+      return this.tableData.map(row => {
+        const formattedRow = { ...row };
+        // 如果 archiveDate 有效，则格式化
+        if (formattedRow.archiveDate) {
+          const date = new Date(formattedRow.archiveDate);
+          if (!isNaN(date.getTime())) {
+            formattedRow.archiveDate = date.toISOString().split('T')[0];
+          }
+        }
 
+        // 基于 archiveNumber 从 upFileList 过滤匹配文件
+        formattedRow.sysOssList = this.upFileList.filter(file =>
+          this.removeFileExtension(file.name) === formattedRow.archiveNumber
+        );
+        if (formattedRow.sysOssList.length > 0) {
+          formattedRow.ossStatus = 1
+        }else {
+          formattedRow.ossStatus = 2
+        }
+        return formattedRow;
+      });
+    },
+    isFileListDisabled() {
+      return this.fileList.length > 0;
+    },
+    isExcel(){
+      return this.columnList.length > 0;
+    }
   },
   methods: {
     // 获取分类列表并构建分类树
@@ -516,7 +380,7 @@ export default {
     constructTree() {
       let map = {};
       this.categoryList.forEach(item => {
-        map[item.id] = {...item, children: []};
+        map[item.id] = {...item, children: [],label:item.name};
       });
 
       let tree = [];
@@ -529,8 +393,9 @@ export default {
       });
       this.categoryTree = [
         {
-          name: "档案类型",
-          children: tree
+          label: "档案类型",
+          children: tree,
+          parentId:-1
         }
       ];
     },
@@ -565,12 +430,19 @@ export default {
 
     // 树组件处理节点点击事件
     handleNodeClick(data) {
-      this.selectedNodeKey = data.id; // 设置选中的节点Key
-      this.itemQueryParams.categoryId = data.id; // 设置项目查询参数的分类ID
-      this.getItemList(); // 获取项目列表
-      this.categoryName = data.name;
-      this.$message.success(`当前分类: ${data.name}`); // 显示当前分类
-      this.active = 1; // 设置步骤条的活动步骤
+      if(data.parentId > 0){
+        this.selectedNodeKey = data.id; // 设置选中的节点Key
+        this.itemQueryParams.categoryId = data.id;// 设置项目查询参数的分类ID
+        this.getItemList(); // 获取项目列表
+        this.categoryName = data.name;
+        this.$message.success(`当前分类: ${data.label}`); // 显示当前分类
+        this.active = 1; // 设置步骤条的活动步骤
+      }else {
+        this.selectedNodeKey = null; // 设置选中的节点Key
+        this.itemQueryParams.categoryId = 0;// 设置项目查询参数的分类ID
+        this.active = 0; // 设置步骤条的活动步骤
+        this.categoryName = 0;
+      }
     },
     // 上传EXCEL处理文件变化事件
     handleFileChange(file) {
@@ -670,23 +542,22 @@ export default {
     async batchInsertData(data) {
       // 写入Log表，创建任务号
       const batchSize = 250; // 每批次插入的数据量
+      const infoImportRecords = data.length;
+      const ossImportRecords = this.fileList.length;
+      const totalBatches = Math.ceil(data.length / batchSize);
+      this.logQueryParams.infoImportRecords = infoImportRecords;
+      this.logQueryParams.ossImportRecords = ossImportRecords;
       addImportLog(this.logQueryParams).then(response => {
         this.logQueryParams.id = response.data.id;
-        console.log("Log表数据", response);
-        console.log("导入信息的任务号", this.logQueryParams.id);
       }).catch(error => {
       });
-
-      const totalBatches = Math.ceil(data.length / batchSize);
-
       const insertBatch = async (batchIndex) => {
         if (batchIndex >= totalBatches) {
 
           // 更新log表
           this.$message.success('数据插入成功');
-          this.content = data.length; // 设置导入的记录数
           this.active = 4; // 设置步骤条的活动步骤
-          this.currentStep = 5;
+          this.currentStep = 3;
           this.isSubmitDateTriggered = true;
           return;
         }
@@ -702,29 +573,66 @@ export default {
 
         try {
           const response = await bulkAdd(batchData);
-          if (batchIndex === totalBatches - 1) {
-            this.tableData = response.data;
+          for(let i = 0; i < response.data.length; i++) {
+            this.ossList = this.ossList.concat(response.data[i].sysOssList);
           }
-          // 更新Log表状态和已处理记录数
-          this.logQueryParams.status = 'processing';
-          this.logQueryParams.infoProcessedRecords += batchData.length;
-          this.logQueryParams.ossProcessedRecords += ossProcessedRecordsInBatch;
-          console.log("batchData.length：", batchData.length);
-          console.log("ossProcessedRecordsInBatch：", ossProcessedRecordsInBatch);
-          await updateImportLog(this.logQueryParams);
-
-          await insertBatch(batchIndex + 1);
+          // 上传文件到OSS
+          addOss(this.ossList)
+          this.ossList = [];
+          await Promise.all([
+            insertBatch(batchIndex + 1),// 插入下一批
+            this.updateLog(batchIndex, ossProcessedRecordsInBatch, batchData), // 更新log表状态和已处理记录数
+          ])
         } catch (error) {
+          this.$message.error('数据插入失败');
+        }
+      };
+      await insertBatch(0);
+    },
+    //更新log表状态和已处理记录数
+    async updateLog(batchIndex,ossProcessedRecordsInBatch,batchData) {
+      // 更新Log表状态和已处理记录数
+      this.logQueryParams.status = 'processing';
+      this.logQueryParams.infoProcessedRecords += batchData.length;
+      this.logQueryParams.ossProcessedRecords += ossProcessedRecordsInBatch;
+      await updateImportLog(this.logQueryParams);
+    },
+
+    // 提交表格数据到数据库
+    async submitData() {
+      const data = this.formatTableData; // 格式化表格数据
+      // 写入Log表，创建任务号
+      const batchSize = 250; // 每批次插入的数据量
+      addImportLog(this.logQueryParams).then(response => {
+        this.logQueryParams.id = response.data.id;
+      }).catch(error => {
+        this.$message.error('写入Log表失败');
+      })
+      const totalBatches = Math.ceil(data.length / batchSize);
+      const insertBatch = async (batchIndex) => {
+        if (batchIndex >= totalBatches) {
+
+          // 更新log表
+          this.$message.success('数据插入成功');
+          this.active = 4; // 设置步骤条的活动步骤
+          this.isSubmitDateTriggered = true;
+          return;
+        }
+        const start = batchIndex * batchSize;
+        const end = Math.min(start + batchSize, data.length);
+        const batchData = data.slice(start, end);
+        try {
+          const response = await bulkAdd(batchData);
+          await Promise.all([
+            insertBatch(batchIndex + 1),// 插入下一批
+            this.updateLog(batchIndex, 0, batchData)// 更新log表状态和已处理记录数
+          ])
+        }catch (error) {
           this.$message.error('数据插入失败');
         }
       };
 
       await insertBatch(0);
-    },
-    // 提交数据到服务器
-    async submitData() {
-      console.log("this.isElCardBodyLoading", this.isElCardBodyLoading);
-      await this.batchInsertData.call(this, this.tableData);
     },
 
     // 清除表单数据
@@ -795,6 +703,7 @@ export default {
 
     // 打开批量挂接对话框
     openBatchAttachmentDialog() {
+      this.circleStep = 0;
       this.batchAttachmentDialogVisible = true;
     },
 
@@ -802,7 +711,7 @@ export default {
     async handleBatchFileChange(file, fileList) {
       this.index = 0;
       this.fileList = fileList;
-      // const fileType = file.name.split('.').pop();
+      this.filteredFileList = [...fileList];
       let newFileList = [];
       await Promise.all(fileList.map(async file => {
         if (file.name.split('.').pop() === 'zip') {
@@ -810,7 +719,8 @@ export default {
           newFileList = newFileList.concat(extractedFiles);
           this.fileList = newFileList;
         } else {
-          newFileList.push(file);
+          this.resetAttachment();
+          this.$message.error('请上传压缩包文件');
         }
       }));
       newFileList = newFileList.filter(file => file.suffix !== 'zip');
@@ -840,7 +750,7 @@ export default {
         }
       }));
 
-      this.currentStep = 2;
+      this.currentStep = 0;
       this.upFileList = newFileList;
     },
 
@@ -851,68 +761,25 @@ export default {
       return `${sizeInMB} MB`;
     },
 
-    // 添加挂接规则
-    addRule() {
-      const selectedItem = this.itemList.find(item => item.columnName === this.selectedProperty);
-      this.rulesList.push({
-        itemName: selectedItem ? selectedItem.itemName : '',
-        columnName: selectedItem ? this.toCamelCase(selectedItem.columnName) : '',
-        prefix: '',
-        suffix: '',
-        isEditing: false
-      });
-      this.selectedProperty = '';
-      this.currentStep = 3;
-    },
-
-    // 编辑挂接规则
-    editRule(rule) {
-      rule.isEditing = true;
-    },
-    // 保存挂接规则
-    saveRule(rule) {
-      rule.isEditing = false;
-    },
-    // 删除挂接规则
-    deleteRule(index) {
-      this.rulesList.splice(index, 1);
-    },
-
     // 批量挂接
     async autoAttach() {
+      this.circleStep = 2;
       this.attach=true;
       this.startAttachment();
-      const formattedData = this.tableData.map(row => {
-        const formattedRow = { ...row };
-        if (formattedRow.archiveDate) {
-          const date = new Date(formattedRow.archiveDate);
-          if (!isNaN(date.getTime())) {
-            formattedRow.archiveDate = date.toISOString().split('T')[0];
-          }
-        }
-        // 匹配文件列表到对应的档案对象，去掉文件名后缀
-        formattedRow.sysOssList = this.upFileList.filter(file => this.removeFileExtension(file.name) === formattedRow.archiveNumber);
-        console.log("formattedRow",formattedRow);
-        return formattedRow;
-      });
+      const formattedData =this.formatTableData;
       // 提交数据到服务器
       await this.batchInsertData.call(this, formattedData);
           this.active = 4; // 设置步骤条的活动步骤
-          this.currentStep = 5;
-          this.currentStep = 6;
+          this.currentStep = 3;
           this.isAttachmentComplete=true;
       this.logQueryParams.status = 'completed';
       updateImportLog(this.logQueryParams).then(response => {
+        getImportLog(this.logQueryParams.id).then(response => {
+          this.importLog = response.data;
+        })
       }).catch(error => {
       });
     },
-
-
-    // 转换为驼峰命名
-    toCamelCase(str) {
-      return str.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
-    },
-
 
     // 处理上传到服务器成功事件
     handleUploadSuccess(response, file, fileList) {
@@ -969,7 +836,7 @@ export default {
       // 解除禁用上传按钮
       this.submitUploadButtonDisabled=false;
       // 流程变化
-      this.currentStep = 3;
+      this.currentStep = 2;
     },
 
     // 上传单个文件
@@ -991,6 +858,7 @@ export default {
 
     // 提交上传至服务器
     submitUpload() {
+      this.circleStep = 1;
       this.uploadFolderFiles(); // 手动触发上传
     },
 
@@ -1055,25 +923,10 @@ export default {
       }
     },
 
-    // 获取颜色
-    getStepColor(index) {
-      if (index < this.currentStep) {
-        const colors = ['#1C69DB', '#2E77DD', '#4186DF', '#538FE1', '#6698E3'];
-        return colors[index];
-      } else {
-        return '#D0E3F7'; // 未完成的步骤显示为更浅的蓝色
-      }
-    }
-    ,
-
     // 挂接档案左侧进度条
     nextStep() {
-      if (this.currentStep < this.steps.length + 1) {
-        this.steps[this.currentStep].completed = true;
-        this.currentStep++;
-      }
+      this.currentStep += 1;
     },
-
 
     // 解压缩文件进度条
     formatProgress() {
@@ -1097,7 +950,7 @@ export default {
       this.attach = true;
       this.attachmentProgress = 0;
       this.interval = setInterval(() => {
-        if (this.currentStep === 6) {
+        if (this.currentStep === 3) {
           this.attachmentProgress = 100;
           clearInterval(this.interval);
         } else {
@@ -1110,28 +963,12 @@ export default {
       }, 100); // 每100毫秒更新一次进度
     },
     formatAttachmentProgress(percentage) {
-      return this.currentStep === 6 ? '挂接完成' : `正在挂接文件 ${percentage.toFixed(2)}%`;
-    },
-    // 挂接文件的翻页
-    onPageSizeChange(newSize) {
-      this.tablePageSize = newSize;
-    },
-    onPageChange(newPage) {
-      this.currentTablePage = newPage;
+      return this.currentStep === 3 ? '挂接完成' : `正在挂接文件 ${percentage.toFixed(2)}%`;
     },
 
-    //   添加挂接规则弹出
-    toggleDropdownVisibility() {
-      this.isDropdownVisible = !this.isDropdownVisible;
-    },
-    chooseItem(item) {
-      this.selectedProperty = item.columnName;
-      this.isDropdownVisible = false;
-      this.addRule();
-    },
     // 重置挂接内容
     resetAttachment() {
-      this.currentStep = 1;
+      this.currentStep = 0;
       this.isAttachmentComplete = false;
       this.rulesList= [{columnName: "archiveNumber",isEditing: false,itemName:"档号",prefix: "", suffix: ""}];
       this.upFileList = [];
@@ -1141,12 +978,8 @@ export default {
       this.progress = 0;
       this.zipLoading = false;
       this.uploadFiles = [];
-      this.isDropdownVisible = false;
-      this.selectedProperty = '';
-    },
-
-    confirmRules() {
-      this.currentStep = 4;
+      this.filteredFileList = [];
+      this.circleStep = 0;
     },
 
     // 辅助函数：去掉文件名的后缀
@@ -1157,7 +990,7 @@ export default {
     },
     look(){
       // this.displayOutput=false;
-      this.$router.push({path: 'info0'});
+      this.$router.push({path: '/ArchiveManagement/info0'});
     }
 
 
@@ -1317,4 +1150,50 @@ export default {
     animation-timing-function: cubic-bezier(0, 0, 1, 1); /* 最后一次下落最快 */
   }
 }
+.upload-demo {
+  width: 150px;  /* 调整上传框的宽度 */
+  height: 150px; /* 调整上传框的高度 */
+  border: 1px dashed #d9d9d9; /* 上传框的边框样式 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px; /* 圆角边框 */
+  background-color: #f9f9f9; /* 上传框的背景颜色 */
+  margin-left: -100px;
+}
+.upload-icon {
+  ont-size: 48px; /* 加号图标的大小 */
+  color: #409EFF;  /* 图标的颜色 */
+}
+.file-item {
+  margin-top: 13%;
+}
+/* 默认步骤样式 */
+.el-steps .el-step {
+  color: #606266; /* 默认颜色 */
+}
+
+/* 活动步骤样式 */
+.el-steps .active-step .el-step__title {
+  color: #409EFF !important; /* 活动步骤的颜色 */
+}
+
+/* 非活动步骤样式 */
+.el-steps .inactive-step .el-step__title {
+  color: #c0c4cc !important; /* 非活动步骤的颜色 */
+}
+.el-dialog {
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform: translate(-50%,-50%);
+  height:100%;
+  width:100%;
+  background-color: rgba(0,0,0,0);
+  padding-top: 10%;
+  padding-left: 10%;
+  padding-right: 10%;
+  margin-top:0!important;
+}
+
 </style>
