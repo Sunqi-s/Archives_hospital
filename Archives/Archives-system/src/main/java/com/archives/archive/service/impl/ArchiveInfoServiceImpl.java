@@ -232,10 +232,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
                     for (SysOss sysOss : sysOssList) {
                         sysOss.setFid(String.valueOf(archiveId));
                     }
-                    // 循环插入文件列表
-                    for (SysOss sysOss : sysOssList) {
-                        sysOssMapper.insertSysOss(sysOss);
-                    }
                 }
             }
 

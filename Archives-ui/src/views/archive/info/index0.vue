@@ -1003,9 +1003,11 @@ export default {
 }
 .fixed-table-container {
   top: 200px;
-  width: 1000px;
-  height: 500px;
+  width: 73%;
+  height: 100%;
   overflow: auto;
   position: fixed;
+  min-width: 500px; /* 可设置最小宽度，避免窗口过小 */
+  min-height: 300px; /* 可设置最小高度，避免窗口过小 */
 }
 </style>
