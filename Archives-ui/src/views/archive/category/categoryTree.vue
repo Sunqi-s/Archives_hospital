@@ -18,7 +18,6 @@
       :default-expand-all="defaultExpandAll"
       :filter-node-method="fileNode"
       ref="tree"
-      :disabled="isDisabled"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>
@@ -48,10 +47,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    isDisabled:{
-      type: Boolean,
-      default: false,
-    }
   },
   data() {
     return {
@@ -82,6 +77,7 @@ export default {
 
 <style scoped>
 .file-style {
-   overflow: auto;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
 }
 </style>

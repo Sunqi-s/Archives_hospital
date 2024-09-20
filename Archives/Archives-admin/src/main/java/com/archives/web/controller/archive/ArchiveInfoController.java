@@ -128,5 +128,14 @@ public class ArchiveInfoController extends BaseController
             return AjaxResult.error("操作失败: " + e.getMessage());
         }
     }
+    /**
+     * 批量发送利用档案信息
+     */
+    @Log(title = "批量发送利用档案信息", businessType = BusinessType.UPDATE)
+    @PutMapping("/send/{ids}")
+    public AjaxResult send(@PathVariable Long[] ids)
+    {
+       return toAjax(archiveInfoService.sendArchiveInfo(ids));
+    }
 
 }

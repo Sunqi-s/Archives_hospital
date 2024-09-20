@@ -101,4 +101,15 @@ public class SysOssController extends BaseController
     {
         return toAjax(sysOssService.deleteSysOssByIds(ids));
     }
+
+    /**
+     * 根据fid查找文件
+     */
+    @PreAuthorize("@ss.hasPermi('system:oss:query')")
+    @GetMapping(value = "/getByFid/{fid}")
+    public AjaxResult getByFid(@PathVariable("fid") String fid)
+    {
+       List<SysOss> list = sysOssService.selectSysOssByFid(fid);
+       return success(list);
+    }
 }

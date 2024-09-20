@@ -362,6 +362,19 @@
             #{id}
         </foreach>
     </update>
+    <update id="sendArchiveInfo">
+        update archive_info
+        SET
+        archive_status = case
+        WHEN archive_status = 1 THEN 2 -- 发送利用
+        WHEN archive_status = 2 THEN 1 -- 退回归档
+        ELSE archive_status -- 其他状态保持原值
+        END
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
 
     <delete id="deleteArchiveInfoById" parameterType="Long">
         delete from archive_info where id = #{id}

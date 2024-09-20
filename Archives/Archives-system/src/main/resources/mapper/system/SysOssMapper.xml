@@ -46,6 +46,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectSysOssVo"/>
         where id = #{id}
     </select>
+    <select id="selectSysOssByFid" resultType="com.archives.system.domain.SysOss">
+        <include refid="selectSysOssVo"/>
+        where fid = #{fid}
+    </select>
 
     <insert id="insertSysOss" parameterType="SysOss" useGeneratedKeys="true" keyProperty="id">
         insert into sys_oss

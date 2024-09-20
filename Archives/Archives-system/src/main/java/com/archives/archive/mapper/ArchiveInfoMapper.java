@@ -98,4 +98,10 @@ public interface ArchiveInfoMapper
      * @return
      */
     public int insertOssStatus(@Param("ossStatus") int ossStatus, @Param("id") Long id);
+
+    /**
+     * 发送利用档案信息
+     *
+     */
+    public int sendArchiveInfo(Long[] ids);
 }

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.archives.archive.mapper.ArchiveSearchMapper">
+
+    <resultMap type="ArchiveInfo" id="ArchiveInfoResult">
+        <result property="id"    column="id"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="fondsNumber"    column="fonds_number"    />
+        <result property="fondsName"    column="fonds_name"    />
+        <result property="retentionPeriod"    column="retention_period"    />
+        <result property="itemNumber"    column="item_number"    />
+        <result property="archiveNumber"    column="archive_number"    />
+        <result property="department"    column="department"    />
+        <result property="archiver"    column="archiver"    />
+        <result property="archiveDate"    column="archive_date"    />
+        <result property="remarks"    column="remarks"    />
+        <result property="archiveStatus"    column="archive_status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="categoryCode"    column="category_code"    />
+        <result property="field1"    column="field1"    />
+        <result property="field2"    column="field2"    />
+        <result property="field3"    column="field3"    />
+        <result property="field4"    column="field4"    />
+        <result property="field5"    column="field5"    />
+        <result property="field6"    column="field6"    />
+        <result property="field7"    column="field7"    />
+        <result property="field8"    column="field8"    />
+        <result property="field9"    column="field9"    />
+        <result property="field10"    column="field10"    />
+        <result property="field11"    column="field11"    />
+        <result property="field12"    column="field12"    />
+        <result property="field13"    column="field13"    />
+        <result property="field14"    column="field14"    />
+        <result property="field15"    column="field15"    />
+        <result property="field16"    column="field16"    />
+        <result property="field17"    column="field17"    />
+        <result property="field18"    column="field18"    />
+        <result property="field19"    column="field19"    />
+        <result property="field20"    column="field20"    />
+        <result property="field21"    column="field21"    />
+        <result property="field22"    column="field22"    />
+        <result property="field23"    column="field23"    />
+        <result property="field24"    column="field24"    />
+        <result property="field25"    column="field25"    />
+        <result property="field26"    column="field26"    />
+        <result property="field27"    column="field27"    />
+        <result property="field28"    column="field28"    />
+        <result property="field29"    column="field29"    />
+        <result property="field30"    column="field30"    />
+        <result property="ossStatus"  column="oss_status" />
+    </resultMap>
+
+    <sql id="selectArchiveInfoVo">
+        select id, category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, remarks, archive_status, create_by, create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status from archive_info
+    </sql>
+
+    <select id="getSearchList" resultMap="ArchiveInfoResult" parameterType="archiveInfo">
+        <include refid="selectArchiveInfoVo"/>
+        <where>
+            and CONCAT_WS('|',
+                fonds_number,
+                fonds_name,
+                retention_period,
+                item_number,
+                archive_number,
+                department,
+                archiver,
+                archive_date,
+                remarks,
+                archive_status,
+                create_by,
+                create_time,
+                update_by,
+                update_time,
+                category_code,
+                field1,
+                field2,
+                field3,
+                field4,
+                field5,
+                field6,
+                field7,
+                field8,
+                field9,
+                field10,
+                field11,
+                field12,
+                field13,
+                field14,
+                field15,
+                field16,
+                field17,
+                field18,
+                field19,
+                field20,
+                field21,
+                field22,
+                field23,
+                field24,
+                field25,
+                field26,
+                field27,
+                field28,
+                field29,
+                field30,
+                oss_status
+            ) like CONCAT('%', #{keyword}, '%')
+        </where>
+        order by category_id
+    </select>
+</mapper>

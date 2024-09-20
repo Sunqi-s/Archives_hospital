@@ -42,3 +42,11 @@ export function delOss(id) {
     method: 'delete'
   })
 }
+
+//根据fid查找oss文件
+export function getOssByFid(fid) {
+  return request({
+    url: '/system/oss/getByFid/' + fid,
+    method: 'get'
+  })
+}
