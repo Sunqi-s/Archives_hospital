@@ -66,4 +66,9 @@ public interface SysOssMapper
      * @return 结果
      */
     public int deleteSysOssByIds(Long[] ids);
+
+    /**
+     * 根据fid查询文件
+     */
+    public List<SysOss> selectSysOssByFid(String fid);
 }

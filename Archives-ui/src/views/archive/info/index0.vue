@@ -118,7 +118,7 @@
 
         <!-- 动态生成的表格 -->
         <div class="fixed-table-container">
-        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="440" ref="dynamicTable" border>
+        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="600" ref="dynamicTable" border>
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
             v-for="field in sortedFields"
@@ -888,6 +888,8 @@ export default {
           return '待归档';
         case 1:
           return '已归档';
+        case 2:
+          return '利用';
         default:
           return '未知状态';
       }
@@ -1003,7 +1005,8 @@ export default {
 }
 .fixed-table-container {
   top: 200px;
-  width: 73%;
+  width: auto;
+  max-width: 70%;
   height: 100%;
   overflow: auto;
   position: fixed;

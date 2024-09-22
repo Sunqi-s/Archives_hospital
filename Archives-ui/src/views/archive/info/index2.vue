@@ -69,24 +69,6 @@
         <el-row :gutter="10" class="mb8">
           <el-col :span="1.5">
             <el-button
-              type="warning"
-              icon="el-icon-download"
-              size="small"
-              @click="handleExport"
-              v-hasPermi="['system:document:export']"
-            >导出</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button
-              type="success"
-              icon="el-icon-s-flag"
-              size="small"
-              :disabled="multiple"
-              @click="handleDocument"
-            >回档</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button
               type="success"
               icon="el-icon-s-flag"
               size="small"
@@ -101,9 +83,8 @@
               size="small"
               :disabled="multiple"
               @click="handleSendUtilize"
-            >发送利用</el-button>
+            >退回资源</el-button>
           </el-col>
-
         </el-row>
 
         <!-- 动态生成的表格 -->
@@ -121,9 +102,10 @@
           >
             <template slot-scope="scope">
               <el-tooltip class="item" effect="dark" :content="getTooltipContent(field.name, scope.row)" placement="top">
-                <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{ getArchiveStatus(scope.row.archiveStatus) }}</span>
-                <span class="truncate-text" v-else-if="field.name === 'department'">{{ getDepartmentName(scope.row.department) }}</span>
+                <template v-if="field.name !== 'archiveStatus'">
+                  <span class="truncate-text" v-if="field.name === 'department'">{{ getDepartmentName(scope.row.department) }}</span>
                 <span class="truncate-text"  v-html="scope.row[field.name]"></span>
+                </template>
               </el-tooltip>
             </template>
           </el-table-column>
@@ -506,7 +488,7 @@ export default {
         ...this.queryParams, // 保留现有的查询参数
         pageNum: this.queryParams.pageNum, // 当前页码
         pageSize: this.queryParams.pageSize, // 每页显示条数
-        archiveStatus: 1 // 归档状态
+        archiveStatus: 2 // 归档状态
       };
       listInfo(params).then(response => {
         if(this.queryParams.searchValue) {
@@ -562,47 +544,6 @@ export default {
           done(); // 当你想要关闭对话框时调用 done()
         })
         .catch(() => {});
-    },
-    /** 导出按钮操作 */
-    // 文件导出逻辑
-    handleExport() {
-      let dataToExport
-      if (this.selectedItems.length > 0) {
-        dataToExport = this.selectedItems;
-        this.exportToExcel(dataToExport);
-      } else {
-        let ExportQueryParams = {
-          pageNum: 1,
-          pageSize: 10000000,
-          categoryId: null,
-          archiveStatus: 1,
-          searchValue: ''
-        }
-        listInfo(ExportQueryParams).then(res => {
-          dataToExport = res.rows;
-          this.exportToExcel(dataToExport);
-        })
-      }
-    },
-    //文件导出
-    exportToExcel(dataToExport) {
-      if (!Array.isArray(this.listFields)) {
-        return;
-      } else {
-        // 提取表头：使用 listFields 中的 label 作为表头
-        const headers = this.listFields.map(field => ({label: field.label}));
-        const data = dataToExport.map(item => {
-          let row = {};
-          this.listFields.forEach(field => {
-            row[field.label] = item[field.name];
-          });
-          return row;
-        });
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, '档案信息');
-        XLSX.writeFile(wb, `archive_${new Date().getTime()}.xlsx`);
-      }
     },
     //文件查看
     handleDetail(row) {
@@ -670,16 +611,6 @@ export default {
           return '未知状态';
       }
     },
-    handleDocument(row){
-      const ids = row.id || this.ids;
-      const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('是否确认回档档号为"' + archiveNumbers + '"的数据？').then(function() {
-        return updatAarchiveStatus(ids)
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("回档成功");
-      }).catch(() => {});
-    },
     getTexted(name){
       name = name.replace(/<\/?span[^>]*>/g, '');
       return name;
@@ -715,7 +646,7 @@ export default {
     handleSendUtilize(row){
       const ids = row.id || this.ids;
       const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('是否确认发送档号为"' + archiveNumbers + '"的数据到利用库？').then(function() {
+      this.$modal.confirm('是否确认档号为"' + archiveNumbers + '"的数据退回资源库？').then(function() {
         return sendInfo(ids)
       }).then(() => {
         this.getList();

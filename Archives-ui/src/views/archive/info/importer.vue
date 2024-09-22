@@ -9,7 +9,7 @@
 
       <!-- 树组件 -->
       <el-col :span="4" :xs="24">
-        <file-tree :file-options="categoryTree" @node-click="handleNodeClick" :default-expand-all="false" :isDisabled="isExcel"></file-tree>
+        <file-tree :file-options="categoryTree" @node-click="handleNodeClick" :default-expand-all="false"></file-tree>
       </el-col>
     <!-- 主体 -->
     <el-row class="el-card__body">
@@ -364,9 +364,6 @@ export default {
     isFileListDisabled() {
       return this.fileList.length > 0;
     },
-    isExcel(){
-      return this.columnList.length > 0;
-    }
   },
   methods: {
     // 获取分类列表并构建分类树
@@ -431,6 +428,9 @@ export default {
     // 树组件处理节点点击事件
     handleNodeClick(data) {
       if(data.parentId > 0){
+        if(this.selectedNodeKey !== data.id){
+          this.reset();
+        }
         this.selectedNodeKey = data.id; // 设置选中的节点Key
         this.itemQueryParams.categoryId = data.id;// 设置项目查询参数的分类ID
         this.getItemList(); // 获取项目列表
@@ -442,6 +442,7 @@ export default {
         this.itemQueryParams.categoryId = 0;// 设置项目查询参数的分类ID
         this.active = 0; // 设置步骤条的活动步骤
         this.categoryName = 0;
+        this.reset();
       }
     },
     // 上传EXCEL处理文件变化事件

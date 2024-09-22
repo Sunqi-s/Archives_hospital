@@ -108,4 +108,9 @@ public class SysOssServiceImpl implements ISysOssService
     {
         return sysOssMapper.deleteSysOssById(id);
     }
+
+    @Override
+    public List<SysOss> selectSysOssByFid(String fid) {
+        return sysOssMapper.selectSysOssByFid(fid);
+    }
 }

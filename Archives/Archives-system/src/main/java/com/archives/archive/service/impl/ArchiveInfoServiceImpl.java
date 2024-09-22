@@ -238,5 +238,10 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             return archiveInfoList;
         }, executorService);
     }
+
+    @Override
+    public int sendArchiveInfo(Long[] ids) {
+        return archiveInfoMapper.sendArchiveInfo(ids);
+    }
 }
 

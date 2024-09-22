@@ -67,4 +67,13 @@ public interface ISysOssService
      * @return 结果
      */
     public int deleteSysOssById(Long id);
+
+    /**
+     * 根据fid查询文件
+     *
+     * @param fid 文件id
+     *
+     * @return 文件信息
+     */
+    public List<SysOss> selectSysOssByFid(String fid);
 }

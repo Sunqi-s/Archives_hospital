@@ -82,4 +82,9 @@ public interface IArchiveInfoService
      * @return 结果
      */
     public CompletableFuture<List<ArchiveInfo>> insertArchiveInfoList(List<ArchiveInfo> archiveInfo);
+
+    /**
+     * 批量发送利用档案信息
+     */
+    public int sendArchiveInfo(Long[] ids);
 }

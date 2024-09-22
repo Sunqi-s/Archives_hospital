@@ -59,3 +59,11 @@ export function updatAarchiveStatus(id) {
     method: 'put',
   })
 }
+
+//发送利用档案信息
+export function sendInfo(id) {
+  return request({
+    url:'/archive/info/send/' + id,
+    method: 'put',
+  })
+}
