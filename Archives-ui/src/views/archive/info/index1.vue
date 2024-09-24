@@ -108,7 +108,7 @@
 
         <!-- 动态生成的表格 -->
         <div class="fixed-table-container">
-        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="640" ref="dynamicTable" border>
+        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="60%" ref="dynamicTable" border>
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
             v-for="field in sortedFields"

@@ -56,24 +56,27 @@
         <result property="ossStatus"  column="oss_status" />
     </resultMap>
 
+    <resultMap id="ArchiveInfoResultFromSearchJson" type="SearchJson">
+        <result property="categoryId" column="category_id" />
+        <result property="length" column="COUNT(*)" />
+    </resultMap>
+
     <sql id="selectArchiveInfoVo">
         select id, category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, remarks, archive_status, create_by, create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status from archive_info
     </sql>
 
-    <select id="getSearchList" resultMap="ArchiveInfoResult" parameterType="archiveInfo">
-        <include refid="selectArchiveInfoVo"/>
+    <select id="getSearchList" resultMap="ArchiveInfoResultFromSearchJson" parameterType="SearchJson">
+        select category_id, COUNT(*) from archive_info
         <where>
-            and CONCAT_WS('|',
+             CONCAT_WS('|',
                 fonds_number,
                 fonds_name,
                 retention_period,
                 item_number,
                 archive_number,
-                department,
                 archiver,
                 archive_date,
                 remarks,
-                archive_status,
                 create_by,
                 create_time,
                 update_by,
@@ -110,8 +113,126 @@
                 field29,
                 field30,
                 oss_status
-            ) like CONCAT('%', #{keyword}, '%')
+            ) like CONCAT('%', #{keyWord}, '%')
+            and archive_status in
+            <foreach collection="value" item="itemValue" open="(" separator="," close=")">
+                #{itemValue}
+            </foreach>
         </where>
-        order by category_id
+        group by category_id
+    </select>
+    <select id="getSearchListAll" resultMap="ArchiveInfoResult">
+        <include refid="selectArchiveInfoVo" />
+        <where>
+            CONCAT_WS('|',
+                fonds_number,
+                fonds_name,
+                retention_period,
+                item_number,
+                archive_number,
+                archiver,
+                archive_date,
+                remarks,
+                create_by,
+                create_time,
+                update_by,
+                update_time,
+                category_code,
+                field1,
+                field2,
+                field3,
+                field4,
+                field5,
+                field6,
+                field7,
+                field8,
+                field9,
+                field10,
+                field11,
+                field12,
+                field13,
+                field14,
+                field15,
+                field16,
+                field17,
+                field18,
+                field19,
+                field20,
+                field21,
+                field22,
+                field23,
+                field24,
+                field25,
+                field26,
+                field27,
+                field28,
+                field29,
+                field30,
+                oss_status
+            ) like CONCAT('%', #{keyWord}, '%')
+            and archive_status in
+            <foreach collection="value" item="itemValue" open="(" separator="," close=")">
+                #{itemValue}
+            </foreach>
+            and category_id = #{categoryId}
+        </where>
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+    <select id="getSearchListAllCount" resultType="java.lang.Integer">
+        select count(*) from archive_info
+        <where>
+            CONCAT_WS('|',
+            fonds_number,
+            fonds_name,
+            retention_period,
+            item_number,
+            archive_number,
+            archiver,
+            archive_date,
+            remarks,
+            create_by,
+            create_time,
+            update_by,
+            update_time,
+            category_code,
+            field1,
+            field2,
+            field3,
+            field4,
+            field5,
+            field6,
+            field7,
+            field8,
+            field9,
+            field10,
+            field11,
+            field12,
+            field13,
+            field14,
+            field15,
+            field16,
+            field17,
+            field18,
+            field19,
+            field20,
+            field21,
+            field22,
+            field23,
+            field24,
+            field25,
+            field26,
+            field27,
+            field28,
+            field29,
+            field30,
+            oss_status
+            ) like CONCAT('%', #{keyWord}, '%')
+            and archive_status in
+            <foreach collection="value" item="itemValue" open="(" separator="," close=")">
+                #{itemValue}
+            </foreach>
+            and category_id = #{categoryId}
+        </where>
+        group by category_id
     </select>
 </mapper>
