@@ -1,5 +1,5 @@
 <template>
-    <div id="app1" v-if="isShowHeaderAndHotTag">
+    <div id="app1" v-if="!showTable">
       <el-container>
         <el-header>
           <img src="@/assets/images/fulltext-search.png">
@@ -10,7 +10,15 @@
         </el-header>
         <el-main>
           <el-row :gutter="20">
-            <el-col :span="24">
+            <el-col :span="22">
+              <el-select v-model="value" multiple placeholder="请选择">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
               <el-input placeholder="请输入内容"
                 v-model="searchQuery"
                 @keyup.enter.native="handleSearch"
@@ -45,13 +53,23 @@
     </div>
     <div v-else>
       <el-main>
-        <el-row :gutter="20" justify="center">
-          <el-col :span="24">
+        <el-row :gutter="0" justify="center" type="flex">
+          <el-col :span="3">
+            <el-select v-model="value" multiple placeholder="请选择" style="width: 100%;">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="9">
             <el-input placeholder="请输入内容"
                       v-model="searchQuery"
                       @keyup.enter.native="handleSearch"
                       class="full_input"
-                      style="margin-left: 30%; margin-bottom: 50px; "
+                      style="width: 100%; margin-bottom: 50px; "
             >
               <el-button slot="append" icon="el-icon-search" class="full_search" type="primary" @click="handleSearch"></el-button>
             </el-input>
@@ -63,8 +81,7 @@
               <el-tab-pane v-for="tag in tagList" :label="tag.name+'('+tag.count+')'" :name="String(tag.category)">
                 <!-- 动态生成的表格 -->
                 <div class="table-container">
-                  <el-table :data="FilteredList" :default-sort = "{prop: 'id', order: 'descending'}" height="640" ref="dynamicTable" border @row-click="handleRowClick">
-                    <el-table-column type="selection" width="55" align="center" />
+                  <el-table :data="FilteredList" :default-sort = "{prop: 'id', order: 'descending'}" height="60vh" ref="dynamicTable" border @row-click="handleRowClick">
                     <el-table-column
                       v-for="field in itemFilteredList"
                       :key="field.name"
@@ -75,10 +92,23 @@
                     >
                       <template slot-scope="scope">
                         <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{getArchiveStatus(scope.row.archiveStatus)}}</span>
+                        <span class="truncate-text" v-else-if="field.name === 'department'">{{ getDepartmentName(scope.row.department) }}</span>
                         <span class="truncate-text"  v-html="scope.row[field.name]"></span>
                       </template>
                     </el-table-column>
                   </el-table>
+                  <div class="block">
+                    <el-pagination
+                      v-show="total > 0"
+                      @size-change="handleSizeChange"
+                      @current-change="handleCurrentChange"
+                      :current-page="queryParams.pageNum"
+                      :page-sizes="[10, 20, 30, 50]"
+                      :page-size="queryParams.pageSize"
+                      layout="total, sizes, prev, pager, next, jumper"
+                      :total="total">
+                    </el-pagination>
+                  </div>
                 </div>
               </el-tab-pane>
             </el-tabs>
@@ -187,16 +217,20 @@
 </template>
 
   <script>
-  import {searchArchive} from "@/api/archive/search";
-  import {listCategory} from "@/api/archive/category";
+  import {getArchiveDetail, searchArchive} from "@/api/archive/search";
+  import {getCategory, listCategory} from "@/api/archive/category";
   import {getItemByCategoryId} from "@/api/archive/item";
   import {getOssByFid} from "@/api/system/oss";
+  import {listDept} from "@/api/system/dept";
 
   export default {
     name: 'FullText',
     data() {
         return {
+        showTable:false,
         searchQuery: '',
+        keyWord:'',
+        value: '',
         hotTags: ['合同', '档案', '发票', '凭证', '文件', '会计', '项目', '通知'],
         searchCountMap: {}, // 记录每个搜索关键词的次数
         searchResult: [],// 搜索结果
@@ -215,28 +249,39 @@
           pageNum: 1,
           pageSize: 10,
           categoryId: null,
+          keyWord: null,
+          value: null,
         },
         itemFilteredList:[],
         showPreview:false,//文件预览对话框
         previewUrl:"",
         open:false,
         title:null,
+        options:[
+          {
+            value: '0',
+            label: '整理库',
+          },
+          {
+            value: '1',
+            label: '资源库',
+          },
+          {
+            value: '2',
+            label: '利用库',
+          }],
       };
     },
     computed:{
-      isShowHeaderAndHotTag(){
-        return this.searchResult.length <= 0;
-      },
       FilteredList(){
         let filteredResults  =this.searchResult.filter(item => {
           return item.categoryId === Number(this.selectedTag);
         });
-        console.log(filteredResults);
         return filteredResults.map(item => {
           let hightLightedContent = {...item};
           for(let key in hightLightedContent){
             if(typeof hightLightedContent[key] === "string"){
-              hightLightedContent[key] = this.hightLightText(hightLightedContent[key], this.searchQuery);
+              hightLightedContent[key] = this.hightLightText(hightLightedContent[key], this.keyWord);
             }
           }
           return hightLightedContent;
@@ -247,12 +292,18 @@
       listCategory().then(res => {
         this.categoryList = res.data;
       })
+      this.loadDepartments();
     },
     methods: {
       goToHot() {
         this.$router.push('/hot');
       },
     handleSearch() {
+      this.keyWord = this.searchQuery;
+      this.tagList = [];
+      this.selectedTag = '0';
+      this.queryParams.pageNum = 1;
+      const searchJson = {keyWord:this.searchQuery,value:this.value};
       const query = this.searchQuery.trim();
       if(query){
         if(!this.searchCountMap[query]) {
@@ -264,62 +315,39 @@
           this.hotTags.push(query);
         }
 
-        searchArchive(this.searchQuery).then(res => {
-          console.log(res);
-          this.searchResult = res;
-          this.getTag();
+        searchArchive(searchJson).then(tagListRes => {
+          for (let i = 0; i < tagListRes.length; i++){
+            getCategory(tagListRes[i].categoryId).then(nameFromCategory => {
+              const tag = {name:nameFromCategory.data.name,category:nameFromCategory.data.id,count:tagListRes[i].length};
+              this.tagList.push(tag)
+            })
+          }
         });
       }
+      this.showTable = true;
     },
     handleCloseTag(tag) {
       // 实现删除标签的逻辑
       this.hotTags = this.hotTags.filter(t => t !== tag);
     },
-    getTag(){
-      let count = 0;
-      let category = this.searchResult[0].categoryId;
-      let tagName = "";
-      // 在每次搜索时清空 tagList
-      this.tagList = [];
-      for(let i = 0; i < this.searchResult.length; i++){
-        if(this.searchResult[i].categoryId === category){
-          count++;
-        }else {
-          for(let j = 0; j < this.categoryList.length; j++){
-            if(this.categoryList[j].id === category){
-              tagName = this.categoryList[j].name;
-              break;
-            }
-          }
-          this.tagList.push({
-            category: category,
-            name: tagName,
-            count: count
-          });
-          category = this.searchResult[i].categoryId;
-          count = 1;
-        }
-      }
-      for(let j = 0; j < this.categoryList.length; j++){
-        if(this.categoryList[j].id === category){
-          tagName = this.categoryList[j].name;
-          break;
-        }
-      }
-      this.tagList.push({
-        category: category,
-        name: tagName,
-        count: count
-      });
-      console.log("tagList", this.tagList);
+    handleNextPage(){
+      getArchiveDetail(this.queryParams).then(infoRes => {
+        this.searchResult = infoRes.searchResults;
+        this.total = infoRes.total;
+      })
+    },
+    handleSizeChange(nowPageSize){
+      this.queryParams.pageSize = nowPageSize;
+      this.handleNextPage();
+    },
+    handleCurrentChange(nowCurrentPage){
+        this.queryParams.pageNum = nowCurrentPage;
+        this.handleNextPage();
     },
     selectedItem(tag, event){
-        console.log(tag);
         getItemByCategoryId(tag.name).then(res => {
-          console.log(res);
           this.itemListOriginal = res.data;
           this.mapFieldData();
-          console.log(this.itemList);
           // 根据不同的场景过滤字段
           this.queryFields = this.itemList.filter(field => field.isQuery === '1');
           this.itemFilteredList = this.itemList.filter(field => field.isList === '1');
@@ -328,12 +356,13 @@
           this.itemFilteredListGroup3 = this.itemList.filter(field => field.isInsert === '1' && field.htmlGroup === '3').sort((a, b) => a.sort - b.sort);
           this.editFields = this.itemList.filter(field => field.isEdit === '1');
           this.editFields = this.itemList.filter(field => field.isEdit === '1');
-          this.itemList.forEach(field => {
-            this.$set(this.queryParams, field.name, null);
-          });
           //初始化校验
           this.generateRules();
         })
+          this.queryParams.keyWord = this.keyWord;
+          this.queryParams.value = this.value;
+          this.queryParams.categoryId = this.selectedTag;
+          this.handleNextPage();
     },
     generateRules() {
       this.rules = {};
@@ -373,7 +402,7 @@
         case 'select':
           return 'el-select';
         case 'treeselect':
-          return 'treeselect'
+          return 'el-input'
         case 'radio':
           return 'el-radio-group';
         case 'checkbox':
@@ -442,7 +471,6 @@
           })
         }
       this.itemList = itemFilteredList;
-      console.log(this.itemList)
     },
     toCamelCase(columnName) {
       return columnName.replace(/_([a-z])/g, (match, p1) => p1.toUpperCase());
@@ -466,14 +494,17 @@
       }
     },
     handleRowClick(row){
-      console.log(row);
+      const  notLightedContent = {...row};
+      for(let key in notLightedContent){
+        if(typeof notLightedContent[key] === "string"){
+          notLightedContent[key] = notLightedContent[key].replace(/<[^>]+>/g, '');
+        }
+      }
       const fid = row.id;
       getOssByFid(fid).then(res => {
-        console.log(res);
-        row.sysOssList = res.data;
+        notLightedContent.sysOssList = res.data;
       })
-      this.form = row;
-      console.log(this.form);
+      this.form = notLightedContent;
       this.open = true;
       this.title = '详情';
     },
@@ -512,6 +543,17 @@
       this.previewUrl = url;
       this.showPreview = true;
     },
+    getDepartmentName(department) {
+      return this.departmentMap[department] || '未知部门';
+    },
+    loadDepartments(){
+      listDept().then(response => {
+        this.departmentMap = response.data.reduce((map, dept) => {
+          map[dept.deptId] = dept.deptName;
+          return map;
+        }, {});
+      })
+    },
   },
   };
   </script>
@@ -520,9 +562,9 @@
     top: 200px;
     width: auto;
     max-width: 88%;
-    height: 50%;
+    height: 77vh;
     position: fixed;
     min-width: 88%; /* 可设置最小宽度，避免窗口过小 */
-    min-height: 80%; /* 可设置最小高度，避免窗口过小 */
+    min-height: 50%; /* 可设置最小高度，避免窗口过小 */
   }
   </style>
