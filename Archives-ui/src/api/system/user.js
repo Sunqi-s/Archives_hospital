@@ -133,3 +133,12 @@ export function deptTreeSelect() {
     method: 'get'
   })
 }
+
+//修改用户数据权限
+export function updateUserDataPermi(data) {
+  return request({
+    url:'system/user/dataPermi',
+    method: 'post',
+    data: data
+  })
+}

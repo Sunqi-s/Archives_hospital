@@ -1,24 +1,22 @@
 package com.archives.archive.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-
+import com.archives.archive.domain.ArchiveInfo;
+import com.archives.archive.mapper.ArchiveInfoMapper;
+import com.archives.archive.service.IArchiveInfoService;
+import com.archives.common.core.domain.entity.SysUser;
 import com.archives.common.exception.ServiceException;
 import com.archives.common.utils.DateUtils;
+import com.archives.common.utils.SecurityUtils;
 import com.archives.system.domain.SysOss;
 import com.archives.system.mapper.SysOssMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.archives.archive.mapper.ArchiveInfoMapper;
-import com.archives.archive.domain.ArchiveInfo;
-import com.archives.archive.service.IArchiveInfoService;
 
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 /**
  * 档案信息Service业务层处理
  *
@@ -70,12 +68,18 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public List<ArchiveInfo> selectArchiveInfoList(ArchiveInfo archiveInfo)
     {
+        String[] dataPermiList = new String[0];
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        if("all".equals(currentUser.getDataPermi())){
+            dataPermiList = new String[0];
+        }else {
+            dataPermiList = (currentUser.getDataPermi().split(","));
+        }
         String searchValue = archiveInfo.getSearchValue();
         if (searchValue != null && !searchValue.isEmpty()) {
-            return archiveInfoMapper.selectArchiveInfoListByKeyword(searchValue);
+            return archiveInfoMapper.selectArchiveInfoListByKeyword(searchValue, dataPermiList);
         }
-        return archiveInfoMapper.selectArchiveInfoList(archiveInfo);
-
+        return archiveInfoMapper.selectArchiveInfoList(archiveInfo, dataPermiList);
     }
 
     /**
@@ -87,6 +91,8 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public int insertArchiveInfo(ArchiveInfo archiveInfo)
     {
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        archiveInfo.setDataPermit(String.valueOf(currentUser.getDeptId()));
         archiveInfo.setCreateTime(DateUtils.getNowDate());
         int cnt = archiveInfoMapper.insertArchiveInfo(archiveInfo);
         Long fid = archiveInfo.getId();
@@ -216,11 +222,16 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
      */
     @Override
     public CompletableFuture<List<ArchiveInfo>> insertArchiveInfoList(List<ArchiveInfo> archiveInfoList) {
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
         return CompletableFuture.supplyAsync(() -> {
+
             if (archiveInfoList == null || archiveInfoList.isEmpty()) {
                 throw new ServiceException("导入用户数据不能为空！");
             }
 
+            for (ArchiveInfo archiveInfo : archiveInfoList) {
+                archiveInfo.setDataPermit(String.valueOf(currentUser.getDeptId()));
+            }
             // 调用mapper里写好的批量插入方法
             int rows = archiveInfoMapper.insertArchiveInfoList(archiveInfoList);
 
