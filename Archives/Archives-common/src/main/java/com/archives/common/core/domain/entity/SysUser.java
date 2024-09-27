@@ -3,14 +3,13 @@ package com.archives.common.core.domain.entity;
 import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.*;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import com.archives.common.annotation.Excel;
 import com.archives.common.annotation.Excel.ColumnType;
 import com.archives.common.annotation.Excel.Type;
 import com.archives.common.annotation.Excels;
 import com.archives.common.core.domain.BaseEntity;
 import com.archives.common.xss.Xss;
+import java.util.Arrays;
 
 /**
  * 用户对象 sys_user
@@ -88,6 +87,8 @@ public class SysUser extends BaseEntity
 
     /** 角色ID */
     private Long roleId;
+
+    private String dataPermi;
 
     public SysUser()
     {
@@ -297,28 +298,36 @@ public class SysUser extends BaseEntity
         this.roleId = roleId;
     }
 
+    public String getDataPermi() {
+        return dataPermi;
+    }
+
+    public void setDataPermi(String dataPermi) {
+        this.dataPermi = dataPermi;
+    }
+
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("userId", getUserId())
-            .append("deptId", getDeptId())
-            .append("userName", getUserName())
-            .append("nickName", getNickName())
-            .append("email", getEmail())
-            .append("phonenumber", getPhonenumber())
-            .append("sex", getSex())
-            .append("avatar", getAvatar())
-            .append("password", getPassword())
-            .append("status", getStatus())
-            .append("delFlag", getDelFlag())
-            .append("loginIp", getLoginIp())
-            .append("loginDate", getLoginDate())
-            .append("createBy", getCreateBy())
-            .append("createTime", getCreateTime())
-            .append("updateBy", getUpdateBy())
-            .append("updateTime", getUpdateTime())
-            .append("remark", getRemark())
-            .append("dept", getDept())
-            .toString();
+        return "SysUser{" +
+                "userId=" + userId +
+                ", deptId=" + deptId +
+                ", userName='" + userName + '\'' +
+                ", nickName='" + nickName + '\'' +
+                ", email='" + email + '\'' +
+                ", phonenumber='" + phonenumber + '\'' +
+                ", sex='" + sex + '\'' +
+                ", avatar='" + avatar + '\'' +
+                ", password='" + password + '\'' +
+                ", status='" + status + '\'' +
+                ", delFlag='" + delFlag + '\'' +
+                ", loginIp='" + loginIp + '\'' +
+                ", loginDate=" + loginDate +
+                ", dept=" + dept +
+                ", roles=" + roles +
+                ", roleIds=" + Arrays.toString(roleIds) +
+                ", postIds=" + Arrays.toString(postIds) +
+                ", roleId=" + roleId +
+                ", dataPermi='" + dataPermi + '\'' +
+                '}';
     }
 }

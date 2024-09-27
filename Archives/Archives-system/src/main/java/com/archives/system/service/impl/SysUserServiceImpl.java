@@ -541,4 +541,8 @@ public class SysUserServiceImpl implements ISysUserService
         }
         return successMsg.toString();
     }
+    @Override
+    public int updateUserDataPermi(SysUser user) {
+        return userMapper.updateUser(user);
+    }
 }

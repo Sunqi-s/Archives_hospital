@@ -93,7 +93,7 @@
                       <template slot-scope="scope">
                         <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{getArchiveStatus(scope.row.archiveStatus)}}</span>
                         <span class="truncate-text" v-else-if="field.name === 'department'">{{ getDepartmentName(scope.row.department) }}</span>
-                        <span class="truncate-text"  v-html="scope.row[field.name]"></span>
+                        <span class="truncate-text" v-else v-html="scope.row[field.name]"></span>
                       </template>
                     </el-table-column>
                   </el-table>

@@ -248,4 +248,13 @@ public class SysUserController extends BaseController
     {
         return success(deptService.selectDeptTreeList(dept));
     }
-}
+
+    /**
+     * 修改用户数据权限
+     */
+    @PreAuthorize("@ss.hasPermi('system:user:edit')")
+    @PostMapping("/dataPermi")
+    public AjaxResult dataPermi(@RequestBody SysUser user) {
+        return success(userService.updateUserDataPermi(user));
+    }
+    }

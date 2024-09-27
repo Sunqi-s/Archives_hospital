@@ -186,6 +186,8 @@
                     v-hasPermi="['system:user:resetPwd']">重置密码</el-dropdown-item>
                   <el-dropdown-item command="handleAuthRole" icon="el-icon-circle-check"
                     v-hasPermi="['system:user:edit']">分配角色</el-dropdown-item>
+                  <el-dropdown-item command="handleAuthDataPermi" icon="el-icon-postcard"
+                    v-hasPermi="['system:user:edit']">分配数据权限</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </template>
@@ -337,11 +339,17 @@
         <el-button @click="upload.open = false">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!--数据权限对话框-->
+    <el-dialog title="修改数据权限" :visible.sync="dataPermiOpen" width="30%" append-to-body>
+      <el-cascader v-model="option" :options="dataPermiOptions" :show-all-levels="false" :props="{multiple: true}"></el-cascader>
+      <el-button @click="save" type="primary">确定</el-button>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listUser, getUser, delUser, addUser, updateUser, resetUserPwd, changeUserStatus, deptTreeSelect } from "@/api/system/user";
+import { listUser, getUser, delUser, addUser, updateUser, resetUserPwd, changeUserStatus, deptTreeSelect ,updateUserDataPermi} from "@/api/system/user";
 import { getToken } from "@/utils/auth";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
@@ -450,7 +458,12 @@ export default {
             trigger: "blur"
           }
         ]
-      }
+      },
+      // 数据权限
+      dataPermiOpen: false,
+      option:0,
+      rowId:0,
+      dataPermiOptions:[]
     };
   },
   watch: {
@@ -554,6 +567,9 @@ export default {
           break;
         case "handleAuthRole":
           this.handleAuthRole(row);
+          break;
+        case "handleAuthDataPermi":
+          this.handleAuthDataPermi(row);
           break;
         default:
           break;
@@ -670,6 +686,83 @@ export default {
     // 提交上传文件
     submitFileForm() {
       this.$refs.upload.submit();
+    },
+    //数据权限初始化
+    dataPermi(){
+      if (this.deptOptions !== undefined){
+        this.dataPermiOptions = this.deptOptions.map(item => {
+          return {
+            value: item.id,
+            label: item.label,
+            children: item.children.map(child => {
+              return {
+                value: child.id,
+                label: child.label,
+                children: child.children.map(grandson => {
+                  return {
+                    value: grandson.id,
+                    label: grandson.label,
+                  }
+                })
+              }
+            })
+          }
+        })
+      }else {
+        return []
+      }
+    },
+    //数据权限修改
+    handleAuthDataPermi(row){
+      this.dataPermiOpen = true;
+      this.rowId = row.userId;
+      this.dataPermi();
+      const tempList = [];
+      getUser(this.rowId).then(response => {
+        if(response.data.dataPermi !== null){
+          if(response.data.dataPermi === "all"){
+            this.dataPermiOptions.forEach(item => {
+              item.children.forEach(child => {
+                child.children.forEach(grandson => {
+                  tempList.push([item.value, child.value, grandson.value])
+                })
+              })
+            })
+          }else {
+            // 处理特定孙子节点情况
+            const grandsonsFromResponse = response.data.dataPermi.split(","); // 分割字符串 "grandson1,grandson2"
+            this.dataPermiOptions.forEach(parent => {
+              parent.children.forEach(child => {
+                child.children.forEach(grandson => {
+                  // 检查当前孙子节点是否在 response 中存在
+                  if (grandsonsFromResponse.includes(String(grandson.value))) {
+                    // 如果存在，构建 [父数据, 子数据, 孙子数据] 并推入 tempList
+                    tempList.push([parent.value, child.value, grandson.value]);
+                  }
+                });
+              });
+            });
+          }
+          this.option = tempList;  // 更新 this.option
+        }
+      })
+    },
+    //数据权限保存
+    save() {
+      const dataList = [];
+      for (let i = 0; i < this.option.length; i++) {
+        dataList.push(this.option[i].slice(-1)[0])
+      }
+      const data = {
+        userId: this.rowId,
+        dataPermi: dataList.join(",")
+      }
+      updateUserDataPermi(data).then(response => {
+        if (response.code === 200) {
+          this.$modal.msgSuccess("修改成功")
+          this.dataPermiOpen = false;
+        }
+      })
     }
   }
 };

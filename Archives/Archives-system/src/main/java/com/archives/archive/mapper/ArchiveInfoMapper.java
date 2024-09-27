@@ -1,9 +1,10 @@
 package com.archives.archive.mapper;
 
-import java.util.List;
 import com.archives.archive.domain.ArchiveInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 档案信息Mapper接口
@@ -20,7 +21,7 @@ public interface ArchiveInfoMapper
      * @param id 档案信息主键
      * @return 档案信息
      */
-    public ArchiveInfo selectArchiveInfoById(Long id);
+    public ArchiveInfo selectArchiveInfoById(@Param("id") Long id);
 
     /**
      * 查询档案信息列表
@@ -28,7 +29,7 @@ public interface ArchiveInfoMapper
      * @param archiveInfo 档案信息
      * @return 档案信息集合
      */
-    public List<ArchiveInfo> selectArchiveInfoList(ArchiveInfo archiveInfo);
+    public List<ArchiveInfo> selectArchiveInfoList(@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
 
     /**
      * 查询档案信息列表
@@ -36,7 +37,7 @@ public interface ArchiveInfoMapper
      * @param keyword 档案信息
      * @return 档案信息集合
      */
-    public List<ArchiveInfo> selectArchiveInfoListByKeyword(String keyword);
+    public List<ArchiveInfo> selectArchiveInfoListByKeyword(@Param("keyword") String keyword,@Param("dataPermit") String[] dataPermiList);
 
     /**
      * 新增档案信息

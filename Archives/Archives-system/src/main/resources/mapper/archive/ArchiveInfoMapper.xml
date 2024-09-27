@@ -53,61 +53,71 @@
         <result property="field29"    column="field29"    />
         <result property="field30"    column="field30"    />
         <result property="ossStatus"  column="oss_status" />
+        <result property="dataPermit" column="data_permit" />
     </resultMap>
 
     <sql id="selectArchiveInfoVo">
         select id, category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, remarks, archive_status, create_by, create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status from archive_info
     </sql>
 
-    <select id="selectArchiveInfoList" parameterType="ArchiveInfo" resultMap="ArchiveInfoResult">
+    <sql id="selectArchiveInfoDataPermit">
+        <if test="dataPermit.length > 0">and data_permit in
+         <foreach collection="dataPermit" item="item" open="(" separator="," close=")">
+            #{item}
+         </foreach>
+        </if>
+    </sql>
+
+    <select id="selectArchiveInfoList" resultMap="ArchiveInfoResult">
         <include refid="selectArchiveInfoVo"/>
         <where>
-            <if test="categoryId != null "> and category_id = #{categoryId}</if>
-            <if test="fondsNumber != null  and fondsNumber != ''"> and fonds_number = #{fondsNumber}</if>
-            <if test="fondsName != null  and fondsName != ''"> and fonds_name like concat('%', #{fondsName}, '%')</if>
-            <if test="retentionPeriod != null  and retentionPeriod != ''"> and retention_period = #{retentionPeriod}</if>
-            <if test="itemNumber != null  and itemNumber != ''"> and item_number = #{itemNumber}</if>
-            <if test="archiveNumber != null  and archiveNumber != ''"> and archive_number = #{archiveNumber}</if>
-            <if test="department != null  and department != ''"> and department = #{department}</if>
-            <if test="archiver != null  and archiver != ''"> and archiver = #{archiver}</if>
-            <if test="archiveDate != null "> and archive_date = #{archiveDate}</if>
-            <if test="remarks != null  and remarks != ''"> and remarks = #{remarks}</if>
-            <if test="archiveStatus != null "> and archive_status = #{archiveStatus}</if>
-            <if test="categoryCode != null  and categoryCode != ''"> and category_code = #{categoryCode}</if>
-            <if test="field1 != null  and field1 != ''"> and field1 = #{field1}</if>
-            <if test="field2 != null  and field2 != ''"> and field2 = #{field2}</if>
-            <if test="field3 != null  and field3 != ''"> and field3 = #{field3}</if>
-            <if test="field4 != null  and field4 != ''"> and field4 = #{field4}</if>
-            <if test="field5 != null  and field5 != ''"> and field5 = #{field5}</if>
-            <if test="field6 != null  and field6 != ''"> and field6 = #{field6}</if>
-            <if test="field7 != null  and field7 != ''"> and field7 = #{field7}</if>
-            <if test="field8 != null  and field8 != ''"> and field8 = #{field8}</if>
-            <if test="field9 != null  and field9 != ''"> and field9 = #{field9}</if>
-            <if test="field10 != null  and field10 != ''"> and field10 = #{field10}</if>
-            <if test="field11 != null  and field11 != ''"> and field11 = #{field11}</if>
-            <if test="field12 != null  and field12 != ''"> and field12 = #{field12}</if>
-            <if test="field13 != null  and field13 != ''"> and field13 = #{field13}</if>
-            <if test="field14 != null  and field14 != ''"> and field14 = #{field14}</if>
-            <if test="field15 != null  and field15 != ''"> and field15 = #{field15}</if>
-            <if test="field16 != null  and field16 != ''"> and field16 = #{field16}</if>
-            <if test="field17 != null  and field17 != ''"> and field17 = #{field17}</if>
-            <if test="field18 != null  and field18 != ''"> and field18 = #{field18}</if>
-            <if test="field19 != null  and field19 != ''"> and field19 = #{field19}</if>
-            <if test="field20 != null  and field20 != ''"> and field20 = #{field20}</if>
-            <if test="field21 != null  and field21 != ''"> and field21 = #{field21}</if>
-            <if test="field22 != null  and field22 != ''"> and field22 = #{field22}</if>
-            <if test="field23 != null  and field23 != ''"> and field23 = #{field23}</if>
-            <if test="field24 != null  and field24 != ''"> and field24 = #{field24}</if>
-            <if test="field25 != null  and field25 != ''"> and field25 = #{field25}</if>
-            <if test="field26 != null  and field26 != ''"> and field26 = #{field26}</if>
-            <if test="field27 != null  and field27 != ''"> and field27 = #{field27}</if>
-            <if test="field28 != null  and field28 != ''"> and field28 = #{field28}</if>
-            <if test="field29 != null  and field29 != ''"> and field29 = #{field29}</if>
-            <if test="field30 != null  and field30 != ''"> and field30 = #{field30}</if>
-            <if test="ossStatus != null and ossStatus != ''">and oss_status = #{ossStatus}</if>
+            <if test="archiveInfo.categoryId != null "> and category_id = #{archiveInfo.categoryId}</if>
+            <if test="archiveInfo.fondsNumber != null  and archiveInfo.fondsNumber != ''"> and fonds_number = #{archiveInfo.fondsNumber}</if>
+            <if test="archiveInfo.fondsName != null  and archiveInfo.fondsName != ''"> and fonds_name like concat('%', #{archiveInfo.fondsName}, '%')</if>
+            <if test="archiveInfo.retentionPeriod != null  and archiveInfo.retentionPeriod != ''"> and retention_period = #{archiveInfo.retentionPeriod}</if>
+            <if test="archiveInfo.itemNumber != null  and archiveInfo.itemNumber != ''"> and item_number = #{archiveInfo.itemNumber}</if>
+            <if test="archiveInfo.archiveNumber != null  and archiveInfo.archiveNumber != ''"> and archive_number = #{archiveInfo.archiveNumber}</if>
+            <if test="archiveInfo.department != null  and archiveInfo.department != ''"> and department = #{archiveInfo.department}</if>
+            <if test="archiveInfo.archiver != null  and archiveInfo.archiver != ''"> and archiver = #{archiveInfo.archiver}</if>
+            <if test="archiveInfo.archiveDate != null "> and archive_date = #{archiveInfo.archiveDate}</if>
+            <if test="archiveInfo.remarks != null  and archiveInfo.remarks != ''"> and remarks = #{archiveInfo.remarks}</if>
+            <if test="archiveInfo.archiveStatus != null "> and archive_status = #{archiveInfo.archiveStatus}</if>
+            <if test="archiveInfo.categoryCode != null  and archiveInfo.categoryCode != ''"> and category_code = #{archiveInfo.categoryCode}</if>
+            <if test="archiveInfo.field1 != null  and archiveInfo.field1 != ''"> and field1 = #{archiveInfo.field1}</if>
+            <if test="archiveInfo.field2 != null  and archiveInfo.field2 != ''"> and field2 = #{archiveInfo.field2}</if>
+            <if test="archiveInfo.field3 != null  and archiveInfo.field3 != ''"> and field3 = #{archiveInfo.field3}</if>
+            <if test="archiveInfo.field4 != null  and archiveInfo.field4 != ''"> and field4 = #{archiveInfo.field4}</if>
+            <if test="archiveInfo.field5 != null  and archiveInfo.field5 != ''"> and field5 = #{archiveInfo.field5}</if>
+            <if test="archiveInfo.field6 != null  and archiveInfo.field6 != ''"> and field6 = #{archiveInfo.field6}</if>
+            <if test="archiveInfo.field7 != null  and archiveInfo.field7 != ''"> and field7 = #{archiveInfo.field7}</if>
+            <if test="archiveInfo.field8 != null  and archiveInfo.field8 != ''"> and field8 = #{archiveInfo.field8}</if>
+            <if test="archiveInfo.field9 != null  and archiveInfo.field9 != ''"> and field9 = #{archiveInfo.field9}</if>
+            <if test="archiveInfo.field10 != null  and archiveInfo.field10 != ''"> and field10 = #{archiveInfo.field10}</if>
+            <if test="archiveInfo.field11 != null  and archiveInfo.field11 != ''"> and field11 = #{archiveInfo.field11}</if>
+            <if test="archiveInfo.field12 != null  and archiveInfo.field12 != ''"> and field12 = #{archiveInfo.field12}</if>
+            <if test="archiveInfo.field13 != null  and archiveInfo.field13 != ''"> and field13 = #{archiveInfo.field13}</if>
+            <if test="archiveInfo.field14 != null  and archiveInfo.field14 != ''"> and field14 = #{archiveInfo.field14}</if>
+            <if test="archiveInfo.field15 != null  and archiveInfo.field15 != ''"> and field15 = #{archiveInfo.field15}</if>
+            <if test="archiveInfo.field16 != null  and archiveInfo.field16 != ''"> and field16 = #{archiveInfo.field16}</if>
+            <if test="archiveInfo.field17 != null  and archiveInfo.field17 != ''"> and field17 = #{archiveInfo.field17}</if>
+            <if test="archiveInfo.field18 != null  and archiveInfo.field18 != ''"> and field18 = #{archiveInfo.field18}</if>
+            <if test="archiveInfo.field19 != null  and archiveInfo.field19 != ''"> and field19 = #{archiveInfo.field19}</if>
+            <if test="archiveInfo.field20 != null  and archiveInfo.field20 != ''"> and field20 = #{archiveInfo.field20}</if>
+            <if test="archiveInfo.field21 != null  and archiveInfo.field21 != ''"> and field21 = #{archiveInfo.field21}</if>
+            <if test="archiveInfo.field22 != null  and archiveInfo.field22 != ''"> and field22 = #{archiveInfo.field22}</if>
+            <if test="archiveInfo.field23 != null  and archiveInfo.field23 != ''"> and field23 = #{archiveInfo.field23}</if>
+            <if test="archiveInfo.field24 != null  and archiveInfo.field24 != ''"> and field24 = #{archiveInfo.field24}</if>
+            <if test="archiveInfo.field25 != null  and archiveInfo.field25 != ''"> and field25 = #{archiveInfo.field25}</if>
+            <if test="archiveInfo.field26 != null  and archiveInfo.field26 != ''"> and field26 = #{archiveInfo.field26}</if>
+            <if test="archiveInfo.field27 != null  and archiveInfo.field27 != ''"> and field27 = #{archiveInfo.field27}</if>
+            <if test="archiveInfo.field28 != null  and archiveInfo.field28 != ''"> and field28 = #{archiveInfo.field28}</if>
+            <if test="archiveInfo.field29 != null  and archiveInfo.field29 != ''"> and field29 = #{archiveInfo.field29}</if>
+            <if test="archiveInfo.field30 != null  and archiveInfo.field30 != ''"> and field30 = #{archiveInfo.field30}</if>
+            <if test="archiveInfo.ossStatus != null and archiveInfo.ossStatus != ''">and oss_status = #{archiveInfo.ossStatus}</if>
+            <include refid="selectArchiveInfoDataPermit"/>
         </where>
         <choose>
-            <when test="archiveStatus != 1">
+            <when test="archiveInfo.archiveStatus != 1">
                 ORDER BY id DESC
             </when>
             <otherwise>
@@ -162,7 +172,8 @@
                         field29,
                         field30,
                         oss_status
-                  ) LIKE CONCAT('%', #{searchValue}, '%')
+                  ) LIKE CONCAT('%', #{archiveInfo.searchValue}, '%')
+                  <include refid="selectArchiveInfoDataPermit" />
         </where>
     </select>
 
@@ -220,6 +231,7 @@
             <if test="field28 != null">field28,</if>
             <if test="field29 != null">field29,</if>
             <if test="field30 != null">field30,</if>
+            <if test="dataPermit != null">data_permit,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="categoryId != null">#{categoryId},</if>
@@ -268,16 +280,17 @@
             <if test="field28 != null">#{field28},</if>
             <if test="field29 != null">#{field29},</if>
             <if test="field30 != null">#{field30},</if>
+            <if test="dataPermit != null">#{dataPermit},</if>
         </trim>
     </insert>
 
     <insert id="insertArchiveInfoList" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO archive_info (
-        category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, archive_status, category_code, field1, field2, field3, field4, field5, field6, field7, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field24, field25, field26, field27, field28, field29, field30, oss_status
+        category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, archive_status, category_code, field1, field2, field3, field4, field5, field6, field7, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field24, field25, field26, field27, field28, field29, field30, oss_status, data_permit
         ) VALUES
         <foreach collection="list" item="item" separator=",">
             (
-            #{item.categoryId}, #{item.fondsNumber}, #{item.fondsName}, #{item.retentionPeriod}, #{item.itemNumber}, #{item.archiveNumber}, #{item.department}, #{item.archiver}, #{item.archiveDate}, #{item.archiveStatus}, #{item.categoryCode}, #{item.field1}, #{item.field2}, #{item.field3}, #{item.field4}, #{item.field5}, #{item.field6}, #{item.field7}, #{item.field9}, #{item.field10}, #{item.field11}, #{item.field12}, #{item.field13}, #{item.field14}, #{item.field15}, #{item.field16}, #{item.field17}, #{item.field18}, #{item.field19}, #{item.field20}, #{item.field21}, #{item.field24}, #{item.field25}, #{item.field26}, #{item.field27}, #{item.field28}, #{item.field29}, #{item.field30}, #{item.ossStatus}
+            #{item.categoryId}, #{item.fondsNumber}, #{item.fondsName}, #{item.retentionPeriod}, #{item.itemNumber}, #{item.archiveNumber}, #{item.department}, #{item.archiver}, #{item.archiveDate}, #{item.archiveStatus}, #{item.categoryCode}, #{item.field1}, #{item.field2}, #{item.field3}, #{item.field4}, #{item.field5}, #{item.field6}, #{item.field7}, #{item.field9}, #{item.field10}, #{item.field11}, #{item.field12}, #{item.field13}, #{item.field14}, #{item.field15}, #{item.field16}, #{item.field17}, #{item.field18}, #{item.field19}, #{item.field20}, #{item.field21}, #{item.field24}, #{item.field25}, #{item.field26}, #{item.field27}, #{item.field28}, #{item.field29}, #{item.field30}, #{item.ossStatus}, #{item.dataPermit}
             )
         </foreach>
     </insert>

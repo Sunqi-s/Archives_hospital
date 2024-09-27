@@ -1,14 +1,14 @@
 package com.archives.archive.domain;
 
-import java.util.Date;
-import java.util.List;
-
+import com.archives.common.annotation.Excel;
+import com.archives.common.core.domain.BaseEntity;
 import com.archives.system.domain.SysOss;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import com.archives.common.annotation.Excel;
-import com.archives.common.core.domain.BaseEntity;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * 档案信息对象 archive_info
@@ -197,6 +197,8 @@ public class ArchiveInfo extends BaseEntity
     private int ossStatus;
 
     private List<SysOss> sysOssList;
+
+    private String dataPermit;
 
     public void setId(Long id)
     {
@@ -603,6 +605,14 @@ public class ArchiveInfo extends BaseEntity
         this.ossStatus = ossStatus;
     }
 
+    public String getDataPermit() {
+        return dataPermit;
+    }
+
+    public void setDataPermit(String dataPermit) {
+        this.dataPermit = dataPermit;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -655,6 +665,7 @@ public class ArchiveInfo extends BaseEntity
             .append("field30", getField30())
             .append("sysOssList", getSysOssList())
             .append("ossStatus", getOssStatus())
+            .append("dataPermit", getDataPermit())
             .toString();
     }
 }

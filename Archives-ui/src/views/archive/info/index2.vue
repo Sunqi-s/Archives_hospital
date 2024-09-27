@@ -521,6 +521,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
+      this.selectedItems = selection;
       this.ids = selection.map(item => item.id)
       this.archiveNumbers = selection.map(item => item.archiveNumber)
       this.single = selection.length!==1
