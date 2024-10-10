@@ -87,4 +87,11 @@ public interface IArchiveInfoService
      * 批量发送利用档案信息
      */
     public int sendArchiveInfo(Long[] ids);
+
+    /**
+     * 批量删除档案信息
+     *
+     *
+     */
+    public boolean deleteArchiveInfoAll();
 }

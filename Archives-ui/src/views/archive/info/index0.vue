@@ -113,6 +113,14 @@
               @click="handlePrint"
             >打印</el-button>
           </el-col>
+          <el-col :span="1.5">
+            <el-button
+              type="deanger"
+              icon="el-icon-s-promotion"
+              size="small"
+              @click="handleBatchDelete"
+            >一键删除</el-button>
+          </el-col>
 
         </el-row>
 
@@ -289,7 +297,7 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import {addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo} from "@/api/archive/info";
+import {addInfo, delAllInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo} from "@/api/archive/info";
 import { listCategory } from "@/api/archive/category";
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
@@ -935,6 +943,17 @@ export default {
     handleNextPage(){
       this.savedids = this.savedids.concat(this.ids);
       this.getList();
+    },
+    handleBatchDelete(){
+      delAllInfo().then((res) => {
+        this.getList();
+        console.log(res)
+        if (res.code === 200){
+          this.$modal.msgSuccess("删除成功");
+        }else {
+          this.$modal.msgError(res.msg);
+        }
+      })
     }
   }
 };

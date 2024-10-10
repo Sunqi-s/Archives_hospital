@@ -399,4 +399,7 @@
             #{id}
         </foreach>
     </delete>
+    <delete id="deleteArchiveInfoAll" parameterType="boolean">
+        delete from archive_info where archive_status = 0
+    </delete>
 </mapper>

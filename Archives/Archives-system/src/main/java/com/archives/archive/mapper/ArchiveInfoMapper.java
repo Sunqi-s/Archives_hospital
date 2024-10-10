@@ -105,4 +105,9 @@ public interface ArchiveInfoMapper
      *
      */
     public int sendArchiveInfo(Long[] ids);
+
+    /**
+     * 批量删除档案信息
+     */
+    public boolean deleteArchiveInfoAll();
 }

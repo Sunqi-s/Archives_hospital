@@ -67,3 +67,11 @@ export function sendInfo(id) {
     method: 'put',
   })
 }
+
+//一键删除档案信息
+export function delAllInfo() {
+  return request({
+    url:'/archive/info/batchRemove',
+    method: 'delete',
+  })
+}

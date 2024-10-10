@@ -115,6 +115,7 @@ public class ArchiveInfoController extends BaseController
     /**
      * 批量新增档案信息
      */
+    @PreAuthorize("@ss.hasPermi('archive:info:bulkAdd')")
     @Log(title = "EXCEL导入", businessType = BusinessType.INSERT)
     @PostMapping("/bulkAdd")
     public AjaxResult bulkAdd(@RequestBody List<ArchiveInfo> archiveInfo)
@@ -131,11 +132,22 @@ public class ArchiveInfoController extends BaseController
     /**
      * 批量发送利用档案信息
      */
+    @PreAuthorize("@ss.hasPermi('archive:info:send')")
     @Log(title = "批量发送利用档案信息", businessType = BusinessType.UPDATE)
     @PutMapping("/send/{ids}")
     public AjaxResult send(@PathVariable Long[] ids)
     {
        return toAjax(archiveInfoService.sendArchiveInfo(ids));
+    }
+
+    /**
+     * 批量删除档案信息
+     */
+    @PreAuthorize("@ss.hasPermi('archive:info:batchRemove')")
+    @Log(title = "批量删除档案信息", businessType = BusinessType.DELETE)
+    @DeleteMapping("/batchRemove")
+    public AjaxResult batchRemove() {
+        return toAjax(archiveInfoService.deleteArchiveInfoAll());
     }
 
 }

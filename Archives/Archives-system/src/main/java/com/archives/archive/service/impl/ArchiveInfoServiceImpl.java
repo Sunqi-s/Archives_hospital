@@ -254,5 +254,10 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     public int sendArchiveInfo(Long[] ids) {
         return archiveInfoMapper.sendArchiveInfo(ids);
     }
+
+    @Override
+    public boolean deleteArchiveInfoAll(){
+        return archiveInfoMapper.deleteArchiveInfoAll();
+    }
 }
 
