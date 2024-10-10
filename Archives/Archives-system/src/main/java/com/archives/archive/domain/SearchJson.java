@@ -11,12 +11,14 @@ public class SearchJson {
         private int pageNum;
         private int pageSize;
         private int total;
+        private String archiveNumber;
+        private String field9;
         private List<ArchiveInfo> searchResults;
 
     public SearchJson() {
     }
 
-    public SearchJson(String keyWord, List<String> value, String categoryId, String length, int pageNum, int pageSize, int total, List<ArchiveInfo> searchResults) {
+    public SearchJson(String keyWord, List<String> value, String categoryId, String length, int pageNum, int pageSize, int total, String archiveNumber, String field9, List<ArchiveInfo> searchResults) {
         this.keyWord = keyWord;
         this.value = value;
         this.categoryId = categoryId;
@@ -24,6 +26,8 @@ public class SearchJson {
         this.pageNum = pageNum;
         this.pageSize = pageSize;
         this.total = total;
+        this.archiveNumber = archiveNumber;
+        this.field9 = field9;
         this.searchResults = searchResults;
     }
 
@@ -91,6 +95,22 @@ public class SearchJson {
         this.searchResults = searchResults;
     }
 
+    public String getArchiveNumber() {
+        return archiveNumber;
+    }
+
+    public void setArchiveNumber(String archiveNumber) {
+        this.archiveNumber = archiveNumber;
+    }
+
+    public String getField9() {
+        return field9;
+    }
+
+    public void setField9(String field9) {
+        this.field9 = field9;
+    }
+
     @Override
     public String toString() {
         return "SearchJson{" +
@@ -101,6 +121,8 @@ public class SearchJson {
                 ", pageNum=" + pageNum +
                 ", pageSize=" + pageSize +
                 ", total=" + total +
+                ", archiveNumber='" + archiveNumber + '\'' +
+                ", field9='" + field9 + '\'' +
                 ", searchResults=" + searchResults +
                 '}';
     }
