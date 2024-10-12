@@ -20,17 +20,11 @@ public class ArchiveBorrowController extends BaseController {
     @Autowired
     private IArchiveBorrowService archiveBorrowService;
 
-    @PreAuthorize("@ss.hasAnyPermi('archive:search:list')")
+    @PreAuthorize("@ss.hasAnyPermi('archive:borrow:list')")
     @PostMapping("/list/")
     public List<Long> getArchiveBorrowList(@RequestBody ArchiveInfo archiveInfo) {
         System.out.println("archiveInfo:" + archiveInfo);
         return archiveBorrowService.getArchiveBorrowList(archiveInfo);
-    }
-
-    @PreAuthorize("@ss.hasAnyPermi('archive:borrow:user')")
-    @PostMapping("/user/")
-    public SysUser getArchiveBorrowUser() {
-        return archiveBorrowService.getArchiveBorrowUser();
     }
 
     @PreAuthorize("@ss.hasAnyPermi('archive:borrow:list')")
@@ -38,7 +32,11 @@ public class ArchiveBorrowController extends BaseController {
     public SearchJson getArchiveBorrowListAll(@RequestBody SearchJson searchJson){
         return archiveBorrowService.getArchiveBorrowListAll(searchJson);
     }
-
+    @PreAuthorize("@ss.hasAnyPermi('archive:borrow:user')")
+    @PostMapping("/user/")
+    public SysUser getArchiveBorrowUser() {
+        return archiveBorrowService.getArchiveBorrowUser();
+    }
 
 
 

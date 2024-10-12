@@ -72,7 +72,7 @@
               type="success"
               icon="el-icon-s-flag"
               size="small"
-              :disabled="multiple"
+              :disabled="!(savedids.length+ids.length)"
               @click="handlePrint"
             >打印</el-button>
           </el-col>
@@ -84,6 +84,9 @@
               :disabled="multiple"
               @click="handleSendUtilize"
             >退回资源</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <i>已选择{{savedids.length+ids.length}}项</i>
           </el-col>
         </el-row>
 

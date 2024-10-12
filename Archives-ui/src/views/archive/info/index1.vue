@@ -90,7 +90,7 @@
               type="success"
               icon="el-icon-s-flag"
               size="small"
-              :disabled="multiple"
+              :disabled="!(savedids.length+ids.length)"
               @click="handlePrint"
             >打印</el-button>
           </el-col>
@@ -103,7 +103,9 @@
               @click="handleSendUtilize"
             >发送利用</el-button>
           </el-col>
-
+          <el-col :span="1.5">
+            <i>已选择{{savedids.length+ids.length}}项</i>
+          </el-col>
         </el-row>
 
         <!-- 动态生成的表格 -->
@@ -326,7 +328,7 @@ export default {
     sortedFields(){
       return this.listFields.sort((a,b)=>{
         if(a.name === 'archiveStatus') return -1;
-        if(b,name === 'archiveStatus') return 1;
+        if(b.name === 'archiveStatus') return 1;
         return 0;
       });
     }

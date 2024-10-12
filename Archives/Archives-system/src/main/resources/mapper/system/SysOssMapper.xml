@@ -54,32 +54,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <insert id="insertSysOss" parameterType="SysOss" useGeneratedKeys="true" keyProperty="id">
         insert into sys_oss
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="path != null">path,</if>
-            <if test="url != null">url,</if>
-            <if test="name != null">name,</if>
-            <if test="size != null">size,</if>
-            <if test="fid != null">fid,</if>
-            <if test="suffix != null">suffix,</if>
-            <if test="deleteFlg != null">delete_flg,</if>
-            <if test="deleteDate != null">delete_date,</if>
-            <if test="createBy != null">create_by,</if>
-            <if test="createTime != null">create_time,</if>
-            <if test="updateBy != null">update_by,</if>
-            <if test="updateTime != null">update_time,</if>
+            <if test="path != null and path != ''">path,</if>
+            <if test="url != null and url != ''">url,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="size != null and size != ''">size,</if>
+            <if test="fid != null and fid != ''">fid,</if>
+            <if test="suffix != null and suffix != ''">suffix,</if>
+            <if test="deleteFlg != null and deleteFlg != ''">delete_flg,</if>
+            <if test="deleteDate != null and deleteDate != ''">delete_date,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null and createTime != ''">create_time,</if>
+            <if test="updateBy != null and updateBy != ''">update_by,</if>
+            <if test="updateTime != null and updateTime != ''">update_time,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="path != null">#{path},</if>
-            <if test="url != null">#{url},</if>
-            <if test="name != null">#{name},</if>
-            <if test="size != null">#{size},</if>
-            <if test="fid != null">#{fid},</if>
-            <if test="suffix != null">#{suffix},</if>
-            <if test="deleteFlg != null">#{deleteFlg},</if>
-            <if test="deleteDate != null">#{deleteDate},</if>
-            <if test="createBy != null">#{createBy},</if>
-            <if test="createTime != null">#{createTime},</if>
-            <if test="updateBy != null">#{updateBy},</if>
-            <if test="updateTime != null">#{updateTime},</if>
+            <if test="path != null and path != ''">#{path},</if>
+            <if test="url != null and url != ''">#{url},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="size != null and size != ''">#{size},</if>
+            <if test="fid != null and fid != ''">#{fid},</if>
+            <if test="suffix != null and suffix != ''">#{suffix},</if>
+            <if test="deleteFlg != null and deleteFlg != ''">#{deleteFlg},</if>
+            <if test="deleteDate != null and deleteDate != ''">#{deleteDate},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null and createTime != ''">#{createTime},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            <if test="updateTime != null and updateTime != ''">#{updateTime},</if>
          </trim>
     </insert>
 

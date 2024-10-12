@@ -231,6 +231,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
             for (ArchiveInfo archiveInfo : archiveInfoList) {
                 archiveInfo.setDataPermit(String.valueOf(currentUser.getDeptId()));
+                archiveInfo.setCreateBy(currentUser.getNickName());
             }
             // 调用mapper里写好的批量插入方法
             int rows = archiveInfoMapper.insertArchiveInfoList(archiveInfoList);

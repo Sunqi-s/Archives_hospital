@@ -191,7 +191,7 @@ import { getCategory, listCategory } from '@/api/archive/category'
 import { getItemByCategoryId } from '@/api/archive/item'
 import { getOssByFid } from '@/api/system/oss'
 import { listDept } from '@/api/system/dept'
-import { borrow, borrowDetail } from '@/api/archive/borrow'
+import { borrow, borrowDetail, borrowUser } from '@/api/archive/borrow'
 import { updatAarchiveStatus } from '@/api/archive/info'
 
 export default {
@@ -273,6 +273,10 @@ export default {
   created() {
     listCategory().then(res => {
       this.categoryList = res.data;
+    })
+    borrowUser().then(response => {
+      this.LoginUserName = response.userName;
+      this.ruleForm.userName = this.LoginUserName;
     })
     console.log(this.categoryList)
     this.loadDepartments();

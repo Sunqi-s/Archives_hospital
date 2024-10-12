@@ -9,6 +9,7 @@ import com.archives.common.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 @Service
 public class ArchiveBorrowServiceImpl implements IArchiveBorrowService {
@@ -18,10 +19,25 @@ public class ArchiveBorrowServiceImpl implements IArchiveBorrowService {
     @Override
     public List<Long> getArchiveBorrowList(ArchiveInfo archiveInfo) {
         String[] dataPermiList =selectSearchByDataPermit();
-        System.out.println("--------archiiveInfo:"+archiveInfo);
         List<Long> archiveBorrowList = archiveBorrowMapper.getArchiveBorrowList(archiveInfo,dataPermiList);
-        System.out.println("--------archiveBorrowList:"+archiveBorrowList.toString());
         return archiveBorrowList;
+    }
+
+    @Override
+    public SearchJson getArchiveBorrowListAll(SearchJson searchJson) {
+        String[] dataPermiList =selectSearchByDataPermit();
+        int pageNum = searchJson.getPageNum();
+        int pageSize = searchJson.getPageSize();
+        int offset = (pageNum - 1) * pageSize;
+        String categoryId = searchJson.getCategoryId();
+        String archiveNumber = searchJson.getArchiveNumber();
+        String field9 = searchJson.getField9();
+
+        List<ArchiveInfo> archiveBorrowListAll = archiveBorrowMapper.getArchiveBorrowListAll(categoryId,archiveNumber,field9,pageSize,offset,dataPermiList);
+        int total = archiveBorrowMapper.getArchiveBorrowCount(categoryId,archiveNumber,field9,dataPermiList);
+        searchJson.setTotal(total);
+        searchJson.setSearchResults(archiveBorrowListAll);
+        return searchJson;
     }
 
     @Override
@@ -38,23 +54,5 @@ public class ArchiveBorrowServiceImpl implements IArchiveBorrowService {
             dataPermiList = (currentUser.getDataPermi().split(","));
         }
         return dataPermiList;
-    }
-
-    @Override
-    public SearchJson getArchiveBorrowListAll(SearchJson searchJson) {
-        System.out.println("--------searchJson:"+searchJson);
-        String[] dataPermiList =selectSearchByDataPermit();
-        int pageNum = searchJson.getPageNum();
-        int pageSize = searchJson.getPageSize();
-        int offset = (pageNum - 1) * pageSize;
-        String categoryId = searchJson.getCategoryId();
-        String archiveNumber = searchJson.getArchiveNumber();
-        String field9 = searchJson.getField9();
-
-        List<ArchiveInfo> archiveBorrowListAll = archiveBorrowMapper.getArchiveBorrowListAll(categoryId,archiveNumber,field9,pageSize,offset,dataPermiList);
-        int total = archiveBorrowMapper.getArchiveBorrowCount(categoryId,archiveNumber,field9,dataPermiList);
-        searchJson.setTotal(total);
-        searchJson.setSearchResults(archiveBorrowListAll);
-        return searchJson;
     }
 }

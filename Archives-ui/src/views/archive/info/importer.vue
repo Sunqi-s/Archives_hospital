@@ -102,6 +102,7 @@
               <el-icon class="el-icon-success success-icon"></el-icon>
               <p class="success-message">此次共导入 {{ importLog.infoImportRecords }} 条记录。
               成功挂接 {{importLog.ossProcessedRecords}} 条记录。</p>
+              <el-button type="primary" @click="takeMeToArchive" size="medium" class="reset-button">转至整理库</el-button>
               <el-button type="primary" @click="look" size="medium" class="reset-button">查看结果</el-button>
               <el-button type="primary" @click="reset" size="medium" class="reset-button">再次导入</el-button>
             </div>
@@ -111,10 +112,10 @@
 
       <!-- 文件夹挂接弹出页 -->
       <el-dialog
-        class="el-dialog"
         title="文件挂接流程"
         :visible.sync="batchAttachmentDialogVisible"
         :modal-append-to-body="false"
+        :close="isClose()"
       >
         <el-row :gutter="20">
           <!-- 上面处理流程步骤条 -->
@@ -151,18 +152,19 @@
           </el-col>
           <!-- 自定义文件展示 -->
           <div>
-            <div v-for="(file, index) in filteredFileList" :key="index" class="file-item" v-if="currentStep <3">
+              <span  v-if="fileList.length === 0 && currentStep === 0" style="font-size: 18px;">{{ "请选择5GB以内的压缩包文件" }}</span>
+            <div v-for="(file, index) in filteredFileList" :key="index" class="file-item" v-if="currentStep <3 && fileList.length > 0">
               <!-- 图标显示 -->
               <i class="el-icon-document" style="font-size: 24px"></i>
               <!-- 文件名显示 -->
               <span style="font-size: 24px">{{ file.name }}</span>
             </div>
           </div>
-          <div style="margin-top: 10px;">
-            <el-button type="success" @click="submitUpload" style="margin-top: 10px;" v-if="currentStep === 1">开始上传</el-button>
-            <el-button type="danger" @click="resetAttachment" v-if="currentStep === 1" style="margin-top: 10px;">文件重置</el-button>
+          <div>
+            <el-button type="success" @click="submitUpload" style="margin-top: 10px;" v-if="currentStep === 1 && isClick">开始上传</el-button>
+            <el-button type="danger" @click="resetAttachment" v-if="currentStep === 1 && isClick" style="margin-top: 10px;">文件重置</el-button>
             <!-- 开始挂接按钮 -->
-            <el-button type="primary" @click="autoAttach" style="margin-top: 10px;" v-if="currentStep === 2">开始挂接</el-button>
+            <el-button type="primary" @click="autoAttach" style="margin-top: 10px;" v-if="currentStep === 2 && isClick">开始挂接</el-button>
           </div>
           <div v-if="currentStep === 3">
             <el-row>
@@ -194,7 +196,7 @@
             :define-back-color="'#FFFFFF'">
           </el-progress>
           <el-progress
-            v-if="isAttaching"
+            v-if="attach"
             :text-inside="true"
             :stroke-width="20"
             :percentage="attachmentProgress"
@@ -203,6 +205,11 @@
             :define-back-color="'#FFFFFF'">
           </el-progress>
         </div>
+      </el-dialog>
+      <el-dialog title="挂接失败记录" :visible.sync="dialogTableVisible">
+        <el-table >
+          <el-table-column property="archiveNumber" label="文件档号" ></el-table-column>
+        </el-table>
       </el-dialog>
     </el-row>
   </el-row>
@@ -300,13 +307,13 @@ export default {
       ossList:[],
       circleStep:0,
       filteredFileList:[],
-      importLog:{}
+      importLog:{},
+      isClick:true,
+      upLoad:false,
+      dialogTableVisible: false,
     };
   },
   computed: {
-    isAttaching(){
-      return this.attach === true;
-    },
     isDisplayOutput(){
       return this.displayOutput === true;
     },
@@ -338,9 +345,15 @@ export default {
     isElCardBodyLoading() {
       return this.isSubmitDateTriggered === true;
     },
+
+    isFileListDisabled() {
+      return this.fileList.length > 0;
+    },
+  },
+  methods: {
     formatTableData() {
       return this.tableData.map(row => {
-        const formattedRow = { ...row };
+        const formattedRow = { ...row ,archiveStatus:0};
         // 如果 archiveDate 有效，则格式化
         if (formattedRow.archiveDate) {
           const date = new Date(formattedRow.archiveDate);
@@ -361,11 +374,6 @@ export default {
         return formattedRow;
       });
     },
-    isFileListDisabled() {
-      return this.fileList.length > 0;
-    },
-  },
-  methods: {
     // 获取分类列表并构建分类树
     getCategoryList() {
       listCategory().then(response => {
@@ -601,7 +609,7 @@ export default {
 
     // 提交表格数据到数据库
     async submitData() {
-      const data = this.formatTableData; // 格式化表格数据
+      const data = this.formatTableData(); // 格式化表格数据
       // 写入Log表，创建任务号
       const batchSize = 250; // 每批次插入的数据量
       addImportLog(this.logQueryParams).then(response => {
@@ -697,6 +705,11 @@ export default {
       this.columnList = []; // 清空列表列
       this.showOn = 0; // 清空显示标志
       this.categoryName = 0;
+      //重置ossProcessedRecords为0
+      this.logQueryParams.ossProcessedRecords = 0;
+      this.logQueryParams.infoProcessedRecords = 0;
+      this.logQueryParams.status = 'waiting';
+      this.isClick=true;
       this.resetAttachment();
       this.clearFormData();
     },
@@ -751,7 +764,6 @@ export default {
         }
       }));
 
-      this.currentStep = 0;
       this.upFileList = newFileList;
     },
 
@@ -764,10 +776,11 @@ export default {
 
     // 批量挂接
     async autoAttach() {
+      this.isClick=false;
       this.circleStep = 2;
       this.attach=true;
       this.startAttachment();
-      const formattedData =this.formatTableData;
+      const formattedData =this.formatTableData();
       // 提交数据到服务器
       await this.batchInsertData.call(this, formattedData);
           this.active = 4; // 设置步骤条的活动步骤
@@ -778,6 +791,13 @@ export default {
         getImportLog(this.logQueryParams.id).then(response => {
           this.importLog = response.data;
         })
+        this.upLoad=false;
+        this.upFileList = [];
+        this.fileList = [];
+        this.uploadFiles = [];
+        this.filteredFileList = [];
+        this.importLog={};
+        this.selectedNodeKey = null;
       }).catch(error => {
       });
     },
@@ -820,19 +840,20 @@ export default {
     async uploadFolderFiles() {
       // 禁用上传按钮
       this.submitUploadButtonDisabled=true;
-      const batchSize = 5; // 每次上传的文件数量
+      const batchSize = 1; // 每次上传的文件数量
       // 进度条服务
       const totalFiles = this.fileList.length;
       let uploadedFiles = 0;
       // 循环遍历文件列表，按批次上传
       for (let i = 0; i < this.fileList.length; i += batchSize) {
-        const batch = this.fileList.slice(i, i + batchSize); // 获取当前批次的文件
+        const batch = this.fileList[i]; // 获取当前批次的文件
         // 并行上传当前批次的文件
-        await Promise.all(batch.map(file => this.uploadFile(file)));
+        await this.uploadFile(batch);
         // 进度条服务
-        uploadedFiles += batch.length;
+        uploadedFiles += 1;
         this.totalUploadProgress = Math.round((uploadedFiles / totalFiles) * 100);
       }
+      this.isClick=true;
       this.$message.success('文件上传成功');
       // 解除禁用上传按钮
       this.submitUploadButtonDisabled=false;
@@ -859,6 +880,8 @@ export default {
 
     // 提交上传至服务器
     submitUpload() {
+      this.upLoad=true;
+      this.isClick=false;
       this.circleStep = 1;
       this.uploadFolderFiles(); // 手动触发上传
     },
@@ -920,13 +943,13 @@ export default {
           };
         });
         this.zipLoading = false;
+        this.currentStep = 1;
         return this.uploadFiles;
       }
     },
 
-    // 挂接档案左侧进度条
-    nextStep() {
-      this.currentStep += 1;
+    look(){
+      this.dialogTableVisible = true;
     },
 
     // 解压缩文件进度条
@@ -934,7 +957,6 @@ export default {
       if (this.progress !== 100) {
         return '正在获取文件列表' + this.progress + '%';
       } else {
-        this.nextStep();
         return '文件列表加载完毕';
       }
     },
@@ -981,6 +1003,8 @@ export default {
       this.uploadFiles = [];
       this.filteredFileList = [];
       this.circleStep = 0;
+      this.importLog={};
+      this.attach = false;
     },
 
     // 辅助函数：去掉文件名的后缀
@@ -989,9 +1013,14 @@ export default {
       if (lastDotIndex === -1) return fileName;
       return fileName.substring(0, lastDotIndex);
     },
-    look(){
+    takeMeToArchive(){
       // this.displayOutput=false;
       this.$router.push({path: '/ArchiveManagement/info0'});
+    },
+    isClose(){
+      if (this.upLoad){
+        this.batchAttachmentDialogVisible = true;
+      }
     }
 
 
@@ -1023,7 +1052,6 @@ export default {
   display: flex;
   justify-content: center;
   margin-top: 15%;
-  //align-items: center;
   height: 100vh;
 }
 
@@ -1167,7 +1195,7 @@ export default {
   color: #409EFF;  /* 图标的颜色 */
 }
 .file-item {
-  margin-top: 13%;
+  margin-top: 10%;
 }
 /* 默认步骤样式 */
 .el-steps .el-step {
@@ -1182,19 +1210,6 @@ export default {
 /* 非活动步骤样式 */
 .el-steps .inactive-step .el-step__title {
   color: #c0c4cc !important; /* 非活动步骤的颜色 */
-}
-.el-dialog {
-  position:fixed;
-  left:50%;
-  top:50%;
-  transform: translate(-50%,-50%);
-  height:100%;
-  width:100%;
-  background-color: rgba(0,0,0,0);
-  padding-top: 10%;
-  padding-left: 10%;
-  padding-right: 10%;
-  margin-top:0!important;
 }
 
 </style>

@@ -2,6 +2,7 @@ package com.archives.system.mapper;
 
 import java.util.List;
 import com.archives.system.domain.SysOss;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 文件上传Mapper接口
@@ -9,6 +10,7 @@ import com.archives.system.domain.SysOss;
  * @author archives
  * @date 2024-07-05
  */
+@Mapper
 public interface SysOssMapper
 {
     /**
