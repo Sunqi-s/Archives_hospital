@@ -245,10 +245,10 @@
       </div>
     </el-dialog>
 
-    <!--文件预览对话框-->
+    <!--文件预览对话框
     <el-dialog title="文件预览" :visible.sync="showPreview" fullscreen>
       <onlinePreview v-if="showPreview" :initialUrl="previewUrl"/>
-    </el-dialog>
+    </el-dialog>-->
   </div>
 </template>
 
@@ -265,6 +265,7 @@ import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import * as XLSX from "xlsx";
 import {getDept, listDept} from "@/api/system/dept";
 import {pointRelation} from "@/api/archive/relation";
+import {Base64} from "js-base64";
 
 export default {
   name: "Resources",
@@ -621,8 +622,11 @@ export default {
     },
     //文件预览
     handleFilePreview(url) {
-      this.previewUrl = url;
-      this.showPreview = true;
+      // this.previewUrl = url;
+      // this.showPreview = true;
+      const encodedUrl = encodeURIComponent(Base64.encode(process.env.VUE_APP_FILE_SERVER_BASE_URL + url));
+      // 打开新页面并调用在线预览接口
+      window.open(process.env.VUE_APP_KKFILEVIEW_BASE_URL + '/onlinePreview?url=' + encodedUrl);
     },
     handleBatchDownload() {
       // 批量下载逻辑

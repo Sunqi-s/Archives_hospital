@@ -50,14 +50,14 @@ module.exports = {
         }
       },
       // KKFileView服务器端口 反向代理到KKFilePreview服务器
-      '/preview': {
-        target: 'http://localhost:8012',
-        ws:false,
-        changeOrigin: true,
-        pathRewrite: {
-          '^/preview': ''
-        }
-      }
+      // '/preview': {
+      //   target: 'http://localhost:8012',
+      //   ws:false,
+      //   changeOrigin: true,
+      //   pathRewrite: {
+      //     '^/preview': ''
+      //   }
+      // }
     },
     disableHostCheck: true
   },
