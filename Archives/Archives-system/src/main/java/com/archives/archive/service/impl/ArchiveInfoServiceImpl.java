@@ -182,12 +182,29 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Override
     public int updateArchiveStatusByIds(Long[] ids) {
-        return archiveInfoMapper.updateArchiveStatusByIds(ids);
+        SysUser StatusUsers = SecurityUtils.getLoginUser().getUser();
+        System.out.println("sysUser: " + StatusUsers);
+        ArchiveInfo archiveInfoStatus = new ArchiveInfo();
+        archiveInfoStatus.setArchiveStatus(1L);
+        archiveInfoStatus.setDepartment(String.valueOf(StatusUsers.getDeptId()));
+        archiveInfoStatus.setArchiver(StatusUsers.getNickName());
+        System.out.println("archiveInfoStatus: " + archiveInfoStatus);
+        return archiveInfoMapper.updateArchiveStatusByIds(ids,archiveInfoStatus);
     }
 
     @Override
-    public int updateArchiveStatusById(Long id) {
-        return archiveInfoMapper.updateArchiveStatusById(id);
+    public int updateArchiveStatusById(Long id)
+    {
+        SysUser StatusUser = SecurityUtils.getLoginUser().getUser();
+        System.out.println("sysUser: " + StatusUser);
+        ArchiveInfo archiveInfoStatus = new ArchiveInfo();
+        archiveInfoStatus.setId(id);
+        archiveInfoStatus.setArchiveStatus(1L);
+        archiveInfoStatus.setDepartment(String.valueOf(StatusUser.getDeptId()));
+        archiveInfoStatus.setArchiver(StatusUser.getNickName());
+        archiveInfoStatus.setArchiveDate(DateUtils.getNowDate());
+        System.out.println("archiveInfoStatus: " + archiveInfoStatus);
+        return archiveInfoMapper.updateArchiveStatusById(archiveInfoStatus);
     }
 
     /**
@@ -257,8 +274,8 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     }
 
     @Override
-    public boolean deleteArchiveInfoAll(){
-        return archiveInfoMapper.deleteArchiveInfoAll();
+    public boolean deleteArchiveInfoAll(Long categoryId){
+        return archiveInfoMapper.deleteArchiveInfoAll(categoryId);
     }
 }
 

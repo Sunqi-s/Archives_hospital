@@ -100,10 +100,10 @@
             </div>
             <div class="text-center">
               <el-icon class="el-icon-success success-icon"></el-icon>
-              <p class="success-message">此次共导入 {{ importLog.infoImportRecords }} 条记录。
-              成功挂接 {{importLog.ossProcessedRecords}} 条记录。</p>
+              <p class="success-message" v-if="importChoice === 0">此次挂接成功 {{ importLog.ossProcessedRecords }} 条记录。
+              挂接失败 {{importLog.ossImportRecords - importLog.ossProcessedRecords}} 条记录。</p>
+              <p class="success-message" v-if="importChoice === 1">此次共导入 {{ importLog.infoImportRecords }} 条记录。</p>
               <el-button type="primary" @click="takeMeToArchive" size="medium" class="reset-button">转至整理库</el-button>
-              <el-button type="primary" @click="look" size="medium" class="reset-button">查看结果</el-button>
               <el-button type="primary" @click="reset" size="medium" class="reset-button">再次导入</el-button>
             </div>
           </el-card>
@@ -311,6 +311,8 @@ export default {
       isClick:true,
       upLoad:false,
       dialogTableVisible: false,
+      upLoadErr:0,
+      importChoice:0,
     };
   },
   computed: {
@@ -542,7 +544,7 @@ export default {
     // 导入文件表单和文件挂接列表
     submitFileForm() {
       this.isSubmitDateTriggered = false;
-
+      this.importChoice = 1;
       this.submitData(); // 提交数据
     },
 
@@ -612,6 +614,7 @@ export default {
       const data = this.formatTableData(); // 格式化表格数据
       // 写入Log表，创建任务号
       const batchSize = 250; // 每批次插入的数据量
+      this.logQueryParams.infoImportRecords = data.length;
       addImportLog(this.logQueryParams).then(response => {
         this.logQueryParams.id = response.data.id;
       }).catch(error => {
@@ -625,6 +628,19 @@ export default {
           this.$message.success('数据插入成功');
           this.active = 4; // 设置步骤条的活动步骤
           this.isSubmitDateTriggered = true;
+          this.logQueryParams.status = 'completed';
+          updateImportLog(this.logQueryParams).then(response => {
+            getImportLog(this.logQueryParams.id).then(response => {
+              this.importLog = response.data;
+            })
+            this.upLoad=false;
+            this.upFileList = [];
+            this.fileList = [];
+            this.uploadFiles = [];
+            this.filteredFileList = [];
+            this.selectedNodeKey = null;
+          }).catch(error => {
+          });
           return;
         }
         const start = batchIndex * batchSize;
@@ -738,31 +754,36 @@ export default {
         }
       }));
       newFileList = newFileList.filter(file => file.suffix !== 'zip');
-      newFileList = await Promise.all(newFileList.map(async file => {
-        const fileNameWithoutSuffix = file.name;
-        const fileSuffix = file.name.split('.').pop();
-        const existingFile = this.upFileList.find(upFile => upFile.name === fileNameWithoutSuffix);
-        this.index += 1;
+      try{
+        newFileList = await Promise.all(newFileList.map(async file => {
+          const fileNameWithoutSuffix = file.name;
+          const fileSuffix = file.name.split('.').pop();
+          const existingFile = this.upFileList.find(upFile => upFile.name === fileNameWithoutSuffix);
+          this.index += 1;
 
-        if (existingFile) {
-          return {
-            name: existingFile.name,
-            url: existingFile.url || "",
-            size: existingFile.size || file.size,
-            fid: existingFile.fid || "",
-            suffix: existingFile.suffix || fileSuffix,
-            status: existingFile.status || '等待上传',
-          };
-        } else {
-          return {
-            name: fileNameWithoutSuffix,
-            size: file.size,
-            fid: "",
-            suffix: file.fileSuffix,
-            status: '等待上传',
-          };
-        }
-      }));
+          if (existingFile) {
+            return {
+              name: existingFile.name,
+              url: existingFile.url || "",
+              size: existingFile.size || file.size,
+              fid: existingFile.fid || "",
+              suffix: existingFile.suffix || fileSuffix,
+              status: existingFile.status || '等待上传',
+            };
+          } else {
+            return {
+              name: fileNameWithoutSuffix,
+              size: file.size,
+              fid: "",
+              suffix: file.fileSuffix,
+              status: '等待上传',
+            };
+          }
+        }));
+
+      }catch (e) {
+        console.log("error")
+      }
 
       this.upFileList = newFileList;
     },
@@ -796,7 +817,6 @@ export default {
         this.fileList = [];
         this.uploadFiles = [];
         this.filteredFileList = [];
-        this.importLog={};
         this.selectedNodeKey = null;
       }).catch(error => {
       });
@@ -823,7 +843,7 @@ export default {
 
     // 处理上传到服务器失败事件
     handleUploadError(err, file, fileList) {
-      this.$message.error('文件上传失败');
+      this.upLoadErr+=1;
       // 找到上传失败的文件在 upFileList 中的索引
       const index = this.upFileList.findIndex(upFile => upFile.name === file.name);
 
@@ -854,7 +874,14 @@ export default {
         this.totalUploadProgress = Math.round((uploadedFiles / totalFiles) * 100);
       }
       this.isClick=true;
-      this.$message.success('文件上传成功');
+      if (this.upLoadErr===0) {
+        this.$message.success('文件上传成功');
+      }else if(this.upLoadErr<this.fileList.length&&this.upLoadErr>0){
+        this.$message.error('部分文件上传失败');
+      }else {
+        this.$message.error('文件上传失败');
+      }
+
       // 解除禁用上传按钮
       this.submitUploadButtonDisabled=false;
       // 流程变化
@@ -880,6 +907,7 @@ export default {
 
     // 提交上传至服务器
     submitUpload() {
+      this.upLoadErr=0;
       this.upLoad=true;
       this.isClick=false;
       this.circleStep = 1;
@@ -1005,6 +1033,7 @@ export default {
       this.circleStep = 0;
       this.importLog={};
       this.attach = false;
+      this.upLoadErr=0;
     },
 
     // 辅助函数：去掉文件名的后缀
@@ -1015,7 +1044,10 @@ export default {
     },
     takeMeToArchive(){
       // this.displayOutput=false;
-      this.$router.push({path: '/ArchiveManagement/info0'});
+      this.$router.push({
+        path: '/ArchiveManagement/info0',
+        query: {categoryId:this.itemQueryParams.categoryId},
+      });
     },
     isClose(){
       if (this.upLoad){

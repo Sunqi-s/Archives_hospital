@@ -121,9 +121,9 @@
               @click="handleBatchDelete"
             >一键删除</el-button>
           </el-col>
-          <el-col :span="1.5">
-            <i>已选择{{savedids.length+ids.length}}项</i>
-          </el-col>
+<!--          <el-col :span="1.5">-->
+<!--            <i>已选择{{savedids.length+ids.length}}项</i>-->
+<!--          </el-col>-->
 
         </el-row>
 
@@ -495,7 +495,9 @@ export default {
     getCategoryTreeList() {
       listCategory().then(response => {
         this.fileOptions = this.handleFileOptions(response.data, "id", "parentId");
-      });
+      }).then(() => {
+        this.getRouterPath();
+      })
     },
     /** 查询部门下拉树结构 */
     getDeptTree() {
@@ -524,8 +526,14 @@ export default {
     },
     handleNodeClick(nodeData) {
       //选择档案节点不显示列表页面
-      if(nodeData.type===1) {
-        this.categoryId = nodeData.id;
+      if (nodeData.type === 1) {
+        if(this.categoryId !== nodeData.id && this.categoryId !== null && this.categoryId !== "" && this.categoryId !== undefined) {
+          this.selectedItems = [];
+          this.ids = [];
+          this.savedids = [];
+        }else {
+          this.categoryId = nodeData.id;
+        }
       } else {
         this.categoryId = null;
       }
@@ -560,9 +568,9 @@ export default {
         archiveStatus: 0 // 归档状态
       };
       listInfo(params).then(response => {
-        if(this.queryParams.searchValue) {
+        if (this.queryParams.searchValue) {
           this.infoList = this.markMatches(response.rows);
-        }else {
+        } else {
           this.infoList = response.rows;
         }
         this.total = response.total;
@@ -590,9 +598,10 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
-      try{
+      try {
         this.$refs['form'].resetFields();
-      }catch{}
+      } catch {
+      }
       this.open = true;
       this.choice = 0;
       this.title = this.parentCategoryName + '-' + this.categoryName;
@@ -603,7 +612,7 @@ export default {
       this.$refs.fileUpload.resetFileList()
     },
     //上传取消按钮
-    cancelUpload(){
+    cancelUpload() {
       this.showDialog = false
       this.$refs.fileUpload.resetFileList()
     },
@@ -623,21 +632,23 @@ export default {
           this.reset();
           done(); // 当你想要关闭对话框时调用 done()
         })
-        .catch(() => {});
+        .catch(() => {
+        });
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.choice = 1;
       this.reset();
-      try{
+      try {
         this.$refs['form'].resetFields();
-      }catch{}
+      } catch {
+      }
       const id = row.id || this.ids
       getInfo(id).then(response => {
         this.form = response.data;
         this.open = true;
         this.originalFile = response.data.sysOssList.length
-        this.title = "修改文书卷内录入";
+        this.title = this.categoryName + "修改";
       });
     },
     //修改查询条件
@@ -648,10 +659,10 @@ export default {
       }
     },
     reset() {
-      this.form = {categoryId: null , sysOssList: []};
+      this.form = { categoryId: null, sysOssList: [] };
     },
     /** 提交按钮 */
-     async submitForm() {
+    async submitForm() {
       this.$refs["form"].validate(async valid => {
         this.form.categoryId = this.categoryId;
         if (valid) {
@@ -670,7 +681,7 @@ export default {
           } else {
             if (this.form.sysOssList.length > 0) {
               const sysOssList = this.form.sysOssList.map(file => ({
-                deleteFlg:file.deleteFlg,
+                deleteFlg: file.deleteFlg,
                 name: file.name,
                 percentage: file.percentage,
                 raw: file.raw,
@@ -679,7 +690,7 @@ export default {
                 uid: file.uid,
                 url: file.url,
                 fid: file.fid,
-                suffix:file.suffix,
+                suffix: file.suffix,
               }))
               await this.$refs.fileUpload.handleUpload(sysOssList);
             }
@@ -695,14 +706,14 @@ export default {
         }
       });
     },
-    returnFiles(fileList){
-       if(this.originalFile > -1){
-         this.form.sysOssList = this.form.sysOssList.filter(item => item.url)
-         this.form.sysOssList.push(...fileList)
-         this.$refs.fileUpload.resetFileList();
-       }else {
-         this.form.sysOssList = fileList;
-       }
+    returnFiles(fileList) {
+      if (this.originalFile > -1) {
+        this.form.sysOssList = this.form.sysOssList.filter(item => item.url)
+        this.form.sysOssList.push(...fileList)
+        this.$refs.fileUpload.resetFileList();
+      } else {
+        this.form.sysOssList = fileList;
+      }
     },
 
     closeAndRefresh() {
@@ -716,7 +727,7 @@ export default {
       })
       this.form.sysOssList = this.form.sysOssList.concat(fileList)
     },
-    clickShow(){
+    clickShow() {
       this.$refs.fileUpload.confirm()
       this.showDialog = false
     },
@@ -729,7 +740,8 @@ export default {
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => {
+      });
     },
 
     // 多选框选中数据
@@ -737,7 +749,7 @@ export default {
       this.selectedItems = selection;
       this.ids = selection.map(item => item.id)
       this.archiveNumbers = selection.map(item => item.archiveNumber)
-      this.single = selection.length!==1
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     generateRules() {
@@ -751,15 +763,23 @@ export default {
         const fieldRules = [];
 
         // 必填项校验
-        if (field.isRequired==='1') {
+        if (field.isRequired === '1') {
           const parentheseIndex = field.label.indexOf('（');
           const comment = parentheseIndex !== -1 ? field.label.substring(0, parentheseIndex) : field.label;
-          fieldRules.push({ required: true, message: `${comment}不能为空`, trigger: field.type === 'select'||'treeselect' ? 'change' : 'blur' });
+          fieldRules.push({
+            required: true,
+            message: `${comment}不能为空`,
+            trigger: field.type === 'select' || 'treeselect' ? 'change' : 'blur'
+          });
         }
 
         // 最大长度校验
         if (field.type !== 'select' && field.type !== 'treeselect' && field.maxLength) {
-          fieldRules.push({ max: field.maxLength, message: `${field.label}不能超过${field.maxLength}字符`, trigger: 'blur' });
+          fieldRules.push({
+            max: field.maxLength,
+            message: `${field.label}不能超过${field.maxLength}字符`,
+            trigger: 'blur'
+          });
         }
 
         // 类型检查
@@ -793,7 +813,7 @@ export default {
     handleFileDelete(index) {
       // 直接从 sysOssList 中删除文件
       this.form.sysOssList.splice(index, 1);
-      if(index <= this.originalFile){
+      if (index <= this.originalFile) {
         this.originalFile -= 1;
       }
     },
@@ -803,7 +823,7 @@ export default {
         return;
       } else {
         // 提取表头：使用 listFields 中的 label 作为表头
-        const headers = this.listFields.map(field => ({label: field.label}));
+        const headers = this.listFields.map(field => ({ label: field.label }));
         const data = dataToExport.map(item => {
           let row = {};
           this.listFields.forEach(field => {
@@ -839,16 +859,16 @@ export default {
     },
     //文件查看
     handleDetail(row) {
-      try{
+      try {
         this.$refs['form'].resetFields();
-      }catch{}
+      } catch {
+      }
       const id = row.id || this.ids
       getInfo(id).then(response => {
         this.form = response.data;
         this.open = true;
         this.choice = 2
-        this.title = this.categoryName + '-' + row.field9;
-        this.title = "文书卷内详情";
+        this.title = this.categoryName + "详情";
       });
     },
     //文件预览
@@ -872,28 +892,28 @@ export default {
       // return this.choice === 2 || field.name === 'archiveNumber'
       return this.choice === 2
     },
-    isCheck(){
+    isCheck() {
       return this.choice === 2;
     },
-    notCheck(){
+    notCheck() {
       return this.choice < 2;
     },
-    notInsert(){
+    notInsert() {
       return this.choice > 0;
     },
-    isUpdate(){
+    isUpdate() {
       return this.choice === 1;
     },
-    getTooltipContent(fieldName,row) {
-      if(fieldName === 'archiveStatus') {
+    getTooltipContent(fieldName, row) {
+      if (fieldName === 'archiveStatus') {
         return this.getArchiveStatus(row.archiveStatus);
-      }else if(fieldName === 'department') {
+      } else if (fieldName === 'department') {
         return this.getDepartmentName(row.department);
-      }else {
+      } else {
         return this.getTexted(String(row[fieldName]));
       }
     },
-    getArchiveStatus(status){
+    getArchiveStatus(status) {
       switch (status) {
         case 0:
           return '待归档';
@@ -905,7 +925,7 @@ export default {
           return '未知状态';
       }
     },
-    handleDocument(row){
+    handleDocument(row) {
       const ids = row.id || this.ids;
       const archiveNumbers = row.archiveNumber || this.archiveNumbers;
       this.$modal.confirm('是否确认归档档号为"' + archiveNumbers + '"的数据？').then(function() {
@@ -913,16 +933,17 @@ export default {
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("归档成功");
-      }).catch(() => {});
+      }).catch(() => {
+      });
     },
-    getTexted(name){
+    getTexted(name) {
       name = name.replace(/<\/?span[^>]*>/g, '');
       return name;
     },
     getDepartmentName(department) {
       return this.departmentMap[department] || '未知部门';
     },
-    loadDepartments(){
+    loadDepartments() {
       listDept().then(response => {
         this.departmentMap = response.data.reduce((map, dept) => {
           map[dept.deptId] = dept.deptName;
@@ -930,33 +951,48 @@ export default {
         }, {});
       })
     },
+    //文件打印
     handlePrint() {
       if (this.selectedItems.length > 0) {
         pointRelation(this.selectedItems[0].categoryId).then(response => {
           const tpl_name = response.name;
-          this.savedids= this.savedids.concat(this.ids);
+          this.savedids = this.ids;
           const ids = this.savedids.join(',');
           const pageIndex = 1;     // 页码
           const renderOption = 1;  // 渲染选项
-          const  url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
-          window.location.href = url;
+          const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
+          window.open(url, '_blank');
         })
       }
     },
-    handleNextPage(){
-      this.savedids = this.savedids.concat(this.ids);
+    handleNextPage() {
+      // this.savedids = this.savedids.concat(this.ids);
       this.getList();
     },
-    handleBatchDelete(){
-      delAllInfo().then((res) => {
+    handleBatchDelete() {
+      this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(function() {
+        delAllInfo(this.categoryId).then((res) => {
+          this.getList();
+          if (res.code === 200) {
+            this.$modal.msgSuccess("删除成功");
+          } else {
+            this.$modal.msgError(res.msg);
+          }
+        });
+      }).catch(() => {
+
+      });
+    },
+    getRouterPath() {
+      this.categoryId = this.$route.query.categoryId;
+      if(this.categoryId !== undefined && this.categoryId !== null){
+        this.getFieldDefinitions(this.categoryId);
         this.getList();
-        console.log(res)
-        if (res.code === 200){
-          this.$modal.msgSuccess("删除成功");
-        }else {
-          this.$modal.msgError(res.msg);
-        }
-      })
+        getCategory(this.categoryId).then((res) => {
+          this.categoryName = res.data.name;
+          this.parentCategoryName = res.data.parentName;
+        });
+      }else {}
     }
   }
 };

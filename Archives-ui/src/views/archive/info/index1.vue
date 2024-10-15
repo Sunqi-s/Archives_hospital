@@ -103,9 +103,9 @@
               @click="handleSendUtilize"
             >发送利用</el-button>
           </el-col>
-          <el-col :span="1.5">
-            <i>已选择{{savedids.length+ids.length}}项</i>
-          </el-col>
+<!--          <el-col :span="1.5">-->
+<!--            <i>已选择{{savedids.length+ids.length}}项</i>-->
+<!--          </el-col>-->
         </el-row>
 
         <!-- 动态生成的表格 -->
@@ -616,8 +616,7 @@ export default {
       getInfo(id).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = this.categoryName + '-' + row.field9;
-        this.title = "文书卷内详情";
+        this.title = this.categoryName + "详情";
       });
     },
     //文件预览
@@ -702,17 +701,17 @@ export default {
       if (this.selectedItems.length > 0) {
         pointRelation(this.selectedItems[0].categoryId).then(response => {
           const tpl_name = response.name;
-          this.savedids= this.savedids.concat(this.ids);
+          this.savedids = this.ids;
           const ids = this.savedids.join(',');
           const pageIndex = 1;     // 页码
           const renderOption = 1;  // 渲染选项
           const  url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
-          window.location.href = url;
+          window.open(url, '_blank');
         })
       }
     },
     handleNextPage(){
-      this.savedids = this.savedids.concat(this.ids);
+      // this.savedids = this.savedids.concat(this.ids);
       this.getList();
     },
     handleSendUtilize(row){

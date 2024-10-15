@@ -138,9 +138,9 @@ public class ArchiveInfoController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('archive:info:batchRemove')")
     @Log(title = "批量删除档案信息", businessType = BusinessType.DELETE)
-    @DeleteMapping("/batchRemove")
-    public AjaxResult batchRemove() {
-        return toAjax(archiveInfoService.deleteArchiveInfoAll());
+    @DeleteMapping("/batchRemove/{categoryId}")
+    public AjaxResult batchRemove(@PathVariable Long categoryId) {
+        return toAjax(archiveInfoService.deleteArchiveInfoAll(categoryId));
     }
 
 }

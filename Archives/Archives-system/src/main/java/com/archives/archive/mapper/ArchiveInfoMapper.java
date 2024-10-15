@@ -70,13 +70,13 @@ public interface ArchiveInfoMapper
      * @param ids 档案信息主键
      * @return 结果
      */
-    public int updateArchiveStatusByIds(Long[] ids);
+    public int updateArchiveStatusByIds(@Param("array") Long[] ids,@Param("archiveInfoStatus") ArchiveInfo archiveInfoStatus);
     /**
      * 归档档案信息
      * @param id
      * @return
      */
-    public int updateArchiveStatusById(Long id);
+    public int updateArchiveStatusById(ArchiveInfo archiveInfoStatus);
 
     /**
      * 删除档案信息
@@ -109,5 +109,5 @@ public interface ArchiveInfoMapper
     /**
      * 批量删除档案信息
      */
-    public boolean deleteArchiveInfoAll();
+    public boolean deleteArchiveInfoAll(Long categroyId);
 }

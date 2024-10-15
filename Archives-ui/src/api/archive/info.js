@@ -69,9 +69,9 @@ export function sendInfo(id) {
 }
 
 //一键删除档案信息
-export function delAllInfo() {
+export function delAllInfo(categoryId) {
   return request({
-    url:'/archive/info/batchRemove',
+    url:'/archive/info/batchRemove/'+ categoryId,
     method: 'delete',
   })
 }

@@ -93,5 +93,5 @@ public interface IArchiveInfoService
      *
      *
      */
-    public boolean deleteArchiveInfoAll();
+    public boolean deleteArchiveInfoAll(Long categroyId);
 }
