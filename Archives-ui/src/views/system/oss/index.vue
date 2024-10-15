@@ -88,15 +88,16 @@
       </el-dialog>
     </template>
 
-    <!-- 预览文件对话框 -->
+    <!-- 预览文件对话框
     <el-dialog :title="previewTitle" :visible.sync="previewVisible" fullscreen >
       <onlinePreview v-if="previewVisible" :initialUrl="previewUrl" />
-    </el-dialog>
+    </el-dialog>-->
   </div>
 </template>
 
 <script>
 import { listOss, delOss, addOss, updateOss } from "@/api/system/oss";
+import {Base64} from "js-base64";
 
 export default {
   name: "Oss",
@@ -225,8 +226,11 @@ export default {
     },
     // 预览
     onlinePreview(row) {
-      this.previewUrl = row.url;
-      this.previewVisible = true;
+      // this.previewUrl = url;
+      // this.showPreview = true;
+      const encodedUrl = encodeURIComponent(Base64.encode(process.env.VUE_APP_FILE_SERVER_BASE_URL + url));
+      // 打开新页面并调用在线预览接口
+      window.open(process.env.VUE_APP_KKFILEVIEW_BASE_URL + '/onlinePreview?url=' + encodedUrl);
     },
     // 关闭预览
     closePreview() {
