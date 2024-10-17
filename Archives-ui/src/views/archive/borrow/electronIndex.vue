@@ -258,7 +258,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
-        field9: null,
+        field3: null,
         archiveNumber: null,
       },
       savedids:[],
@@ -295,8 +295,8 @@ export default {
         if(b.name === 'archiveNumber') return 1;
         return 0;
       }).sort((a,b)=>{
-        if(a.name === 'field9') return -1;
-        if(b.name === 'field9') return 1;
+        if(a.name === 'field3') return -1;
+        if(b.name === 'field3') return 1;
         return 0;
       }).sort((a,b)=>{
         if(a.name === 'archiveStatus') return -1;
@@ -310,7 +310,7 @@ export default {
       this.tagList = [];
       this.selectedTag = '0';
       this.queryParams.pageNum = 1;
-      const searchJson = {field9:this.inputArchiveName,archiveNumber:this.inputArchiveNumber};
+      const searchJson = {field3:this.inputArchiveName,archiveNumber:this.inputArchiveNumber};
       borrow(searchJson).then(tagListRes => {
         // console.log(tagListRes)
         tagListRes.forEach(tag => {
@@ -364,7 +364,7 @@ export default {
         //初始化校验
         // this.generateRules();
       })
-      this.queryParams.field9 = this.inputArchiveName;
+      this.queryParams.field3 = this.inputArchiveName;
       this.queryParams.archiveNumber = this.inputArchiveNumber;
       this.queryParams.categoryId = this.selectedTag;
       this.handleNextPage();
@@ -395,7 +395,7 @@ export default {
         return {
           id: item.id,
           archiveNumber: item.archiveNumber,
-          field9: item.field9,
+          field3: item.field3,
         }
       })
       this.archiveNumbers = selection.map(item => item.archiveNumber)

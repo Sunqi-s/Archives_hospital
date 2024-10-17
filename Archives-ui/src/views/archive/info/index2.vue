@@ -650,7 +650,7 @@ export default {
     handleSendUtilize(row){
       const ids = row.id || this.ids;
       const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('是否确认档号为"' + archiveNumbers + '"的数据退回资源库？').then(function() {
+      this.$modal.confirm('确认退回以下数据：' + archiveNumbers ).then(function() {
         return sendInfo(ids)
       }).then(() => {
         this.getList();

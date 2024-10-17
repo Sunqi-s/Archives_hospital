@@ -679,7 +679,7 @@ export default {
     handleDocument(row){
       const ids = row.id || this.ids;
       const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('是否确认回档档号为"' + archiveNumbers + '"的数据？').then(function() {
+      this.$modal.confirm('确认回档以下数据：' + archiveNumbers ).then(function() {
         return updatAarchiveStatus(ids)
       }).then(() => {
         this.getList();
@@ -721,7 +721,7 @@ export default {
     handleSendUtilize(row){
       const ids = row.id || this.ids;
       const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('是否确认发送档号为"' + archiveNumbers + '"的数据到利用库？').then(function() {
+      this.$modal.confirm('确认发送利用以下数据：' + archiveNumbers ).then(function() {
         return sendInfo(ids)
       }).then(() => {
         this.getList();

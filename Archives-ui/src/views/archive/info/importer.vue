@@ -152,7 +152,7 @@
           </el-col>
           <!-- 自定义文件展示 -->
           <div>
-              <span  v-if="fileList.length === 0 && currentStep === 0" style="font-size: 18px;">{{ "请选择5GB以内的压缩包文件" }}</span>
+              <span  v-if="fileList.length === 0 && currentStep === 0" style="font-size: 18px;">{{ "请选择2GB以内的压缩包文件" }}</span>
             <div v-for="(file, index) in filteredFileList" :key="index" class="file-item" v-if="currentStep <3 && fileList.length > 0">
               <!-- 图标显示 -->
               <i class="el-icon-document" style="font-size: 24px"></i>
@@ -183,7 +183,7 @@
             :percentage="progress"
             :format="formatProgress"
             :text-color="'#FFFFFF'"
-            :define-back-color="'#FFFFFF'">
+            :define-back-color="color">
           </el-progress>
           <!-- 上传进度条 -->
           <el-progress
@@ -193,7 +193,7 @@
             :percentage="totalUploadProgress"
             :format="formatTotaUploadProgress"
             :text-color="'#FFFFFF'"
-            :define-back-color="'#FFFFFF'">
+            :define-back-color="color">
           </el-progress>
           <el-progress
             v-if="attach"
@@ -202,7 +202,7 @@
             :percentage="attachmentProgress"
             :format="formatAttachmentProgress"
             :text-color="'#FFFFFF'"
-            :define-back-color="'#FFFFFF'">
+            :define-back-color="color">
           </el-progress>
         </div>
       </el-dialog>
@@ -313,6 +313,7 @@ export default {
       dialogTableVisible: false,
       upLoadErr:0,
       importChoice:0,
+      color:'#FFFFFF'
     };
   },
   computed: {
@@ -569,6 +570,7 @@ export default {
           this.$message.success('数据插入成功');
           this.active = 4; // 设置步骤条的活动步骤
           this.currentStep = 3;
+          this.color = '#FFFFFF'
           this.isSubmitDateTriggered = true;
           return;
         }
@@ -587,6 +589,23 @@ export default {
           for(let i = 0; i < response.data.length; i++) {
             this.ossList = this.ossList.concat(response.data[i].sysOssList);
           }
+          this.ossList = this.ossList.map(item => {
+            return {
+                createBy : item.createBy,
+                createTime : item.createTime,
+                deleteDate : item.deleteDate,
+                fid : item.fid,
+                deleteFlg : item.deleteFlg,
+                name : item.name,
+                path : item.path,
+                size : item.size,
+                suffix : item.suffix,
+                updateBy : item.updateBy,
+                updateTime : item.updateTime,
+                url : item.url
+            }
+          })
+          console.log("oss",this.ossList)
           // 上传文件到OSS
           addOss(this.ossList)
           this.ossList = [];
@@ -739,6 +758,7 @@ export default {
 
     //选择文件点击事件
     async handleBatchFileChange(file, fileList) {
+      this.color = '#FFCC22'
       this.index = 0;
       this.fileList = fileList;
       this.filteredFileList = [...fileList];
@@ -799,6 +819,7 @@ export default {
     async autoAttach() {
       this.isClick=false;
       this.circleStep = 2;
+      this.color = '#FFCC22'
       this.attach=true;
       this.startAttachment();
       const formattedData =this.formatTableData();
@@ -886,6 +907,7 @@ export default {
       this.submitUploadButtonDisabled=false;
       // 流程变化
       this.currentStep = 2;
+      this.color = '#FFFFFF';
     },
 
     // 上传单个文件
@@ -911,6 +933,7 @@ export default {
       this.upLoad=true;
       this.isClick=false;
       this.circleStep = 1;
+      this.color = '#FFCC22'
       this.uploadFolderFiles(); // 手动触发上传
     },
 
@@ -927,9 +950,10 @@ export default {
       this.progress = 0;
       // 将 File 对象转为 Blob 对象
       const file = event.slice(0, event.size);
-      if (file) {
+      const buffer = await file.arrayBuffer();
+      if (buffer) {
         const zip = new JSZip();
-        const zipContent = await zip.loadAsync(file);
+        const zipContent = await zip.loadAsync(buffer);
         const files = [];
         const processZipEntry = async (zipEntry) => {
           if (!zipEntry.dir) {
@@ -961,17 +985,13 @@ export default {
         this.uploadFiles = files.map(file => {
           file.raw.uid = file.raw.lastModified; // 在 raw 中添加 uid 属性
           return {
-            name: file.name,
-            url: file.url,
-            status: file.status,
-            raw: file.raw,
-            uid: file.uid,
+            ...file,
             percentage: 0,
-            size: file.size,
           };
         });
         this.zipLoading = false;
         this.currentStep = 1;
+        this.color = '#FFFFFF';
         return this.uploadFiles;
       }
     },
@@ -1034,6 +1054,7 @@ export default {
       this.importLog={};
       this.attach = false;
       this.upLoadErr=0;
+      this.color = '#FFFFFF';
     },
 
     // 辅助函数：去掉文件名的后缀

@@ -126,7 +126,7 @@
         </choose>
     </select>
 
-    <select id="selectArchiveInfoListByKeyword" parameterType="ArchiveInfo" resultMap="ArchiveInfoResult">
+    <select id="selectArchiveInfoListByKeyword" parameterType="String" resultMap="ArchiveInfoResult">
         <include refid="selectArchiveInfoVo"/>
         <where>
         and CONCAT_WS('|',
@@ -172,7 +172,7 @@
                         field29,
                         field30,
                         oss_status
-                  ) LIKE CONCAT('%', #{archiveInfo.searchValue}, '%')
+                  ) LIKE CONCAT('%', #{keyword}, '%')
                   <include refid="selectArchiveInfoDataPermit" />
         </where>
     </select>

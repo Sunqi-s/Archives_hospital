@@ -605,7 +605,7 @@ export default {
       }
       this.open = true;
       this.choice = 0;
-      this.title = this.parentCategoryName + '-' + this.categoryName;
+      this.title = this.parentCategoryName + '-' + this.categoryName + '录入';
     },
     // 取消按钮
     cancel() {
@@ -736,7 +736,7 @@ export default {
     handleDelete(row) {
       const ids = row.id || this.ids;
       const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('是否确认删除档号为"' + archiveNumbers + '"的数据？').then(function() {
+      this.$modal.confirm('是否确认删除以下数据：' + archiveNumbers ).then(function() {
         return delInfo(ids);
       }).then(() => {
         this.getList();
@@ -848,7 +848,7 @@ export default {
         let ExportQueryParams = {
           pageNum: 1,
           pageSize: 10000000,
-          categoryId: null,
+          categoryId: this.categoryId,
           archiveStatus: 0,
           searchValue: ''
         }
@@ -933,7 +933,7 @@ export default {
     handleDocument(row) {
       const ids = row.id || this.ids;
       const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('是否确认归档档号为"' + archiveNumbers + '"的数据？').then(function() {
+      this.$modal.confirm('确认归档以下数据：' + archiveNumbers ).then(function() {
         return updatAarchiveStatus(ids)
       }).then(() => {
         this.getList();
@@ -946,7 +946,7 @@ export default {
       return name;
     },
     getDepartmentName(department) {
-      return this.departmentMap[department] || '未知部门';
+      return this.departmentMap[department] || '无';
     },
     loadDepartments() {
       listDept().then(response => {
@@ -975,8 +975,8 @@ export default {
       this.getList();
     },
     handleBatchDelete() {
-      this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(function() {
-        delAllInfo(this.categoryId).then((res) => {
+      this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(()=> {
+        return delAllInfo(this.categoryId).then((res) => {
           this.getList();
           if (res.code === 200) {
             this.$modal.msgSuccess("删除成功");
