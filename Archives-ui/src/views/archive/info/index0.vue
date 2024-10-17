@@ -301,7 +301,7 @@
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
 import {addInfo, delAllInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo} from "@/api/archive/info";
-import { listCategory } from "@/api/archive/category";
+import { getCategory, listCategory } from '@/api/archive/category'
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
 import Treeselect from "@riophae/vue-treeselect";
@@ -369,9 +369,27 @@ export default {
     };
   },
   created() {
+    this.categoryId = null;
+    this.queryParams= {
+      pageNum: 1,
+        pageSize: 10,
+        categoryId: null,
+        archiveStatus: 0, //默认显示待归档数据
+        searchValue: ''
+    },
     this.getCategoryTreeList();
     this.getDeptTree();
     this.loadDepartments();
+  },
+  activated() {
+    this.categoryId = null;
+    this.queryParams= {
+      pageNum: 1,
+      pageSize: 10,
+      categoryId: null,
+      archiveStatus: 0, //默认显示待归档数据
+      searchValue: ''
+    }
   },
   computed:{
     sortedFields(){
@@ -545,6 +563,7 @@ export default {
       this.getList();
     },
     handleQuery() {
+      this.queryParams.categoryId = this.categoryId;
       this.getList();
     },
     resetQuery() {
@@ -605,7 +624,7 @@ export default {
       }
       this.open = true;
       this.choice = 0;
-      this.title = this.parentCategoryName + '-' + this.categoryName + '录入';
+      this.title =  this.categoryName + '录入';
     },
     // 取消按钮
     cancel() {
@@ -963,7 +982,6 @@ export default {
           const tpl_name = response.name;
           this.savedids = this.ids;
           const ids = this.savedids.join(',');
-          console.log("ids", ids)
           const pageIndex = 1;     // 页码
           const renderOption = 1;  // 渲染选项
           const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
@@ -988,9 +1006,11 @@ export default {
       })
     },
     getRouterPath() {
-      this.categoryId = this.$route.query.categoryId;
-      if(this.categoryId !== undefined && this.categoryId !== null){
+      const cId = this.$route.query.categoryId;
+      if(cId !== undefined && cId !== null){
+        this.categoryId = cId;
         this.getFieldDefinitions(this.categoryId);
+        this.queryParams.categoryId = cId;
         this.getList();
         getCategory(this.categoryId).then((res) => {
           this.categoryName = res.data.name;

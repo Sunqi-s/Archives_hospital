@@ -76,8 +76,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             dataPermiList = (currentUser.getDataPermi().split(","));
         }
         String searchValue = archiveInfo.getSearchValue();
+        Long categoryId = archiveInfo.getCategoryId();
         if (searchValue != null && !searchValue.isEmpty()) {
-            return archiveInfoMapper.selectArchiveInfoListByKeyword(searchValue, dataPermiList);
+            return archiveInfoMapper.selectArchiveInfoListByKeyword(searchValue,categoryId, dataPermiList);
         }
         return archiveInfoMapper.selectArchiveInfoList(archiveInfo, dataPermiList);
     }

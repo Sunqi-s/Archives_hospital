@@ -37,7 +37,7 @@ public interface ArchiveInfoMapper
      * @param keyword 档案信息
      * @return 档案信息集合
      */
-    public List<ArchiveInfo> selectArchiveInfoListByKeyword(@Param("keyword") String keyword,@Param("dataPermit") String[] dataPermiList);
+    public List<ArchiveInfo> selectArchiveInfoListByKeyword(@Param("keyword") String keyword,@Param("categoryId")Long categoryId,@Param("dataPermit") String[] dataPermiList);
 
     /**
      * 新增档案信息
