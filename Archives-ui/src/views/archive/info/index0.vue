@@ -533,8 +533,8 @@ export default {
           this.ids = [];
           this.savedids = [];
         }else {
-          this.categoryId = nodeData.id;
         }
+        this.categoryId = nodeData.id;
       } else {
         this.categoryId = null;
       }
@@ -697,10 +697,10 @@ export default {
             }
             addInfo(this.form).then(() => {
               this.$modal.msgSuccess("新增成功");
-              this.getList();
               this.closeAndRefresh();
               this.reset();
-              this.$refs.fileUpload.resetFileList()
+              this.$refs.fileUpload.resetFileList();
+              this.getList();
             })
 
           }
@@ -963,6 +963,7 @@ export default {
           const tpl_name = response.name;
           this.savedids = this.ids;
           const ids = this.savedids.join(',');
+          console.log("ids", ids)
           const pageIndex = 1;     // 页码
           const renderOption = 1;  // 渲染选项
           const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
@@ -977,16 +978,14 @@ export default {
     handleBatchDelete() {
       this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(()=> {
         return delAllInfo(this.categoryId).then((res) => {
-          this.getList();
           if (res.code === 200) {
             this.$modal.msgSuccess("删除成功");
           } else {
             this.$modal.msgError(res.msg);
           }
+          this.getList();
         });
-      }).catch(() => {
-
-      });
+      })
     },
     getRouterPath() {
       this.categoryId = this.$route.query.categoryId;
