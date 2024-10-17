@@ -481,18 +481,25 @@ export default {
       const data = XLSX.utils.sheet_to_json(sheet, {header: 1, raw: false, dateNF: 'yyyy/MM/dd'});
       const headers = data[0];
       const rows = data.slice(1);
+      const yesList = this.columnList.filter(col => headers.includes(col.label));
+      const noList = this.columnList.filter(col => !headers.includes(col.label)&&col.isRequired === '1');
       this.tableData = rows.map(row => {
-        const rowData = {validationErrors: [], categoryId: this.itemQueryParams.categoryId};
-        headers.forEach((header, index) => {
-          const column = this.columnList.find(col => col.label === header);
-          if (column) {
-            rowData[column.prop] = row[index];
-            const error = this.validateCell(row[index], column.length, column.type, column.isRequired, column.prop);
-            if (error) {
-              rowData.validationErrors.push({field: column.prop, messssage: error});
-            }
+        const rowData = { validationErrors: [], categoryId: this.itemQueryParams.categoryId };
+        yesList.forEach((yes) => {
+          const idx = headers.indexOf(yes.label);
+          rowData[yes.prop] = row[idx];
+          const error = this.validateCell(row[idx], yes.length, yes.type, yes.isRequired, yes.prop);
+          if (error) {
+            rowData.validationErrors.push({field: yes.prop, messsage: error});
           }
         });
+        noList.forEach((no) => {
+          rowData[no.prop] = null;
+          const error = this.validateCell(null, no.length, no.type, no.isRequired, no.prop);
+          if (error) {
+            rowData.validationErrors.push({field: no.prop, messsage: error});
+          }
+        })
         this.isSubmitDateTriggered = true;
         return rowData;
       });
