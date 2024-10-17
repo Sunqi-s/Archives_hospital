@@ -276,7 +276,14 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Override
     public boolean deleteArchiveInfoAll(Long categoryId){
-        return archiveInfoMapper.deleteArchiveInfoAll(categoryId);
+        ArchiveInfo archiveInfo = new ArchiveInfo();
+        archiveInfo.setCategoryId(categoryId);
+        List<ArchiveInfo> archiveInfoList = selectArchiveInfoList(archiveInfo);
+        if (archiveInfoList == null || archiveInfoList.isEmpty()) {
+            return true;
+        }else {
+            return archiveInfoMapper.deleteArchiveInfoAll(categoryId);
+        }
     }
 }
 

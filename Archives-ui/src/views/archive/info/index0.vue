@@ -7,7 +7,7 @@
       </el-col>
 
       <!-- 未选择档案库时显示该画面 -->
-      <el-col :span="20" :xs="24" v-show="categoryId===null">
+      <el-col :span="20" :xs="24" v-show="isselect">
         <div class="no-selection">
           <img src="@/assets/images/lock.png" class="file-center">
           <p class="file-fontcenter">请选择右侧档案库</p>
@@ -398,7 +398,10 @@ export default {
         if(b.name === 'archiveStatus') return 1;
         return 0;
       });
-    }
+    },
+    isselect(){
+      return this.categoryId===null;
+    },
   },
   methods: {
     mapHtmlType(htmlType) {
@@ -546,12 +549,6 @@ export default {
     handleNodeClick(nodeData) {
       //选择档案节点不显示列表页面
       if (nodeData.type === 1) {
-        if(this.categoryId !== nodeData.id && this.categoryId !== null && this.categoryId !== "" && this.categoryId !== undefined) {
-          this.selectedItems = [];
-          this.ids = [];
-          this.savedids = [];
-        }else {
-        }
         this.categoryId = nodeData.id;
       } else {
         this.categoryId = null;
