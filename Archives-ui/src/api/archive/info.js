@@ -75,3 +75,12 @@ export function delAllInfo(categoryId) {
     method: 'delete',
   })
 }
+
+//高级搜索
+export function getBeachList(query) {
+  return request({
+    url: '/archive/info/beachSearch',
+    method: 'get',
+    params: query
+  })
+}

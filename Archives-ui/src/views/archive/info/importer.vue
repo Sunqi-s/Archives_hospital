@@ -9,7 +9,7 @@
 
       <!-- 树组件 -->
       <el-col :span="4" :xs="24">
-        <file-tree :file-options="categoryTree" @node-click="handleNodeClick" :default-expand-all="false"></file-tree>
+        <file-tree :file-options="categoryTree" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree"></file-tree>
       </el-col>
     <!-- 主体 -->
     <el-row class="el-card__body">
@@ -68,7 +68,7 @@
                          @click="exportTemplate">导出模板
               </el-button>
               <!-- 重置按钮 -->
-              <el-button @click="reset">
+              <el-button @click="resetTree">
                 <el-icon class="el-icon-refresh"> </el-icon>
                 重置
               </el-button>
@@ -104,7 +104,7 @@
               挂接失败 {{importLog.ossImportRecords - importLog.ossProcessedRecords}} 条记录。</p>
               <p class="success-message" v-if="importChoice === 1">此次共导入 {{ importLog.infoImportRecords }} 条记录。</p>
               <el-button type="primary" @click="takeMeToArchive" size="medium" class="reset-button">转至整理库</el-button>
-              <el-button type="primary" @click="reset" size="medium" class="reset-button">再次导入</el-button>
+              <el-button type="primary" @click="resetTree" size="medium" class="reset-button">再次导入</el-button>
             </div>
           </el-card>
         </el-col>
@@ -297,12 +297,12 @@ export default {
       isSubmitDateTriggered: true,
       fileList:[],
       logQueryParams: {
-        status: 'pending',                 // 初始状态为 pending
+        status: '',                 // 初始状态
         infoProcessedRecords: 0,         // info 表的已处理记录数初始化为 0
         ossProcessedRecords: 0,          // oss 表的已处理记录数初始化为 0
         infoImportRecords: 0,            // info 表的待导入记录数初始化为 0
         ossImportRecords: 0,             // oss 表的待导入记录数初始化为 0
-        startTime: new Date().toLocaleString(), // 返回包含日期和时间的字符串
+        startTime: '', // 返回包含日期和时间的字符串
       },
       ossList:[],
       circleStep:0,
@@ -409,7 +409,6 @@ export default {
     },
     // 获取项目列表并设置列信息
     getItemList() {
-      console.log(this.logQueryParams);
       listItemSuccess(this.itemQueryParams).then(response => {
         this.itemList = response.data; // 获取项目列表数据
         this.columnList = [];
@@ -566,6 +565,8 @@ export default {
       const totalBatches = Math.ceil(data.length / batchSize);
       this.logQueryParams.infoImportRecords = infoImportRecords;
       this.logQueryParams.ossImportRecords = ossImportRecords;
+      this.logQueryParams.startTime = new Date().toLocaleString();
+      this.logQueryParams.status = 'pending';
       addImportLog(this.logQueryParams).then(response => {
         this.logQueryParams.id = response.data.id;
       }).catch(error => {
@@ -612,16 +613,14 @@ export default {
                 url : item.url
             }
           })
-          console.log("oss",this.ossList)
           // 上传文件到OSS
-          addOss(this.ossList)
-          this.ossList = [];
-          await Promise.all([
-            insertBatch(batchIndex + 1),// 插入下一批
-            this.updateLog(batchIndex, ossProcessedRecordsInBatch, batchData), // 更新log表状态和已处理记录数
-          ])
+          addOss(this.ossList).then(response => {
+            this.ossList = [];
+            this.updateLog(batchIndex, ossProcessedRecordsInBatch, batchData) // 更新log表状态和已处理记录数
+            insertBatch(batchIndex + 1)// 插入下一批
+          })
         } catch (error) {
-          this.$message.error('数据插入失败');
+          this.$message.error('数据插入失败'+error);
         }
       };
       await insertBatch(0);
@@ -629,10 +628,10 @@ export default {
     //更新log表状态和已处理记录数
     async updateLog(batchIndex,ossProcessedRecordsInBatch,batchData) {
       // 更新Log表状态和已处理记录数
-      this.logQueryParams.status = 'processing';
-      this.logQueryParams.infoProcessedRecords += batchData.length;
-      this.logQueryParams.ossProcessedRecords += ossProcessedRecordsInBatch;
-      await updateImportLog(this.logQueryParams);
+        this.logQueryParams.status = 'processing'
+        this.logQueryParams.infoProcessedRecords += batchData.length
+        this.logQueryParams.ossProcessedRecords += ossProcessedRecordsInBatch
+        await updateImportLog(this.logQueryParams)
     },
 
     // 提交表格数据到数据库
@@ -641,20 +640,20 @@ export default {
       // 写入Log表，创建任务号
       const batchSize = 250; // 每批次插入的数据量
       this.logQueryParams.infoImportRecords = data.length;
+      this.logQueryParams.startTime = new Date().toLocaleString();
+      this.logQueryParams.status = 'pending';
       addImportLog(this.logQueryParams).then(response => {
         this.logQueryParams.id = response.data.id;
       }).catch(error => {
-        this.$message.error('写入Log表失败');
+        this.$message.error('写入Log表失败',error);
       })
       const totalBatches = Math.ceil(data.length / batchSize);
       const insertBatch = async (batchIndex) => {
         if (batchIndex >= totalBatches) {
 
           // 更新log表
-          this.$message.success('数据插入成功');
-          this.active = 4; // 设置步骤条的活动步骤
-          this.isSubmitDateTriggered = true;
           this.logQueryParams.status = 'completed';
+          this.$message.success('数据插入成功');
           updateImportLog(this.logQueryParams).then(response => {
             getImportLog(this.logQueryParams.id).then(response => {
               this.importLog = response.data;
@@ -665,22 +664,24 @@ export default {
             this.uploadFiles = [];
             this.filteredFileList = [];
             this.selectedNodeKey = null;
+            this.active = 4; // 设置步骤条的活动步骤
+            this.isSubmitDateTriggered = true;
           }).catch(error => {
           });
-          return;
+        }else {
+          const start = batchIndex * batchSize;
+          const end = Math.min(start + batchSize, data.length);
+          const batchData = data.slice(start, end);
+          try {
+            const response = await bulkAdd(batchData).then(response => {
+              this.updateLog(batchIndex, 0, batchData)// 更新log表状态和已处理记录数
+              insertBatch(batchIndex + 1)// 插入下一批
+            })
+          }catch (error) {
+            this.$message.error('数据插入失败',error);
+          }
         }
-        const start = batchIndex * batchSize;
-        const end = Math.min(start + batchSize, data.length);
-        const batchData = data.slice(start, end);
-        try {
-          const response = await bulkAdd(batchData);
-          await Promise.all([
-            insertBatch(batchIndex + 1),// 插入下一批
-            this.updateLog(batchIndex, 0, batchData)// 更新log表状态和已处理记录数
-          ])
-        }catch (error) {
-          this.$message.error('数据插入失败');
-        }
+
       };
 
       await insertBatch(0);
@@ -809,7 +810,6 @@ export default {
         }));
 
       }catch (e) {
-        console.log("error")
       }
 
       this.upFileList = newFileList;
@@ -852,7 +852,6 @@ export default {
 
     // 处理上传到服务器成功事件
     handleUploadSuccess(response, file, fileList) {
-      console.log("成功responde",response);
       // 找到上传成功的文件在 upFileList 中的索引
       const index = this.upFileList.findIndex(upFile => upFile.name === file.name);
       if (index !== -1) {
@@ -1074,13 +1073,19 @@ export default {
       // this.displayOutput=false;
       this.$router.push({
         path: '/ArchiveManagement/info0',
-        query: {categoryId:this.itemQueryParams.categoryId},
+        query: {categoryId:null},
       });
     },
     isClose(){
       if (this.upLoad){
         this.batchAttachmentDialogVisible = true;
       }
+    },
+    resetTree(){
+      if(this.$refs.fileTree){
+        this.$refs.fileTree.clear();
+      }
+      this.reset();
     }
 
 

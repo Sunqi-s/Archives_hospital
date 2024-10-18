@@ -143,4 +143,14 @@ public class ArchiveInfoController extends BaseController
         return toAjax(archiveInfoService.deleteArchiveInfoAll(categoryId));
     }
 
+    /**
+     * 高级搜索
+     */
+    @PreAuthorize("@ss.hasPermi('archive:info:beachSearch')")
+    @GetMapping("/beachSearch")
+    public TableDataInfo beachSearch(ArchiveInfo archiveInfo) {
+        startPage();
+        List<ArchiveInfo> list = archiveInfoService.beachSearch(archiveInfo);
+        return getDataTable(list);
+    }
 }

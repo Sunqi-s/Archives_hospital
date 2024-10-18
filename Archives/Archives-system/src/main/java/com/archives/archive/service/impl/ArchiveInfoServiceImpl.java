@@ -285,5 +285,10 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             return archiveInfoMapper.deleteArchiveInfoAll(categoryId);
         }
     }
+
+    @Override
+    public List<ArchiveInfo> beachSearch(ArchiveInfo archiveInfo) {
+        return archiveInfoMapper.beachSearch(archiveInfo);
+    }
 }
 

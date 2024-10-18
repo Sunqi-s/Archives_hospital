@@ -28,26 +28,26 @@
               </el-input>
             </el-col>
           </el-row>
-          <el-row :gutter="20">
-            <el-col :span="6" :offset="8">
-              <el-card class="full_card">
-                <div slot="header">
-                  <span ><img src="@/assets/images/hot.png">热门检索</span>
-                </div>
-                <el-row>
-                    <el-tag
-                        v-for="tag in hotTags"
-                        :key="tag"
-                        closable
-                        @close="handleCloseTag(tag)"
-                        type="info"
-                    >
-                      <router-link to="/system/archivesExploit/borrowing/hotSearches"> {{ tag }}</router-link>
-                    </el-tag>
-                </el-row>
-              </el-card>
-            </el-col>
-          </el-row>
+<!--          <el-row :gutter="20">-->
+<!--            <el-col :span="6" :offset="8">-->
+<!--              <el-card class="full_card">-->
+<!--                <div slot="header">-->
+<!--                  <span ><img src="@/assets/images/hot.png">热门检索</span>-->
+<!--                </div>-->
+<!--                <el-row>-->
+<!--                    <el-tag-->
+<!--                        v-for="tag in hotTags"-->
+<!--                        :key="tag"-->
+<!--                        closable-->
+<!--                        @close="handleCloseTag(tag)"-->
+<!--                        type="info"-->
+<!--                    >-->
+<!--                      <router-link to="/system/archivesExploit/borrowing/hotSearches"> {{ tag }}</router-link>-->
+<!--                    </el-tag>-->
+<!--                </el-row>-->
+<!--              </el-card>-->
+<!--            </el-col>-->
+<!--          </el-row>-->
         </el-main>
       </el-container>
     </div>

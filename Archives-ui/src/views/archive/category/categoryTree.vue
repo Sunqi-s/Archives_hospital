@@ -20,10 +20,10 @@
       ref="tree"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
-        <span>
+        <span >
           <i class="el-icon-document" v-if="data.parentId!==0"></i>
           <i class="el-icon-folder" v-else></i>
-          {{ data.label }}
+          <span :style="clickNode === data.id && data.parentId>0? 'color:#409eff':''">{{ data.label }}</span>
         </span>
       </span>
     </el-tree>
@@ -55,11 +55,13 @@ export default {
         children: 'children',
         label: 'label',
       },
+      clickNode: null, // 点击节点的ID
     };
   },
   methods: {
     // 处理节点点击事件，传递节点ID给父组件
     handleNodeClick(data) {
+        this.clickNode = data.id;
       this.$emit('node-click', data);
     },
     // 过滤树节点
@@ -71,6 +73,12 @@ export default {
     debounceFilterTree: debounce(function (value) {
       this.$refs.tree.filter(value);
     }, 300),
+    clear(){
+      this.clickNode = null;
+    },
+    setNode(id){
+      this.clickNode = id;
+    }
   },
 };
 </script>

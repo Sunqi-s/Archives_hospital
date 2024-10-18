@@ -110,4 +110,9 @@ public interface ArchiveInfoMapper
      * 批量删除档案信息
      */
     public boolean deleteArchiveInfoAll(Long categroyId);
+
+    /**
+     * 高级搜索
+     */
+    public List<ArchiveInfo> beachSearch(ArchiveInfo archiveInfo);
 }

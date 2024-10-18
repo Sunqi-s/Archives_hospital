@@ -3,14 +3,14 @@
     <el-row :gutter="20">
       <!-- 档案分类树形结构 -->
       <el-col :span="4" :xs="24">
-        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false"></file-tree>
+        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree"></file-tree>
       </el-col>
 
       <!-- 未选择档案库时显示该画面 -->
       <el-col :span="20" :xs="24" v-show="isselect">
         <div class="no-selection">
           <img src="@/assets/images/lock.png" class="file-center">
-          <p class="file-fontcenter">请选择右侧档案库</p>
+          <p class="file-fontcenter">请选择左侧档案库</p>
         </div>
       </el-col>
 
@@ -59,7 +59,7 @@
           </el-form>
 
           <div class="form-button-wrapper">
-            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach">搜索</el-button>
             <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
           </div>
 
@@ -109,7 +109,7 @@
               type="success"
               icon="el-icon-s-flag"
               size="small"
-              :disabled="!(savedids.length+ids.length)"
+              :disabled="selectedItems.length === 0"
               @click="handlePrint"
             >打印</el-button>
           </el-col>
@@ -247,11 +247,11 @@
                     <el-table-column prop="fileSize" label="文件大小" width="120">
                       <template slot-scope="scope">{{formatSize(scope.row.size)}}</template>
                     </el-table-column>
-                    <el-table-column label="操作" width="120" v-if="notInsert()">
+                    <el-table-column label="操作" width="120" >
                       <template slot-scope="scope">
                         <div class="butten-column">
                           <el-button @click="handleFileDownload(scope.row.url)" size="small" v-if="notInsert()">下载</el-button>
-                          <el-button type="danger" @click="handleFileDelete(scope.$index)" size="small" v-if="isUpdate()">删除</el-button>
+                          <el-button type="danger" @click="handleFileDelete(scope.$index)" size="small" v-if="notCheck()">删除</el-button>
                           <el-button type="success" @click="handleFilePreview(scope.row.url)" size="small" v-if="isCheck()">预览</el-button>
                         </div>
                       </template>
@@ -390,6 +390,7 @@ export default {
       archiveStatus: 0, //默认显示待归档数据
       searchValue: ''
     }
+    this.getCategoryTreeList();
   },
   computed:{
     sortedFields(){
@@ -518,7 +519,10 @@ export default {
       listCategory().then(response => {
         this.fileOptions = this.handleFileOptions(response.data, "id", "parentId");
       }).then(() => {
-        this.getRouterPath();
+        if(this.$refs.fileTree){
+          this.$refs.fileTree.clear();
+        }
+        // this.getRouterPath();
       })
     },
     /** 查询部门下拉树结构 */
@@ -563,8 +567,14 @@ export default {
       this.queryParams.categoryId = this.categoryId;
       this.getList();
     },
+    handleQueryBeach(){
+      this.queryParams.categoryId = this.categoryId;
+      this.queryParams.archiveStatus = 0;
+      this.getBeachList();
+    },
     resetQuery() {
       this.queryParams = {
+        categoryId: this.categoryId,
         pageNum: 1,
         pageSize: 10,
         archiveStatus: 0,
@@ -626,12 +636,16 @@ export default {
     // 取消按钮
     cancel() {
       this.close()
-      this.$refs.fileUpload.resetFileList()
+      if(this.$refs.fileUpload){
+        this.$refs.fileUpload.resetFileList()
+      }
     },
     //上传取消按钮
     cancelUpload() {
       this.showDialog = false
-      this.$refs.fileUpload.resetFileList()
+      if(this.$refs.fileUpload){
+        this.$refs.fileUpload.resetFileList()
+      }
     },
     /** 对话框关闭操作 */
     close() {
@@ -685,18 +699,25 @@ export default {
         if (valid) {
           if (this.form.id != null && this.form.id != undefined) {
             const newSysOssList = this.form.sysOssList.slice(this.originalFile)
-            if (newSysOssList.length > 0) {
+            if (newSysOssList.length > 0 && this.$refs.fileUpload) {
               await this.$refs.fileUpload.handleUpload(newSysOssList);
             }
-            updateInfo(this.form).then(() => {
-              this.$modal.msgSuccess("修改成功");
-              this.closeAndRefresh();
-              this.reset();
-              this.getList();
-              this.$refs.fileUpload.resetFileList();
-            })
+            await updateInfo(this.form)
+              .then(() => {
+                this.$modal.msgSuccess("修改成功");
+                this.closeAndRefresh();
+                this.reset();
+                this.getList();
+                if(this.$refs.fileUpload){
+                  this.$refs.fileUpload.resetFileList();
+                }
+              })
+              .catch(error => {
+                this.$modal.msgError("修改失败，请重试");
+              });
+
           } else {
-            if (this.form.sysOssList.length > 0) {
+            if (this.form.sysOssList.length > 0 && this.$refs.fileUpload) {
               const sysOssList = this.form.sysOssList.map(file => ({
                 deleteFlg: file.deleteFlg,
                 name: file.name,
@@ -711,13 +732,17 @@ export default {
               }))
               await this.$refs.fileUpload.handleUpload(sysOssList);
             }
-            addInfo(this.form).then(() => {
+            await addInfo(this.form).then(() => {
               this.$modal.msgSuccess("新增成功");
               this.closeAndRefresh();
               this.reset();
-              this.$refs.fileUpload.resetFileList();
               this.getList();
-            })
+              if(this.$refs.fileUpload){
+                this.$refs.fileUpload.resetFileList();
+              }
+            }).catch(error => {
+              this.$modal.msgError("录入失败，请重试");
+            });
 
           }
         }
@@ -727,7 +752,9 @@ export default {
       if (this.originalFile > -1) {
         this.form.sysOssList = this.form.sysOssList.filter(item => item.url)
         this.form.sysOssList.push(...fileList)
-        this.$refs.fileUpload.resetFileList();
+        if(this.$refs.fileUpload){
+          this.$refs.fileUpload.resetFileList();
+        }
       } else {
         this.form.sysOssList = fileList;
       }
@@ -745,7 +772,9 @@ export default {
       this.form.sysOssList = this.form.sysOssList.concat(fileList)
     },
     clickShow() {
-      this.$refs.fileUpload.confirm()
+      if(this.$refs.fileUpload){
+        this.$refs.fileUpload.confirm();
+      }
       this.showDialog = false
     },
     /** 删除按钮操作 */
@@ -830,7 +859,7 @@ export default {
     handleFileDelete(index) {
       // 直接从 sysOssList 中删除文件
       this.form.sysOssList.splice(index, 1);
-      if (index <= this.originalFile) {
+      if (this.choice === 1 &&index <= this.originalFile) {
         this.originalFile -= 1;
       }
     },
@@ -976,13 +1005,18 @@ export default {
     handlePrint() {
       if (this.selectedItems.length > 0) {
         pointRelation(this.selectedItems[0].categoryId).then(response => {
-          const tpl_name = response.name;
-          this.savedids = this.ids;
-          const ids = this.savedids.join(',');
-          const pageIndex = 1;     // 页码
-          const renderOption = 1;  // 渲染选项
-          const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
-          window.open(url, '_blank');
+          if(response.name){
+            const tpl_name = response.name;
+            this.savedids = this.ids;
+            const ids = this.savedids.join(',');
+            const pageIndex = 1;     // 页码
+            const renderOption = 1;  // 渲染选项
+            const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
+            window.open(url, '_blank');
+          }else {
+            this.$message.error("未找到打印模板");
+          }
+
         })
       }
     },
@@ -992,20 +1026,29 @@ export default {
     },
     handleBatchDelete() {
       this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(()=> {
-        return delAllInfo(this.categoryId).then((res) => {
-          if (res.code === 200) {
-            this.$modal.msgSuccess("删除成功");
-          } else {
-            this.$modal.msgError(res.msg);
-          }
-          this.getList();
-        });
-      })
+        return delAllInfo(this.categoryId)
+          .then((res) => {
+            if (res.code === 200) {
+              this.$modal.msgSuccess("删除成功");
+            } else {
+              this.$modal.msgError(res.msg);
+            }
+          })
+          .catch((error) => {
+            this.$modal.msgError("删除过程中发生错误");
+          })
+          .finally(() => {
+            this.getList(); // 确保无论成功或失败都执行
+          });
+      });
     },
     getRouterPath() {
       const cId = this.$route.query.categoryId;
       if(cId !== undefined && cId !== null){
         this.categoryId = cId;
+        if(this.$refs.fileTree){
+          this.$refs.fileTree.setNode(this.categoryId);
+        }
         this.getFieldDefinitions(this.categoryId);
         this.queryParams.categoryId = cId;
         this.getList();
@@ -1014,7 +1057,8 @@ export default {
           this.parentCategoryName = res.data.parentName;
         });
       }else {}
-    }
+    },
+
   }
 };
 

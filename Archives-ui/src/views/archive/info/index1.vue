@@ -3,14 +3,14 @@
     <el-row :gutter="20">
       <!-- 档案分类树形结构 -->
       <el-col :span="4" :xs="24">
-        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false"></file-tree>
+        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree"></file-tree>
       </el-col>
 
       <!-- 未选择档案库时显示该画面 -->
-      <el-col :span="20" :xs="24" v-show="categoryId===null">
+      <el-col :span="20" :xs="24" v-show="isselect">
         <div class="no-selection">
           <img src="../../../assets/images/lock.png" class="file-center">
-          <p class="file-fontcenter">请选择右侧档案库</p>
+          <p class="file-fontcenter">请选择左侧档案库</p>
         </div>
       </el-col>
 
@@ -90,7 +90,7 @@
               type="success"
               icon="el-icon-s-flag"
               size="small"
-              :disabled="!(savedids.length+ids.length)"
+              :disabled="selectedItems.length === 0"
               @click="handlePrint"
             >打印</el-button>
           </el-col>
@@ -332,7 +332,10 @@ export default {
         if(b.name === 'archiveStatus') return 1;
         return 0;
       });
-    }
+    },
+    isselect(){
+      return this.categoryId===null;
+    },
   },
   methods: {
     treeselect,
@@ -441,9 +444,6 @@ export default {
         this.fields.forEach(field => {
           this.$set(this.queryParams, field.name, null);
         });
-
-        //初始化校验
-        this.generateRules();
       });
     },
     getCategoryTreeList() {
@@ -490,12 +490,15 @@ export default {
       this.getList();
     },
     handleQuery() {
+      this.queryParams.categoryId = this.categoryId;
       this.getList();
     },
     resetQuery() {
       this.queryParams = {
+        categoryId: this.categoryId,
         pageNum: 1,
         pageSize: 10,
+        archiveStatus: 1,
       };
       this.queryFields.forEach(field => {
         this.$set(this.queryParams, field.name, '');

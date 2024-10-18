@@ -94,4 +94,9 @@ public interface IArchiveInfoService
      *
      */
     public boolean deleteArchiveInfoAll(Long categroyId);
+
+    /**
+     * 高级搜索
+     */
+    public List<ArchiveInfo> beachSearch(ArchiveInfo archiveInfo);
 }
