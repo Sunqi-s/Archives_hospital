@@ -13,12 +13,12 @@ import com.archives.archive.service.IArchiveReportRelationService;
 
 /**
  * 档案报表关系Service业务层处理
- * 
+ *
  * @author é«å°å·
  * @date 2024-09-04
  */
 @Service
-public class ArchiveReportRelationServiceImpl implements IArchiveReportRelationService 
+public class ArchiveReportRelationServiceImpl implements IArchiveReportRelationService
 {
     @Autowired
     private ArchiveReportRelationMapper archiveReportRelationMapper;
@@ -27,7 +27,7 @@ public class ArchiveReportRelationServiceImpl implements IArchiveReportRelationS
 
     /**
      * 查询档案报表关系
-     * 
+     *
      * @param id 档案报表关系主键
      * @return 档案报表关系
      */
@@ -39,7 +39,7 @@ public class ArchiveReportRelationServiceImpl implements IArchiveReportRelationS
 
     /**
      * 查询档案报表关系列表
-     * 
+     *
      * @param archiveReportRelation 档案报表关系
      * @return 档案报表关系
      */
@@ -51,7 +51,7 @@ public class ArchiveReportRelationServiceImpl implements IArchiveReportRelationS
 
     /**
      * 新增档案报表关系
-     * 
+     *
      * @param archiveReportRelation 档案报表关系
      * @return 结果
      */
@@ -69,7 +69,7 @@ public class ArchiveReportRelationServiceImpl implements IArchiveReportRelationS
 
     /**
      * 修改档案报表关系
-     * 
+     *
      * @param archiveReportRelation 档案报表关系
      * @return 结果
      */
@@ -81,7 +81,7 @@ public class ArchiveReportRelationServiceImpl implements IArchiveReportRelationS
 
     /**
      * 批量删除档案报表关系
-     * 
+     *
      * @param ids 需要删除的档案报表关系主键
      * @return 结果
      */
@@ -93,7 +93,7 @@ public class ArchiveReportRelationServiceImpl implements IArchiveReportRelationS
 
     /**
      * 删除档案报表关系信息
-     * 
+     *
      * @param id 档案报表关系主键
      * @return 结果
      */
@@ -106,8 +106,12 @@ public class ArchiveReportRelationServiceImpl implements IArchiveReportRelationS
     @Override
     public ArchiveReportTemplates selectArchiveReportRelationByCategoryId(Long categoryId) {
         ArchiveReportRelation archiveReportRelation = archiveReportRelationMapper.selectArchiveReportRelationByCategoryId(categoryId);
-        Long count = archiveReportRelation.getReportId();
-        ArchiveReportTemplates archiveReportTemplates = archiveReportTemplatesMapper.selectArchiveReportTemplatesById(count);
-        return archiveReportTemplates;
+        if(archiveReportRelation == null){
+            return null;
+        }else{
+            Long count = archiveReportRelation.getReportId();
+            ArchiveReportTemplates archiveReportTemplates = archiveReportTemplatesMapper.selectArchiveReportTemplatesById(count);
+            return archiveReportTemplates;
+        }
     }
 }

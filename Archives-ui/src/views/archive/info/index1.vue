@@ -73,7 +73,7 @@
               icon="el-icon-download"
               size="small"
               @click="handleExport"
-              v-hasPermi="['system:document:export']"
+              v-hasPermi="['archive:info:export']"
             >导出</el-button>
           </el-col>
           <el-col :span="1.5">
@@ -707,13 +707,17 @@ export default {
     handlePrint() {
       if (this.selectedItems.length > 0) {
         pointRelation(this.selectedItems[0].categoryId).then(response => {
-          const tpl_name = response.name;
-          this.savedids = this.ids;
-          const ids = this.savedids.join(',');
-          const pageIndex = 1;     // 页码
-          const renderOption = 1;  // 渲染选项
-          const  url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
-          window.open(url, '_blank');
+          if(response.name){
+            const tpl_name = response.name;
+            this.savedids = this.ids;
+            const ids = this.savedids.join(',');
+            const pageIndex = 1;     // 页码
+            const renderOption = 1;  // 渲染选项
+            const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
+            window.open(url, '_blank');
+          }else {
+            this.$message.error("未找到打印模板");
+          }
         })
       }
     },

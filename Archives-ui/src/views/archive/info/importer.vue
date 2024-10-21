@@ -313,7 +313,8 @@ export default {
       dialogTableVisible: false,
       upLoadErr:0,
       importChoice:0,
-      color:'#FFFFFF'
+      color:'#FFFFFF',
+      exportList:[],
     };
   },
   computed: {
@@ -482,6 +483,15 @@ export default {
       const rows = data.slice(1);
       const yesList = this.columnList.filter(col => headers.includes(col.label));
       const noList = this.columnList.filter(col => !headers.includes(col.label)&&col.isRequired === '1');
+      this.exportList = [];
+        rows.forEach(row => {
+          headers.forEach((header, index) => {
+            const column = this.columnList.find(col => col.label === header);
+            if (column && row[index] != null && !this.exportList.includes(column)) {
+              this.exportList.push(column);
+            }
+          });
+        });
       this.tableData = rows.map(row => {
         const rowData = { validationErrors: [], categoryId: this.itemQueryParams.categoryId };
         yesList.forEach((yes) => {
@@ -740,7 +750,7 @@ export default {
     // 导出模板
     exportTemplate() {
       const excludedColumns = ['主键ID', '创建者', '更新者', '创建时间', '更新时间'];
-      const headers = this.columnList
+      const headers = this.exportList
         .filter(col => !excludedColumns.includes(col.label))
         .map(col => col.label);
 

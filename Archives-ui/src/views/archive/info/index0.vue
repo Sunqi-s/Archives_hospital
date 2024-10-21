@@ -73,7 +73,7 @@
               icon="el-icon-plus"
               size="small"
               @click="handleAdd"
-              v-hasPermi="['system:document:add']"
+              v-hasPermi="['archive:info:add']"
             >录入</el-button>
           </el-col>
           <el-col :span="1.5">
@@ -83,7 +83,7 @@
               size="small"
               :disabled="multiple"
               @click="handleDelete"
-              v-hasPermi="['system:document:remove']"
+              v-hasPermi="['archive:info:remove']"
             >删除</el-button>
           </el-col>
           <el-col :span="1.5">
@@ -92,7 +92,7 @@
               icon="el-icon-download"
               size="small"
               @click="handleExport"
-              v-hasPermi="['system:document:export']"
+              v-hasPermi="['archive:info:export']"
             >导出</el-button>
           </el-col>
           <el-col :span="1.5">

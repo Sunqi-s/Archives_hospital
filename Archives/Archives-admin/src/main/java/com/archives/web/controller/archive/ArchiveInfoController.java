@@ -124,7 +124,6 @@ public class ArchiveInfoController extends BaseController
     /**
      * 批量发送利用档案信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:send')")
     @Log(title = "批量发送利用档案信息", businessType = BusinessType.UPDATE)
     @PutMapping("/send/{ids}")
     public AjaxResult send(@PathVariable Long[] ids)
