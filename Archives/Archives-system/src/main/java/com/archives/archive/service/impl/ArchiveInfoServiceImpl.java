@@ -288,7 +288,15 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Override
     public List<ArchiveInfo> beachSearch(ArchiveInfo archiveInfo) {
-        return archiveInfoMapper.beachSearch(archiveInfo);
+        String[] dataPermiList = new String[0];
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        if("all".equals(currentUser.getDataPermi())){
+            dataPermiList = new String[0];
+        }else {
+            dataPermiList = (currentUser.getDataPermi().split(","));
+        }
+        System.out.println("archiveInfo: " + archiveInfo);
+        return archiveInfoMapper.beachSearch(archiveInfo, dataPermiList);
     }
 }
 

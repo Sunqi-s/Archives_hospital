@@ -25,7 +25,7 @@ import com.archives.common.core.page.TableDataInfo;
 
 /**
  * 档案报表关系Controller
- * 
+ *
  * @author é«å°å·
  * @date 2024-09-04
  */
@@ -39,7 +39,6 @@ public class ArchiveReportRelationController extends BaseController
     /**
      * 查询档案报表关系列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:relation:list')")
     @GetMapping("/list")
     public TableDataInfo list(ArchiveReportRelation archiveReportRelation)
     {
@@ -64,7 +63,6 @@ public class ArchiveReportRelationController extends BaseController
     /**
      * 获取档案报表关系详细信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:relation:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
@@ -107,7 +105,6 @@ public class ArchiveReportRelationController extends BaseController
     /**
      * 查询档案报表关系列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:relation:listByCategoryId')")
     @GetMapping("/pointByCategoryId/{categoryId}")
     public ArchiveReportTemplates archiveReportRelationByCategoryId (@PathVariable Long categoryId)
     {

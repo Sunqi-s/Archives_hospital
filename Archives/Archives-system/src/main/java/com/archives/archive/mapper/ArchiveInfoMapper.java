@@ -114,5 +114,5 @@ public interface ArchiveInfoMapper
     /**
      * 高级搜索
      */
-    public List<ArchiveInfo> beachSearch(ArchiveInfo archiveInfo);
+    public List<ArchiveInfo> beachSearch(@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
 }

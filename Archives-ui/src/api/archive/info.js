@@ -80,7 +80,7 @@ export function delAllInfo(categoryId) {
 export function getBeachList(query) {
   return request({
     url: '/archive/info/beachSearch',
-    method: 'get',
+    method: 'post',
     params: query
   })
 }

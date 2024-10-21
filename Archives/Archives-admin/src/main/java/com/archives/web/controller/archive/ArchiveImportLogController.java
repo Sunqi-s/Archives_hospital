@@ -37,7 +37,6 @@ public class ArchiveImportLogController extends BaseController
     /**
      * 查询数据导入日志列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:importLog:list')")
     @GetMapping("/list")
     public TableDataInfo list(ArchiveImportLog archiveImportLog)
     {
@@ -49,7 +48,6 @@ public class ArchiveImportLogController extends BaseController
     /**
      * 导出数据导入日志列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:importLog:export')")
     @Log(title = "数据导入日志", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, ArchiveImportLog archiveImportLog)
@@ -62,7 +60,6 @@ public class ArchiveImportLogController extends BaseController
     /**
      * 获取数据导入日志详细信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:importLog:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
@@ -72,7 +69,6 @@ public class ArchiveImportLogController extends BaseController
     /**
      * 新增数据导入日志
      */
-    @PreAuthorize("@ss.hasPermi('archive:importLog:add')")
     @Log(title = "数据导入日志", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody ArchiveImportLog archiveImportLog)
@@ -88,7 +84,6 @@ public class ArchiveImportLogController extends BaseController
     /**
      * 修改数据导入日志
      */
-    @PreAuthorize("@ss.hasPermi('archive:importLog:edit')")
     @Log(title = "数据导入日志", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody ArchiveImportLog archiveImportLog)
@@ -99,7 +94,6 @@ public class ArchiveImportLogController extends BaseController
     /**
      * 删除数据导入日志
      */
-    @PreAuthorize("@ss.hasPermi('archive:importLog:remove')")
     @Log(title = "数据导入日志", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)

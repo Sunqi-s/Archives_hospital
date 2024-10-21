@@ -300,7 +300,7 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import {addInfo, delAllInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo} from "@/api/archive/info";
+import {addInfo, delAllInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo,getBeachList} from "@/api/archive/info";
 import { getCategory, listCategory } from '@/api/archive/category'
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
@@ -570,7 +570,12 @@ export default {
     handleQueryBeach(){
       this.queryParams.categoryId = this.categoryId;
       this.queryParams.archiveStatus = 0;
-      this.getBeachList();
+      getBeachList(this.queryParams).then(response => {
+        if (response.rows.length > 0) {
+          this.infoList = response.rows;
+          this.total = response.total;
+        }
+      });
     },
     resetQuery() {
       this.queryParams = {

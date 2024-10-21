@@ -51,7 +51,6 @@ public class ArchiveItemController extends BaseController
     /**
      * 查询档案信息模板列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:item:list')")
     @GetMapping("/listSuccess")
     public AjaxResult listSuccess(ArchiveItem archiveItem)
     {

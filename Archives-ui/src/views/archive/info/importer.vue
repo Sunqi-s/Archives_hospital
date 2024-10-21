@@ -575,30 +575,39 @@ export default {
         if (batchIndex >= totalBatches) {
 
           // 更新log表
+          this.logQueryParams.status = 'completed';
           this.$message.success('数据插入成功');
-          this.active = 4; // 设置步骤条的活动步骤
-          this.currentStep = 3;
-          this.color = '#FFFFFF'
-          this.isSubmitDateTriggered = true;
-          return;
-        }
+          updateImportLog(this.logQueryParams).then(response => {
+            getImportLog(this.logQueryParams.id).then(response => {
+              this.importLog = response.data;
+            })
+            this.upLoad=false;
+            this.upFileList = [];
+            this.fileList = [];
+            this.uploadFiles = [];
+            this.filteredFileList = [];
+            this.selectedNodeKey = null;
+            this.active = 4; // 设置步骤条的活动步骤
+            this.isSubmitDateTriggered = true;
+          }).catch(error => {
+          });
+        }else {
+          const start = batchIndex * batchSize;
+          const end = Math.min(start + batchSize, data.length);
+          const batchData = data.slice(start, end);
 
-        const start = batchIndex * batchSize;
-        const end = Math.min(start + batchSize, data.length);
-        const batchData = data.slice(start, end);
+          // 统计当前批次中所有项的 sysOssList 长度总和
+          const ossProcessedRecordsInBatch = batchData.reduce((sum, item) => {
+            return sum + (item.sysOssList ? item.sysOssList.length : 0);
+          }, 0);
 
-        // 统计当前批次中所有项的 sysOssList 长度总和
-        const ossProcessedRecordsInBatch = batchData.reduce((sum, item) => {
-          return sum + (item.sysOssList ? item.sysOssList.length : 0);
-        }, 0);
-
-        try {
-          const response = await bulkAdd(batchData);
-          for(let i = 0; i < response.data.length; i++) {
-            this.ossList = this.ossList.concat(response.data[i].sysOssList);
-          }
-          this.ossList = this.ossList.map(item => {
-            return {
+          try {
+            const response = await bulkAdd(batchData);
+            for(let i = 0; i < response.data.length; i++) {
+              this.ossList = this.ossList.concat(response.data[i].sysOssList);
+            }
+            this.ossList = this.ossList.map(item => {
+              return {
                 createBy : item.createBy,
                 createTime : item.createTime,
                 deleteDate : item.deleteDate,
@@ -611,17 +620,20 @@ export default {
                 updateBy : item.updateBy,
                 updateTime : item.updateTime,
                 url : item.url
-            }
-          })
-          // 上传文件到OSS
-          addOss(this.ossList).then(response => {
-            this.ossList = [];
-            this.updateLog(batchIndex, ossProcessedRecordsInBatch, batchData) // 更新log表状态和已处理记录数
-            insertBatch(batchIndex + 1)// 插入下一批
-          })
-        } catch (error) {
-          this.$message.error('数据插入失败'+error);
+              }
+            })
+            // 上传文件到OSS
+            addOss(this.ossList).then(response => {
+              this.ossList = [];
+              this.updateLog(batchIndex, ossProcessedRecordsInBatch, batchData) // 更新log表状态和已处理记录数
+              insertBatch(batchIndex + 1)// 插入下一批
+            })
+          } catch (error) {
+            this.$message.error('数据插入失败'+error);
+          }
         }
+
+
       };
       await insertBatch(0);
     },

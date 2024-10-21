@@ -108,7 +108,6 @@ public class ArchiveInfoController extends BaseController
     /**
      * 批量新增档案信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:bulkAdd')")
     @Log(title = "EXCEL导入", businessType = BusinessType.INSERT)
     @PostMapping("/bulkAdd")
     public AjaxResult bulkAdd(@RequestBody List<ArchiveInfo> archiveInfo)
@@ -146,8 +145,7 @@ public class ArchiveInfoController extends BaseController
     /**
      * 高级搜索
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:beachSearch')")
-    @GetMapping("/beachSearch")
+    @PostMapping ("/beachSearch")
     public TableDataInfo beachSearch(ArchiveInfo archiveInfo) {
         startPage();
         List<ArchiveInfo> list = archiveInfoService.beachSearch(archiveInfo);

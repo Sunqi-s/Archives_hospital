@@ -687,30 +687,30 @@ export default {
     submitFileForm() {
       this.$refs.upload.submit();
     },
-    //数据权限初始化
-    dataPermi(){
-      if (this.deptOptions !== undefined){
+    dataPermi() {
+      if (Array.isArray(this.deptOptions)) {
         this.dataPermiOptions = this.deptOptions.map(item => {
           return {
             value: item.id,
             label: item.label,
-            children: item.children.map(child => {
+            children: Array.isArray(item.children) ? item.children.map(child => {
               return {
                 value: child.id,
                 label: child.label,
-                children: child.children.map(grandson => {
+                children: Array.isArray(child.children) ? child.children.map(grandson => {
                   return {
                     value: grandson.id,
                     label: grandson.label,
-                  }
-                })
-              }
-            })
-          }
-        })
-      }else {
-        return []
+                  };
+                }) : []
+              };
+            }) : []
+          };
+        });
+      } else {
+        return [];
       }
+      return this.dataPermiOptions; // 明确返回
     },
     //数据权限修改
     handleAuthDataPermi(row){

@@ -182,7 +182,7 @@
         <include refid="selectArchiveInfoVo"/>
         where id = #{id}
     </select>
-    <select id="beachSearch" resultType="com.archives.archive.domain.ArchiveInfo">
+    <select id="beachSearch" resultMap="ArchiveInfoResult">
         <include refid="selectArchiveInfoVo"/>
         <where>
             <if test="archiveInfo.categoryId != null "> and category_id = #{archiveInfo.categoryId}</if>
