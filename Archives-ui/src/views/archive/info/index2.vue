@@ -240,13 +240,12 @@ import {getDicts} from "@/api/system/dict/data";
 import {getItemByCategoryId} from "@/api/archive/item";
 import {listCategory} from "@/api/archive/category";
 import {deptTreeSelect} from "@/api/system/user";
-import {getInfo, listInfo, sendInfo, updatAarchiveStatus} from "@/api/archive/info";
+import {getInfo, listInfo, sendInfo} from "@/api/archive/info";
 import categoryTree from "@/views/archive/category/categoryTree.vue";
 import Treeselect from "@riophae/vue-treeselect";
 import {treeselect} from "@/api/system/menu";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
-import * as XLSX from "xlsx";
-import {getDept, listDept} from "@/api/system/dept";
+import {listDept} from "@/api/system/dept";
 import {pointRelation} from "@/api/archive/relation";
 import {Base64} from "js-base64";
 
@@ -424,6 +423,7 @@ export default {
         this.fields.forEach(field => {
           this.$set(this.queryParams, field.name, null);
         });
+        this.$set(this.queryParams, 'categoryId', this.categoryId);
       });
     },
     getCategoryTreeList() {
@@ -471,6 +471,7 @@ export default {
     },
     handleQuery() {
       this.queryParams.categoryId = this.categoryId;
+      this.queryParams.archiveStatus = 2;
       this.getList();
     },
     resetQuery() {

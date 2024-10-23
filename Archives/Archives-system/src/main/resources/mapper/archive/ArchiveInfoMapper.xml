@@ -138,7 +138,6 @@
                         department,
                         archiver,
                         remarks,
-                        archive_status,
                         create_by,
                         update_by,
                         field1,
@@ -174,6 +173,7 @@
                         oss_status
                   ) LIKE CONCAT('%', #{keyword}, '%')
                   and category_id = #{categoryId}
+                  and archive_status = #{archiveStatus}
                   <include refid="selectArchiveInfoDataPermit" />
         </where>
     </select>

@@ -66,6 +66,9 @@ public class SysOssServiceImpl implements ISysOssService
     @Override
     public int insertSysOssBatch(List<SysOss> sysOssList)
     {
+        if(sysOssList == null || sysOssList.size() == 0) {
+            return 1;
+        }
         for (SysOss sysOss : sysOssList) {
             sysOss.setCreateTime(DateUtils.getNowDate());
         }

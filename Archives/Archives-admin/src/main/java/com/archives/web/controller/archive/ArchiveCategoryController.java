@@ -36,7 +36,7 @@ public class ArchiveCategoryController extends BaseController
     /**
      * 查询档案分类列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:category:list')")
+//    @PreAuthorize("@ss.hasPermi('archive:category:list')")
     @GetMapping("/list")
     public AjaxResult list(ArchiveCategory archiveCategory)
     {
@@ -60,7 +60,7 @@ public class ArchiveCategoryController extends BaseController
     /**
      * 获取档案分类详细信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:category:query')")
+//    @PreAuthorize("@ss.hasPermi('archive:category:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {

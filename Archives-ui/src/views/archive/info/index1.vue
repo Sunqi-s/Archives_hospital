@@ -444,6 +444,7 @@ export default {
         this.fields.forEach(field => {
           this.$set(this.queryParams, field.name, null);
         });
+        this.$set(this.queryParams, 'categoryId', this.categoryId);
       });
     },
     getCategoryTreeList() {
@@ -491,6 +492,7 @@ export default {
     },
     handleQuery() {
       this.queryParams.categoryId = this.categoryId;
+      this.queryParams.archiveStatus = 1;
       this.getList();
     },
     resetQuery() {

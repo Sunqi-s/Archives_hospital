@@ -510,6 +510,7 @@ export default {
         this.fields.forEach(field => {
           this.$set(this.queryParams, field.name, null);
         });
+        this.$set(this.queryParams, 'categoryId', this.categoryId);
 
         //初始化校验
         this.generateRules();
@@ -565,6 +566,7 @@ export default {
     },
     handleQuery() {
       this.queryParams.categoryId = this.categoryId;
+      this.queryParams.archiveStatus = 0;
       this.getList();
     },
     handleQueryBeach(){

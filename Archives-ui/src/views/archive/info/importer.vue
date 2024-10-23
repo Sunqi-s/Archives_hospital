@@ -78,7 +78,7 @@
       </el-row>
 
       <!-- 表格 -->
-      <el-row class="main_body" v-if="showOn&&!isMessageRow">
+      <el-row class="main_body" v-if="showOn">
         <slot name="data-display">
           <DataDisplay ref="dataDisplay"
                        :paginatedTableData="paginatedTableData"
@@ -568,6 +568,7 @@ export default {
 
     // 批量上传数据
     async batchInsertData(data) {
+      this.displayOutput=false;
       // 写入Log表，创建任务号
       const batchSize = 250; // 每批次插入的数据量
       const infoImportRecords = data.length;
@@ -586,19 +587,13 @@ export default {
 
           // 更新log表
           this.logQueryParams.status = 'completed';
-          this.$message.success('数据插入成功');
           updateImportLog(this.logQueryParams).then(response => {
             getImportLog(this.logQueryParams.id).then(response => {
               this.importLog = response.data;
+              this.complete()
+              this.$message.success('数据插入成功');
             })
-            this.upLoad=false;
-            this.upFileList = [];
-            this.fileList = [];
-            this.uploadFiles = [];
-            this.filteredFileList = [];
-            this.selectedNodeKey = null;
-            this.active = 4; // 设置步骤条的活动步骤
-            this.isSubmitDateTriggered = true;
+
           }).catch(error => {
           });
         }else {
@@ -675,19 +670,12 @@ export default {
 
           // 更新log表
           this.logQueryParams.status = 'completed';
-          this.$message.success('数据插入成功');
           updateImportLog(this.logQueryParams).then(response => {
             getImportLog(this.logQueryParams.id).then(response => {
               this.importLog = response.data;
+              this.complete()
+              this.$message.success('数据插入成功');
             })
-            this.upLoad=false;
-            this.upFileList = [];
-            this.fileList = [];
-            this.uploadFiles = [];
-            this.filteredFileList = [];
-            this.selectedNodeKey = null;
-            this.active = 4; // 设置步骤条的活动步骤
-            this.isSubmitDateTriggered = true;
           }).catch(error => {
           });
         }else {
@@ -783,6 +771,7 @@ export default {
     // 打开批量挂接对话框
     openBatchAttachmentDialog() {
       this.circleStep = 0;
+      this.importChoice = 0;
       this.batchAttachmentDialogVisible = true;
     },
 
@@ -1108,6 +1097,18 @@ export default {
         this.$refs.fileTree.clear();
       }
       this.reset();
+    },
+    complete(){
+      this.showOn = 0;
+      this.active = 4; // 设置步骤条的活动步骤
+      this.isSubmitDateTriggered = true;
+      this.displayOutput=true;
+      this.upLoad=false;
+      this.upFileList = [];
+      this.fileList = [];
+      this.uploadFiles = [];
+      this.filteredFileList = [];
+      this.selectedNodeKey = null;
     }
 
 

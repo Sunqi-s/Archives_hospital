@@ -81,7 +81,7 @@
               <el-tab-pane v-for="tag in tagList" :label="tag.name+'('+tag.count+')'" :name="String(tag.category)">
                 <!-- 动态生成的表格 -->
                 <div class="table-container">
-                  <el-table :data="FilteredList" :default-sort = "{prop: 'id', order: 'descending'}" height="60vh" ref="dynamicTable" border @row-click="handleRowClick">
+                  <el-table :data="FilteredList" :default-sort = "{prop: 'id', order: 'descending'}" height="53vh" ref="dynamicTable" border @row-click="handleRowClick">
                     <el-table-column
                       v-for="field in itemFilteredList"
                       :key="field.name"
@@ -197,7 +197,7 @@
                         <template slot-scope="scope">
                           <div class="butten-column">
                             <el-button @click="handleFileDownload(scope.row.url)" size="small">下载</el-button>
-                            <el-button type="success" @click="handleFilePreview(scope.row.url)" size="small">预览</el-button>
+                            <el-button type="success" class="el-button" @click="handleFilePreview(scope.row.url)" size="small">预览</el-button>
                           </div>
                         </template>
                       </el-table-column>
@@ -222,6 +222,7 @@
   import {getItemByCategoryId} from "@/api/archive/item";
   import {getOssByFid} from "@/api/system/oss";
   import {listDept} from "@/api/system/dept";
+  import { Base64 } from 'js-base64'
 
   export default {
     name: 'FullText',
@@ -367,9 +368,9 @@
     generateRules() {
       this.rules = {};
       const fields = [
-        ...this.insertFieldsGroup1,
-        ...this.insertFieldsGroup2,
-        ...this.insertFieldsGroup3
+        ...this.itemFilteredListGroup1,
+        ...this.itemFilteredListGroup2,
+        ...this.itemFilteredListGroup3
       ];
       fields.forEach(field => {
         const fieldRules = [];
@@ -569,5 +570,18 @@
     position: fixed;
     min-width: 88%; /* 可设置最小宽度，避免窗口过小 */
     min-height: 50%; /* 可设置最小高度，避免窗口过小 */
+  }
+  .butten-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items:center;
+  }
+  .el-button {
+    margin-left: 0;
+  }
+  .table-container {
+    max-height: 62vh; /* 限制表格的最大高度 */
+    overflow-y: auto; /* 添加垂直滚动条 */
   }
   </style>

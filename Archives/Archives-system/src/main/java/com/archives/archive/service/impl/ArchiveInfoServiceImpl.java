@@ -77,8 +77,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         }
         String searchValue = archiveInfo.getSearchValue();
         Long categoryId = archiveInfo.getCategoryId();
+        Long archiveStatus = archiveInfo.getArchiveStatus();
         if (searchValue != null && !searchValue.isEmpty()) {
-            return archiveInfoMapper.selectArchiveInfoListByKeyword(searchValue,categoryId, dataPermiList);
+            return archiveInfoMapper.selectArchiveInfoListByKeyword(searchValue,categoryId,archiveStatus, dataPermiList);
         }
         return archiveInfoMapper.selectArchiveInfoList(archiveInfo, dataPermiList);
     }
@@ -248,6 +249,51 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             }
 
             for (ArchiveInfo archiveInfo : archiveInfoList) {
+                if(archiveInfo.getCategoryId() == null) {archiveInfo.setCategoryId(0L);}
+                if(archiveInfo.getArchiveStatus() == null) {archiveInfo.setArchiveStatus(0L);}
+                if(archiveInfo.getArchiveDate() == null) {archiveInfo.setArchiveDate(DateUtils.getNowDate());}
+                if(archiveInfo.getCreateTime() == null) {archiveInfo.setCreateTime(DateUtils.getNowDate());}
+                if(archiveInfo.getArchiver() == null) {archiveInfo.setArchiver("");}
+                if(archiveInfo.getFondsNumber() == null){archiveInfo.setFondsNumber("");}
+                if(archiveInfo.getFondsName() == null){archiveInfo.setFondsName("");}
+                if(archiveInfo.getRetentionPeriod() == null){archiveInfo.setRetentionPeriod("");}
+                if(archiveInfo.getItemNumber() == null){archiveInfo.setItemNumber("");}
+                if(archiveInfo.getArchiveNumber() == null){archiveInfo.setArchiveNumber("");}
+                if(archiveInfo.getArchiveDate() == null){archiveInfo.setArchiveDate(null);}
+                if(archiveInfo.getRemarks() == null){archiveInfo.setRemarks("");}
+                if(archiveInfo.getArchiveStatus() == null){archiveInfo.setArchiveStatus(0L);}
+                if(archiveInfo.getCategoryCode() == null){archiveInfo.setCategoryCode("");}
+                if(archiveInfo.getField1() == null){archiveInfo.setField1("");}
+                if(archiveInfo.getField2() == null){archiveInfo.setField2("");}
+                if(archiveInfo.getField3() == null){archiveInfo.setField3("");}
+                if(archiveInfo.getField4() == null){archiveInfo.setField4("");}
+                if(archiveInfo.getField5() == null){archiveInfo.setField5("");}
+                if(archiveInfo.getField6() == null){archiveInfo.setField6("");}
+                if(archiveInfo.getField7() == null){archiveInfo.setField7("");}
+                if(archiveInfo.getField8() == null){archiveInfo.setField8("");}
+                if(archiveInfo.getField9() == null){archiveInfo.setField9("");}
+                if(archiveInfo.getField10() == null){archiveInfo.setField10("");}
+                if(archiveInfo.getField11() == null){archiveInfo.setField11("");}
+                if(archiveInfo.getField12() == null){archiveInfo.setField12("");}
+                if(archiveInfo.getField13() == null){archiveInfo.setField13("");}
+                if(archiveInfo.getField14() == null){archiveInfo.setField14("");}
+                if(archiveInfo.getField15() == null){archiveInfo.setField15("");}
+                if(archiveInfo.getField16() == null){archiveInfo.setField16("");}
+                if(archiveInfo.getField17() == null){archiveInfo.setField17("");}
+                if(archiveInfo.getField18() == null){archiveInfo.setField18("");}
+                if(archiveInfo.getField19() == null){archiveInfo.setField19("");}
+                if(archiveInfo.getField20() == null){archiveInfo.setField20("");}
+                if(archiveInfo.getField21() == null){archiveInfo.setField21("");}
+                if(archiveInfo.getField22() == null){archiveInfo.setField22("");}
+                if(archiveInfo.getField23() == null){archiveInfo.setField23("");}
+                if(archiveInfo.getField24() == null){archiveInfo.setField24("");}
+                if(archiveInfo.getField25() == null){archiveInfo.setField25("");}
+                if(archiveInfo.getField26() == null){archiveInfo.setField26("");}
+                if(archiveInfo.getField27() == null){archiveInfo.setField27("");}
+                if(archiveInfo.getField28() == null){archiveInfo.setField28("");}
+                if(archiveInfo.getField29() == null){archiveInfo.setField29("");}
+                if(archiveInfo.getField30() == null){archiveInfo.setField30("");}
+
                 archiveInfo.setDataPermit(String.valueOf(currentUser.getDeptId()));
                 archiveInfo.setCreateBy(currentUser.getNickName());
             }
