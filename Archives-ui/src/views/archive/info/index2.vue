@@ -59,7 +59,7 @@
           </el-form>
 
           <div class="form-button-wrapper">
-            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach">搜索</el-button>
             <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
           </div>
 
@@ -240,7 +240,7 @@ import {getDicts} from "@/api/system/dict/data";
 import {getItemByCategoryId} from "@/api/archive/item";
 import {listCategory} from "@/api/archive/category";
 import {deptTreeSelect} from "@/api/system/user";
-import {getInfo, listInfo, sendInfo} from "@/api/archive/info";
+import { getBeachList, getInfo, listInfo, sendInfo } from '@/api/archive/info'
 import categoryTree from "@/views/archive/category/categoryTree.vue";
 import Treeselect from "@riophae/vue-treeselect";
 import {treeselect} from "@/api/system/menu";
@@ -457,6 +457,7 @@ export default {
       return tree;
     },
     handleNodeClick(nodeData) {
+      this.clearSearch();
       //选择档案节点不显示列表页面
       if(nodeData.type===1) {
         this.categoryId = nodeData.id;
@@ -473,6 +474,16 @@ export default {
       this.queryParams.categoryId = this.categoryId;
       this.queryParams.archiveStatus = 2;
       this.getList();
+    },
+    handleQueryBeach(){
+      this.queryParams.categoryId = this.categoryId;
+      this.queryParams.archiveStatus = 2;
+      getBeachList(this.queryParams).then(response => {
+        if (response.rows.length > 0) {
+          this.infoList = response.rows;
+          this.total = response.total;
+        }
+      });
     },
     resetQuery() {
       this.queryParams = {
@@ -504,7 +515,13 @@ export default {
         this.total = response.total;
         this.loading = false;
         this.$nextTick(() => {
-          this.$refs.dynamicTable.doLayout();// 重新布局表格
+          if (this.$refs.dynamicTable && this.$refs.dynamicTable.doLayout) {
+            this.$refs.dynamicTable.doLayout(); // 确保方法存在后再调用
+          }else {
+            setTimeout(() => {
+              this.$refs.dynamicTable.doLayout(); // 延迟0.1秒后调用
+            }, 100); // 100 毫秒
+          }
         })
       });
     },
@@ -658,13 +675,23 @@ export default {
     handleSendUtilize(row){
       const ids = row.id || this.ids;
       const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('确认退回以下数据：' + archiveNumbers ).then(function() {
+      this.$modal.confirm('确认退回选中数据？').then(function() {
         return sendInfo(ids)
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("发送成功");
       }).catch(() => {});
-    }
+    },
+    clearSearch() {
+      this.categoryId = null;
+      this.queryParams= {
+        pageNum: 1,
+        pageSize: 10,
+        categoryId: null,
+        archiveStatus: 0, //默认显示待归档数据
+        searchValue: ''
+      }
+    },
   }
 };
 </script>

@@ -369,27 +369,13 @@ export default {
     };
   },
   created() {
-    this.categoryId = null;
-    this.queryParams= {
-      pageNum: 1,
-        pageSize: 10,
-        categoryId: null,
-        archiveStatus: 0, //默认显示待归档数据
-        searchValue: ''
-    },
+    this.clearSearch()
     this.getCategoryTreeList();
     this.getDeptTree();
     this.loadDepartments();
   },
   activated() {
-    this.categoryId = null;
-    this.queryParams= {
-      pageNum: 1,
-      pageSize: 10,
-      categoryId: null,
-      archiveStatus: 0, //默认显示待归档数据
-      searchValue: ''
-    }
+    this.clearSearch()
     this.getCategoryTreeList();
   },
   computed:{
@@ -552,6 +538,7 @@ export default {
       return tree;
     },
     handleNodeClick(nodeData) {
+      this.clearSearch()
       //选择档案节点不显示列表页面
       if (nodeData.type === 1) {
         this.categoryId = nodeData.id;
@@ -610,7 +597,13 @@ export default {
         this.total = response.total;
         this.loading = false;
         this.$nextTick(() => {
-          this.$refs.dynamicTable.doLayout();// 重新计算表格布局
+          if (this.$refs.dynamicTable && this.$refs.dynamicTable.doLayout) {
+            this.$refs.dynamicTable.doLayout(); // 确保方法存在后再调用
+          }else {
+            setTimeout(() => {
+                this.$refs.dynamicTable.doLayout(); // 延迟0.1秒后调用
+            }, 100); // 100 毫秒
+          }
         })
       });
     },
@@ -788,7 +781,7 @@ export default {
     handleDelete(row) {
       const ids = row.id || this.ids;
       const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('是否确认删除以下数据：' + archiveNumbers ).then(function() {
+      this.$modal.confirm('确认删除选中数据？').then(function() {
         return delInfo(ids);
       }).then(() => {
         this.getList();
@@ -985,7 +978,7 @@ export default {
     handleDocument(row) {
       const ids = row.id || this.ids;
       const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('确认归档以下数据：' + archiveNumbers ).then(function() {
+      this.$modal.confirm('确认归档选中数据？').then(function() {
         return updatAarchiveStatus(ids)
       }).then(() => {
         this.getList();
@@ -1048,6 +1041,16 @@ export default {
             this.getList(); // 确保无论成功或失败都执行
           });
       });
+    },
+    clearSearch() {
+      this.categoryId = null;
+      this.queryParams= {
+        pageNum: 1,
+        pageSize: 10,
+        categoryId: null,
+        archiveStatus: 0, //默认显示待归档数据
+        searchValue: ''
+      }
     },
     getRouterPath() {
       const cId = this.$route.query.categoryId;
