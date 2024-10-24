@@ -469,5 +469,6 @@
     </delete>
     <delete id="deleteArchiveInfoAll" parameterType="Long">
         delete from archive_info where archive_status = 0 and category_id = #{categoryId}
+        <include refid="selectArchiveInfoDataPermit" />
     </delete>
 </mapper>

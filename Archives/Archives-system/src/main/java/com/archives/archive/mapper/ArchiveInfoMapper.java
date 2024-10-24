@@ -109,7 +109,7 @@ public interface ArchiveInfoMapper
     /**
      * 批量删除档案信息
      */
-    public boolean deleteArchiveInfoAll(Long categroyId);
+    public boolean deleteArchiveInfoAll(@Param("categoryId") Long categoryId,@Param("dataPermit") String[] dataPermiList);
 
     /**
      * 高级搜索
