@@ -24,11 +24,6 @@ public class ArchiveSearchServiceImpl implements ArchiveSearchService {
         List<SearchJson> a;
         String keyWord = searchJson.getKeyWord();
         List<String> value = searchJson.getValue();
-        if (value.isEmpty()){
-            value.add("0");
-            value.add("1");
-            value.add("2");
-        }
         a = archiveSearchMapper.getSearchList(keyWord, value, dataPermiList);
         return a;
     }
@@ -54,13 +49,8 @@ public class ArchiveSearchServiceImpl implements ArchiveSearchService {
         String keyWord = searchJson.getKeyWord();
         List<String> value = searchJson.getValue();
         String categoryId = searchJson.getCategoryId();
-        if (value.isEmpty()){
-            value.add("0");
-            value.add("1");
-            value.add("2");
-        }
-        List<ArchiveInfo> searchListAll = archiveSearchMapper.getSearchListAll(keyWord, value, categoryId,pageSize,offset, dataPermiList);
-        int total = archiveSearchMapper.getSearchListAllCount(keyWord, value, categoryId, dataPermiList);
+        List<ArchiveInfo> searchListAll = archiveSearchMapper.getSearchListAll(keyWord, categoryId,pageSize,offset, dataPermiList);
+        int total = archiveSearchMapper.getSearchListAllCount(keyWord,  categoryId, dataPermiList);
         searchJson1.setTotal(total);
         searchJson1.setSearchResults(searchListAll);
         return searchJson1;

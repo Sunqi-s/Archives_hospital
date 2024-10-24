@@ -123,10 +123,13 @@
                 field30,
                 oss_status
             ) like CONCAT('%', #{keyWord}, '%')
-            and archive_status in
+            and archive_status = 2
+                 <if test="value.size() > 0">
+            and category_id in
             <foreach collection="value" item="itemValue" open="(" separator="," close=")">
                 #{itemValue}
             </foreach>
+                 </if>
             <include refid="selectSearchListBydataPermiList"/>
         </where>
         group by category_id
@@ -180,10 +183,7 @@
                 field30,
                 oss_status
             ) like CONCAT('%', #{keyWord}, '%')
-            and archive_status in
-            <foreach collection="value" item="itemValue" open="(" separator="," close=")">
-                #{itemValue}
-            </foreach>
+            and archive_status = 2
             and category_id = #{categoryId}
             <include refid="selectSearchListBydataPermiList"/>
         </where>
@@ -238,10 +238,7 @@
             field30,
             oss_status
             ) like CONCAT('%', #{keyWord}, '%')
-            and archive_status in
-            <foreach collection="value" item="itemValue" open="(" separator="," close=")">
-                #{itemValue}
-            </foreach>
+            and archive_status = 2
             and category_id = #{categoryId}
             <include refid="selectSearchListBydataPermiList"/>
         </where>
