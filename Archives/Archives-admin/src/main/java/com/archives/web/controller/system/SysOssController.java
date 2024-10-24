@@ -2,7 +2,6 @@ package com.archives.web.controller.system;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,7 +36,7 @@ public class SysOssController extends BaseController
     /**
      * 查询文件上传列表
      */
-    @PreAuthorize("@ss.hasPermi('system:oss:list')")
+//    @PreAuthorize("@ss.hasPermi('system:oss:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysOss sysOss)
     {
@@ -49,7 +48,7 @@ public class SysOssController extends BaseController
     /**
      * 导出文件上传列表
      */
-    @PreAuthorize("@ss.hasPermi('system:oss:export')")
+//    @PreAuthorize("@ss.hasPermi('system:oss:export')")
     @Log(title = "文件上传", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysOss sysOss)
@@ -62,7 +61,7 @@ public class SysOssController extends BaseController
     /**
      * 获取文件上传详细信息
      */
-    @PreAuthorize("@ss.hasPermi('system:oss:query')")
+//    @PreAuthorize("@ss.hasPermi('system:oss:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
@@ -72,7 +71,7 @@ public class SysOssController extends BaseController
     /**
      * 新增文件上传
      */
-    @PreAuthorize("@ss.hasPermi('system:oss:add')")
+//    @PreAuthorize("@ss.hasPermi('system:oss:add')")
     @Log(title = "文件上传", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody List<SysOss> sysOssList)
@@ -83,7 +82,7 @@ public class SysOssController extends BaseController
     /**
      * 修改文件上传
      */
-    @PreAuthorize("@ss.hasPermi('system:oss:edit')")
+//    @PreAuthorize("@ss.hasPermi('system:oss:edit')")
     @Log(title = "文件上传", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody SysOss sysOss)
@@ -94,7 +93,7 @@ public class SysOssController extends BaseController
     /**
      * 删除文件上传
      */
-    @PreAuthorize("@ss.hasPermi('system:oss:remove')")
+//    @PreAuthorize("@ss.hasPermi('system:oss:remove')")
     @Log(title = "文件上传", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)

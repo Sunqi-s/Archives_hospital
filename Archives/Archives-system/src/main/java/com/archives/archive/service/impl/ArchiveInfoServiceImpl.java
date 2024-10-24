@@ -325,10 +325,17 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         ArchiveInfo archiveInfo = new ArchiveInfo();
         archiveInfo.setCategoryId(categoryId);
         List<ArchiveInfo> archiveInfoList = selectArchiveInfoList(archiveInfo);
+        String[] dataPermiList = new String[0];
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        if("all".equals(currentUser.getDataPermi())){
+            dataPermiList = new String[0];
+        }else {
+            dataPermiList = (currentUser.getDataPermi().split(","));
+        }
         if (archiveInfoList == null || archiveInfoList.isEmpty()) {
             return true;
         }else {
-            return archiveInfoMapper.deleteArchiveInfoAll(categoryId);
+            return archiveInfoMapper.deleteArchiveInfoAll(categoryId,dataPermiList);
         }
     }
 
@@ -341,7 +348,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         }else {
             dataPermiList = (currentUser.getDataPermi().split(","));
         }
-        System.out.println("archiveInfo: " + archiveInfo);
         return archiveInfoMapper.beachSearch(archiveInfo, dataPermiList);
     }
 }
