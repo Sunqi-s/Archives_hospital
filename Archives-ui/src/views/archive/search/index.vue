@@ -11,14 +11,14 @@
         <el-main>
           <el-row :gutter="20">
             <el-col :span="22">
-              <el-select v-model="value" multiple placeholder="请选择">
-                <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
+              <el-cascader
+                v-model="value"
+                :options="fileOptions"
+                :show-all-levels="false"
+                :props="{multiple: true}"
+                ref="cascader"
+                @change="handleCascaderChange"
+              ></el-cascader>
               <el-input placeholder="请输入内容"
                 v-model="searchQuery"
                 @keyup.enter.native="handleSearch"
@@ -52,17 +52,17 @@
       </el-container>
     </div>
     <div v-else>
-      <el-main>
+      <el-main style="padding-left: 2%">
         <el-row :gutter="0" justify="center" type="flex">
           <el-col :span="3">
-            <el-select v-model="value" multiple placeholder="请选择" style="width: 100%;">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <el-cascader
+              v-model="value"
+              :options="fileOptions"
+              :show-all-levels="false"
+              :props="{multiple: true}"
+              ref="cascader"
+              @change="handleCascaderChange"
+            ></el-cascader>
           </el-col>
           <el-col :span="9">
             <el-input placeholder="请输入内容"
@@ -77,7 +77,7 @@
         </el-row>
         <el-row :gutter="20">
           <el-col :span="24">
-            <el-tabs type="border-card" v-model="selectedTag" @tab-click="selectedItem" class="fixed-table-container">
+            <el-tabs v-model="selectedTag" @tab-click="selectedItem" class="fixed-table-container">
               <el-tab-pane v-for="tag in tagList" :label="tag.name+'('+tag.count+')'" :name="String(tag.category)">
                 <!-- 动态生成的表格 -->
                 <div class="table-container">
@@ -231,7 +231,7 @@
         showTable:false,
         searchQuery: '',
         keyWord:'',
-        value: '',
+        value:0,
         hotTags: ['合同', '档案', '发票', '凭证', '文件', '会计', '项目', '通知'],
         searchCountMap: {}, // 记录每个搜索关键词的次数
         searchResult: [],// 搜索结果
@@ -253,24 +253,13 @@
           keyWord: null,
           value: null,
         },
+        selectedNodes:[],
+        fileOptions:[],
         itemFilteredList:[],
         showPreview:false,//文件预览对话框
         previewUrl:"",
         open:false,
         title:null,
-        options:[
-          {
-            value: '0',
-            label: '整理库',
-          },
-          {
-            value: '1',
-            label: '资源库',
-          },
-          {
-            value: '2',
-            label: '利用库',
-          }],
       };
     },
     computed:{
@@ -290,10 +279,8 @@
       },
     },
     created() {
-      listCategory().then(res => {
-        this.categoryList = res.data;
-      })
       this.loadDepartments();
+      this.getCategoryTreeList();
     },
     methods: {
       goToHot() {
@@ -301,21 +288,12 @@
       },
     handleSearch() {
       this.keyWord = this.searchQuery;
-      this.tagList = [];
-      this.selectedTag = '0';
+      const categoryList = this.selectedNodes.map(item => {
+        return item.data.id;
+      } );
+      this.value=0;
       this.queryParams.pageNum = 1;
-      const searchJson = {keyWord:this.searchQuery,value:this.value};
-      const query = this.searchQuery.trim();
-      if(query){
-        if(!this.searchCountMap[query]) {
-          this.searchCountMap[query] = 0;
-        }
-        this.searchCountMap[query]++;
-
-        if(this.searchCountMap[query] === 5 && !this.hotTags.includes(query)){
-          this.hotTags.push(query);
-        }
-
+      const searchJson = {keyWord:this.searchQuery,value:categoryList};
         searchArchive(searchJson).then(tagListRes => {
           for (let i = 0; i < tagListRes.length; i++){
             getCategory(tagListRes[i].categoryId).then(nameFromCategory => {
@@ -323,8 +301,8 @@
               this.tagList.push(tag)
             })
           }
+          this.showTable = true;
         });
-      }
       this.showTable = true;
     },
     handleCloseTag(tag) {
@@ -361,7 +339,7 @@
           this.generateRules();
         })
           this.queryParams.keyWord = this.keyWord;
-          this.queryParams.value = this.value;
+          // this.queryParams.value = this.value;
           this.queryParams.categoryId = this.selectedTag;
           this.handleNextPage();
     },
@@ -558,14 +536,51 @@
         }, {});
       })
     },
+      handleCascaderChange(){
+        this.selectedNodes = this.$refs['cascader'].getCheckedNodes(true);
+      },
+      getCategoryTreeList() {
+        listCategory().then(response => {
+          this.fileOptions = this.handleFileOptions(response.data, "id", "parentId");
+        }).then(() => {
+          this.value = 0
+        })
+      },
+      handleFileOptions(data, idKey, parentKey) {
+        const tree = [];
+        const idMap = {};
+        const idMap2 = {};
+
+        data.forEach(item => {
+          idMap2[item[idKey]] = {
+            id: item.id,
+            parentId: item.parentId,
+            parentName: item.parentName,
+            type: item.type,
+            label: item.name
+          };
+          idMap[item[idKey]] = { ...idMap2[item[idKey]], children: [] };
+        });
+
+        data.forEach(item => {
+          const parent = idMap[item[parentKey]];
+          if (parent) {
+            parent.children.push(idMap2[item[idKey]]);
+          } else {
+            tree.push(idMap[item[idKey]]);
+          }
+        });
+
+        return tree;
+      },
   },
   };
   </script>
   <style lang="scss" scoped>
   .fixed-table-container {
-    top: 200px;
+    top: 21%;
     width: auto;
-    max-width: 88%;
+    max-width: 93%;
     height: 77vh;
     position: fixed;
     min-width: 88%; /* 可设置最小宽度，避免窗口过小 */
@@ -583,5 +598,12 @@
   .table-container {
     max-height: 62vh; /* 限制表格的最大高度 */
     overflow-y: auto; /* 添加垂直滚动条 */
+  }
+  .truncate-text {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%; /* Adjust as needed */
   }
   </style>
