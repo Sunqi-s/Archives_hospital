@@ -72,7 +72,6 @@
               type="success"
               icon="el-icon-s-flag"
               size="small"
-              :disabled="selectedItems.length === 0"
               @click="handlePrint"
             >打印</el-button>
           </el-col>
@@ -81,7 +80,6 @@
               type="success"
               icon="el-icon-s-flag"
               size="small"
-              :disabled="multiple"
               @click="handleSendUtilize"
             >退回资源</el-button>
           </el-col>
@@ -651,36 +649,77 @@ export default {
         }, {});
       })
     },
+    //文件打印
     handlePrint() {
-      if (this.selectedItems.length > 0) {
-        pointRelation(this.selectedItems[0].categoryId).then(response => {
+        pointRelation(this.categoryId).then(response => {
           if(response.name){
-            const tpl_name = response.name;
-            this.savedids = this.ids;
-            const ids = this.savedids.join(',');
-            const pageIndex = 1;     // 页码
-            const renderOption = 1;  // 渲染选项
-            const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
-            window.open(url, '_blank');
+            let ids = ''
+            if (this.selectedItems.length > 0) {
+              this.savedids = this.ids;
+              ids = this.savedids.join(',');
+              print(response.name,ids)
+            }
+            else {
+              let listids = []
+              let ExportQueryParams = {
+                pageNum: 1,
+                pageSize: 10000000,
+                categoryId: this.categoryId,
+                archiveStatus: 2,
+                searchValue: ''
+              }
+              listInfo(ExportQueryParams).then(res => {
+                listids = res.rows.map(item => item.id)
+                ids = listids.join(',');
+                print(response.name,ids)
+                }
+              )
+            }
           }else {
             this.$message.error("未找到打印模板");
           }
         })
-      }
+        const print = (name,ids)=>{
+          const tpl_name = name;
+          const pageIndex = 1;     // 页码
+          const renderOption = 1;  // 渲染选项
+          const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
+          window.open(url, '_blank');
+        }
     },
     handleNextPage(){
       // this.savedids = this.savedids.concat(this.ids);
       this.getList();
     },
-    handleSendUtilize(row){
-      const ids = row.id || this.ids;
-      const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('确认退回选中数据？').then(function() {
-        return sendInfo(ids)
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("发送成功");
-      }).catch(() => {});
+    handleSendUtilize(){
+      if(this.ids.length > 1){
+        const ids = this.ids;
+        this.$modal.confirm('确认退回选中数据？').then(()=> {
+          return sendInfo(ids)
+        }).then(() => {
+          this.getList();
+          this.$modal.msgSuccess("退回成功");
+        }).catch(() => {
+        });
+      }else {
+        this.$modal.confirm('确认退回全部'+this.total+'条数据？').then(()=> {
+          let ExportQueryParams = {
+            pageNum: 1,
+            pageSize: 10000000,
+            categoryId: this.categoryId,
+            archiveStatus: 2,
+            searchValue: ''
+          }
+          listInfo(ExportQueryParams).then(res => {
+            let ids = res.rows.map(item => item.id)
+            sendInfo(ids);
+          }).then(() => {
+            this.getList();
+            this.$modal.msgSuccess("退回成功");
+          }).catch(() => {
+          });
+        })
+      }
     },
     clearSearch() {
       this.categoryId = null;
@@ -688,7 +727,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
-        archiveStatus: 0, //默认显示待归档数据
+        archiveStatus: 2, //默认显示待归档数据
         searchValue: ''
       }
     },

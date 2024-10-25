@@ -100,7 +100,6 @@
               type="success"
               icon="el-icon-s-flag"
               size="small"
-              :disabled="multiple"
               @click="handleDocument"
             >归档</el-button>
           </el-col>
@@ -109,7 +108,6 @@
               type="success"
               icon="el-icon-s-flag"
               size="small"
-              :disabled="selectedItems.length === 0"
               @click="handlePrint"
             >打印</el-button>
           </el-col>
@@ -143,6 +141,7 @@
               <el-tooltip class="item" effect="dark" :content="getTooltipContent(field.name, scope.row)" placement="top">
                 <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{ getArchiveStatus(scope.row.archiveStatus) }}</span>
                 <span class="truncate-text" v-else-if="field.name === 'department'">{{ getDepartmentName(scope.row.department) }}</span>
+                <span class="truncate-text" v-else-if="field.name === 'ossStatus'">{{ getOssStatus(scope.row.ossStatus) }}</span>
                 <span class="truncate-text"  v-html="scope.row[field.name]"></span>
               </el-tooltip>
             </template>
@@ -667,14 +666,14 @@ export default {
         });
     },
     /** 修改按钮操作 */
-    handleUpdate(row) {
+    handleUpdate() {
       this.choice = 1;
       this.reset();
       try {
         this.$refs['form'].resetFields();
       } catch {
       }
-      const id = row.id || this.ids
+      const id = this.ids
       getInfo(id).then(response => {
         this.form = response.data;
         this.open = true;
@@ -778,10 +777,9 @@ export default {
       this.showDialog = false
     },
     /** 删除按钮操作 */
-    handleDelete(row) {
-      const ids = row.id || this.ids;
-      const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('确认删除选中数据？').then(function() {
+    handleDelete() {
+      const ids = this.ids;
+      this.$modal.confirm('确认删除选中数据？').then(()=> {
         return delInfo(ids);
       }).then(() => {
         this.getList();
@@ -904,12 +902,12 @@ export default {
       }
     },
     //文件查看
-    handleDetail(row) {
+    handleDetail() {
       try {
         this.$refs['form'].resetFields();
       } catch {
       }
-      const id = row.id || this.ids
+      const id = this.ids
       getInfo(id).then(response => {
         this.form = response.data;
         this.open = true;
@@ -975,16 +973,35 @@ export default {
           return '未知状态';
       }
     },
-    handleDocument(row) {
-      const ids = row.id || this.ids;
-      const archiveNumbers = row.archiveNumber || this.archiveNumbers;
-      this.$modal.confirm('确认归档选中数据？').then(function() {
-        return updatAarchiveStatus(ids)
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("归档成功");
-      }).catch(() => {
-      });
+    handleDocument() {
+      if(this.ids.length > 1){
+        const ids = this.ids;
+        this.$modal.confirm('确认归档选中数据？').then(()=> {
+          return updatAarchiveStatus(ids)
+        }).then(() => {
+          this.getList();
+          this.$modal.msgSuccess("归档成功");
+        }).catch(() => {
+        });
+      }else {
+        this.$modal.confirm('确认归档全部'+this.total+'条数据？').then(()=> {
+          let ExportQueryParams = {
+            pageNum: 1,
+            pageSize: 10000000,
+            categoryId: this.categoryId,
+            archiveStatus: 0,
+            searchValue: ''
+          }
+          listInfo(ExportQueryParams).then(res => {
+            let ids = res.rows.map(item => item.id)
+            updatAarchiveStatus(ids);
+          }).then(() => {
+            this.getList();
+            this.$modal.msgSuccess("归档成功");
+          }).catch(() => {
+          });
+        })
+      }
     },
     getTexted(name) {
       name = name.replace(/<\/?span[^>]*>/g, '');
@@ -992,6 +1009,16 @@ export default {
     },
     getDepartmentName(department) {
       return this.departmentMap[department] || '无';
+    },
+    getOssStatus(status){
+      switch (status) {
+        case 1:
+          return '有附件';
+        case 2:
+          return '无附件';
+        default:
+          return '未知';
+      }
     },
     loadDepartments() {
       listDept().then(response => {
@@ -1003,22 +1030,41 @@ export default {
     },
     //文件打印
     handlePrint() {
-      if (this.selectedItems.length > 0) {
-        pointRelation(this.selectedItems[0].categoryId).then(response => {
+        pointRelation(this.categoryId).then(response => {
           if(response.name){
-            const tpl_name = response.name;
-            this.savedids = this.ids;
-            const ids = this.savedids.join(',');
-            const pageIndex = 1;     // 页码
-            const renderOption = 1;  // 渲染选项
-            const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
-            window.open(url, '_blank');
+            let ids = ''
+            if (this.selectedItems.length > 0) {
+              this.savedids = this.ids;
+              ids = this.savedids.join(',');
+              print(response.name,ids)
+            }
+            else {
+              let listids = []
+              let ExportQueryParams = {
+                pageNum: 1,
+                pageSize: 10000000,
+                categoryId: this.categoryId,
+                archiveStatus: 0,
+                searchValue: ''
+              }
+              listInfo(ExportQueryParams).then(res => {
+                listids = res.rows.map(item => item.id)
+                ids = listids.join(',');
+                print(response.name,ids)
+                }
+              )
+            }
           }else {
             this.$message.error("未找到打印模板");
           }
-
         })
-      }
+        const print = (name,ids)=>{
+          const tpl_name = name;
+          const pageIndex = 1;     // 页码
+          const renderOption = 1;  // 渲染选项
+          const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
+          window.open(url, '_blank');
+        }
     },
     handleNextPage() {
       // this.savedids = this.savedids.concat(this.ids);
