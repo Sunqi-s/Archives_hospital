@@ -12,7 +12,7 @@ export function listInfo(query) {
 // 查询档案信息详细
 export function getInfo(id) {
   return request({
-    url: '/archive/info/' + id,
+    url: '/archive/info/getInfo/' + id,
     method: 'get'
   })
 }

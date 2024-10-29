@@ -14,11 +14,12 @@ public class SearchJson {
         private String archiveNumber;
         private String field9;
         private List<ArchiveInfo> searchResults;
+        private String path;
 
     public SearchJson() {
     }
 
-    public SearchJson(String keyWord, List<String> value, String categoryId, String length, int pageNum, int pageSize, int total, String archiveNumber, String field9, List<ArchiveInfo> searchResults) {
+    public SearchJson(String keyWord, List<String> value, String categoryId, String length, int pageNum, int pageSize, int total, String archiveNumber, String field9, List<ArchiveInfo> searchResults, String path) {
         this.keyWord = keyWord;
         this.value = value;
         this.categoryId = categoryId;
@@ -29,6 +30,7 @@ public class SearchJson {
         this.archiveNumber = archiveNumber;
         this.field9 = field9;
         this.searchResults = searchResults;
+        this.path = path;
     }
 
     public String getKeyWord() {
@@ -111,6 +113,14 @@ public class SearchJson {
         this.field9 = field9;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     @Override
     public String toString() {
         return "SearchJson{" +
@@ -124,6 +134,7 @@ public class SearchJson {
                 ", archiveNumber='" + archiveNumber + '\'' +
                 ", field9='" + field9 + '\'' +
                 ", searchResults=" + searchResults +
+                ", path='" + path + '\'' +
                 '}';
     }
 }

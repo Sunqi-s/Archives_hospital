@@ -23,13 +23,13 @@ public class ArchiveSearchController extends BaseController {
     @Autowired
     private ArchiveSearchService archiveSearchService;
 
-    @PreAuthorize("@ss.hasAnyPermi('archive:search:list')")
+//    @PreAuthorize("@ss.hasAnyPermi('archive:search:list')")
     @PostMapping("/list/")
     public List<SearchJson> getSearchList(@RequestBody SearchJson searchJson){
         return archiveSearchService.getSearchList(searchJson);
     }
 
-    @PreAuthorize("@ss.hasAnyPermi('archive:search:list')")
+//    @PreAuthorize("@ss.hasAnyPermi('archive:search:list')")
     @PostMapping("/list/all/")
     public SearchJson getSearchListAll(@RequestBody SearchJson searchJson){
         return archiveSearchService.getSearchListAll(searchJson);

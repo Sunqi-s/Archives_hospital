@@ -39,7 +39,7 @@ public class ArchiveItemController extends BaseController
     /**
      * 查询档案信息模板列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:item:list')")
+//    @PreAuthorize("@ss.hasPermi('archive:item:list')")
     @GetMapping("/list")
     public TableDataInfo list(ArchiveItem archiveItem)
     {
@@ -60,7 +60,7 @@ public class ArchiveItemController extends BaseController
     /**
      * 导出档案信息模板列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:item:export')")
+//    @PreAuthorize("@ss.hasPermi('archive:item:export')")
     @Log(title = "档案信息模板", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, ArchiveItem archiveItem)
@@ -73,7 +73,7 @@ public class ArchiveItemController extends BaseController
     /**
      * 获取档案信息模板详细信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:item:query')")
+//    @PreAuthorize("@ss.hasPermi('archive:item:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
@@ -83,7 +83,7 @@ public class ArchiveItemController extends BaseController
     /**
      * 新增档案信息模板
      */
-    @PreAuthorize("@ss.hasPermi('archive:item:add')")
+//    @PreAuthorize("@ss.hasPermi('archive:item:add')")
     @Log(title = "档案信息模板", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody ArchiveItem archiveItem)
@@ -94,7 +94,7 @@ public class ArchiveItemController extends BaseController
     /**
      * 修改档案信息模板
      */
-    @PreAuthorize("@ss.hasPermi('archive:item:edit')")
+//    @PreAuthorize("@ss.hasPermi('archive:item:edit')")
     @Log(title = "档案信息模板", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody List<ArchiveItem> archiveItems)
@@ -105,7 +105,7 @@ public class ArchiveItemController extends BaseController
     /**
      * 删除档案信息模板
      */
-    @PreAuthorize("@ss.hasPermi('archive:item:remove')")
+//    @PreAuthorize("@ss.hasPermi('archive:item:remove')")
     @Log(title = "档案信息模板", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)

@@ -31,7 +31,7 @@ public class ArchiveInfoController extends BaseController
     /**
      * 查询档案信息列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:list')")
+//    @PreAuthorize("@ss.hasPermi('archive:info:list')")
     @GetMapping("/list")
     public TableDataInfo list(ArchiveInfo archiveInfo)
     {
@@ -43,7 +43,7 @@ public class ArchiveInfoController extends BaseController
     /**
      * 导出档案信息列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:export')")
+//    @PreAuthorize("@ss.hasPermi('archive:info:export')")
     @Log(title = "档案信息", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, ArchiveInfo archiveInfo)
@@ -56,8 +56,8 @@ public class ArchiveInfoController extends BaseController
     /**
      * 获取档案信息详细信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:query')")
-    @GetMapping(value = "/{id}")
+//    @PreAuthorize("@ss.hasPermi('archive:info:query')")
+    @GetMapping(value = "getInfo/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
         return success(archiveInfoService.selectArchiveInfoById(id));
@@ -66,7 +66,7 @@ public class ArchiveInfoController extends BaseController
     /**
      * 新增档案信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:add')")
+//    @PreAuthorize("@ss.hasPermi('archive:info:add')")
     @Log(title = "档案信息", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody ArchiveInfo archiveInfo)
@@ -77,7 +77,7 @@ public class ArchiveInfoController extends BaseController
     /**
      * 修改档案信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:edit')")
+//    @PreAuthorize("@ss.hasPermi('archive:info:edit')")
     @Log(title = "档案信息", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody ArchiveInfo archiveInfo)
@@ -88,7 +88,7 @@ public class ArchiveInfoController extends BaseController
     /**
      * 归档档案信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:document')")
+//    @PreAuthorize("@ss.hasPermi('archive:info:document')")
     @PutMapping("/document/{ids}")
     public AjaxResult document(@PathVariable Long[] ids)
     {
@@ -98,7 +98,7 @@ public class ArchiveInfoController extends BaseController
     /**
      * 删除档案信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:remove')")
+//    @PreAuthorize("@ss.hasPermi('archive:info:remove')")
     @Log(title = "档案信息", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
@@ -134,7 +134,7 @@ public class ArchiveInfoController extends BaseController
     /**
      * 批量删除档案信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:info:batchRemove')")
+//    @PreAuthorize("@ss.hasPermi('archive:info:batchRemove')")
     @Log(title = "批量删除档案信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/batchRemove/{categoryId}")
     public AjaxResult batchRemove(@PathVariable Long categoryId) {

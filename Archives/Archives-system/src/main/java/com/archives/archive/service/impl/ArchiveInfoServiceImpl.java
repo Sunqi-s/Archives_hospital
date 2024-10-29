@@ -137,17 +137,15 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         Set<Long> originalFileIds = originalSysOssList.stream()
                 .map(SysOss::getId)
                 .collect(Collectors.toSet());
-        System.out.println("originalFileIds: " + originalFileIds);
 
         // 将新附件列表转换为附件ID的集合
         Set<Long> newFileIds = newSysOssList.stream()
                 .map(SysOss::getId)
                 .collect(Collectors.toSet());
-        System.out.println("newFileIds: " + newFileIds);
+
         // 找出需要删除的附件ID
         Set<Long> idsToDelete = new HashSet<>(originalFileIds);
         idsToDelete.removeAll(newFileIds);
-        System.out.println("idsToDelete: " + idsToDelete);
 
         // 删除原有附件中不再存在于新列表的附件
         if (!idsToDelete.isEmpty()) {
@@ -185,12 +183,10 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public int updateArchiveStatusByIds(Long[] ids) {
         SysUser StatusUsers = SecurityUtils.getLoginUser().getUser();
-        System.out.println("sysUser: " + StatusUsers);
         ArchiveInfo archiveInfoStatus = new ArchiveInfo();
         archiveInfoStatus.setArchiveStatus(1L);
         archiveInfoStatus.setDepartment(String.valueOf(StatusUsers.getDeptId()));
         archiveInfoStatus.setArchiver(StatusUsers.getNickName());
-        System.out.println("archiveInfoStatus: " + archiveInfoStatus);
         return archiveInfoMapper.updateArchiveStatusByIds(ids,archiveInfoStatus);
     }
 
@@ -198,14 +194,12 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     public int updateArchiveStatusById(Long id)
     {
         SysUser StatusUser = SecurityUtils.getLoginUser().getUser();
-        System.out.println("sysUser: " + StatusUser);
         ArchiveInfo archiveInfoStatus = new ArchiveInfo();
         archiveInfoStatus.setId(id);
         archiveInfoStatus.setArchiveStatus(1L);
         archiveInfoStatus.setDepartment(String.valueOf(StatusUser.getDeptId()));
         archiveInfoStatus.setArchiver(StatusUser.getNickName());
         archiveInfoStatus.setArchiveDate(DateUtils.getNowDate());
-        System.out.println("archiveInfoStatus: " + archiveInfoStatus);
         return archiveInfoMapper.updateArchiveStatusById(archiveInfoStatus);
     }
 
