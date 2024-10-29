@@ -12,7 +12,6 @@
           <el-row :gutter="20">
             <el-col :span="22">
               <el-cascader
-                v-model="value"
                 :options="fileOptions"
                 :show-all-levels="false"
                 :props="{multiple: true}"
@@ -56,7 +55,6 @@
         <el-row :gutter="0" justify="center" type="flex">
           <el-col :span="3">
             <el-cascader
-              v-model="value"
               :options="fileOptions"
               :show-all-levels="false"
               :props="{multiple: true}"
@@ -75,7 +73,7 @@
             </el-input>
           </el-col>
         </el-row>
-        <el-row :gutter="20">
+        <el-row :gutter="20" v-if="!isEmpty">
           <el-col :span="24">
             <el-tabs v-model="selectedTag" @tab-click="selectedItem" class="fixed-table-container">
               <el-tab-pane v-for="tag in tagList" :label="tag.name+'('+tag.count+')'" :name="String(tag.category)">
@@ -88,7 +86,7 @@
                       :prop="field.name"
                       :label="field.label"
                       :sortable="true"
-                      :width="field.width || '120px'"
+                      :width="field.label.length * 11 + 65+'vh'"
                     >
                       <template slot-scope="scope">
                         <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{getArchiveStatus(scope.row.archiveStatus)}}</span>
@@ -113,6 +111,9 @@
               </el-tab-pane>
             </el-tabs>
           </el-col>
+        </el-row>
+        <el-row :gutter="20" v-else>
+          <el-empty description="未找到搜索内容"></el-empty>
         </el-row>
       </el-main>
 
@@ -229,9 +230,9 @@
     data() {
         return {
         showTable:false,
+        isEmpty:false,
         searchQuery: '',
         keyWord:'',
-        value:0,
         hotTags: ['合同', '档案', '发票', '凭证', '文件', '会计', '项目', '通知'],
         searchCountMap: {}, // 记录每个搜索关键词的次数
         searchResult: [],// 搜索结果
@@ -286,25 +287,30 @@
       goToHot() {
         this.$router.push('/hot');
       },
-    handleSearch() {
-      this.keyWord = this.searchQuery;
-      const categoryList = this.selectedNodes.map(item => {
-        return item.data.id;
-      } );
-      this.value=0;
-      this.queryParams.pageNum = 1;
-      const searchJson = {keyWord:this.searchQuery,value:categoryList};
-        searchArchive(searchJson).then(tagListRes => {
-          for (let i = 0; i < tagListRes.length; i++){
-            getCategory(tagListRes[i].categoryId).then(nameFromCategory => {
-              const tag = {name:nameFromCategory.data.name,category:nameFromCategory.data.id,count:tagListRes[i].length};
-              this.tagList.push(tag)
-            })
-          }
-          this.showTable = true;
+      handleSearch() {
+        this.keyWord = this.searchQuery;
+        const categoryList = this.selectedNodes.map(item => {
+          return item.data.id;
         });
-      this.showTable = true;
-    },
+        this.value = categoryList;
+        this.queryParams.pageNum = 1;
+        const searchJson = {keyWord: this.searchQuery, value: categoryList};
+        searchArchive(searchJson).then(async tagListRes => {
+          this.tagList = [];
+          // 创建一个数组存储所有的Promise
+          const promises = tagListRes.map(tagRes => {
+            return getCategory(tagRes.categoryId).then(nameFromCategory => {
+              const tag = { name: nameFromCategory.data.name, category: nameFromCategory.data.id, count: tagRes.length };
+              this.tagList.push(tag);
+            });
+          });
+          // 等待所有的Promise执行完成
+          await Promise.all(promises);
+          // 此时所有的tag已被添加到tagList中
+          this.isEmpty = this.tagList.length === 0;
+        });
+        this.showTable = true;
+      },
     handleCloseTag(tag) {
       // 实现删除标签的逻辑
       this.hotTags = this.hotTags.filter(t => t !== tag);
@@ -542,8 +548,6 @@
       getCategoryTreeList() {
         listCategory().then(response => {
           this.fileOptions = this.handleFileOptions(response.data, "id", "parentId");
-        }).then(() => {
-          this.value = 0
         })
       },
       handleFileOptions(data, idKey, parentKey) {
@@ -557,7 +561,8 @@
             parentId: item.parentId,
             parentName: item.parentName,
             type: item.type,
-            label: item.name
+            label: item.name,
+            value: item.id
           };
           idMap[item[idKey]] = { ...idMap2[item[idKey]], children: [] };
         });

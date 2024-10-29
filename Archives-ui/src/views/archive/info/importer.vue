@@ -411,10 +411,9 @@ export default {
             formattedRow.archiveDate = date.toISOString().split('T')[0];
           }
         }
-
         // 基于 archiveNumber 从 upFileList 过滤匹配文件
         formattedRow.sysOssList = this.upFileList.filter(file =>
-          this.removeFileExtension(file.name) === formattedRow.archiveNumber
+          file.folderName === formattedRow.archiveNumber
         );
         if (formattedRow.sysOssList.length > 0) {
           formattedRow.ossStatus = 1
@@ -926,6 +925,7 @@ export default {
           name: fileResponse.originalFilename || '',
           size: fileResponse.size || '',
           suffix: fileResponse.originalFilename ? fileResponse.originalFilename.split('.').pop() : '',
+          folderName: file.folderName || '',
         });
       }
     },
@@ -1026,12 +1026,14 @@ export default {
         const processZipEntry = async (zipEntry) => {
           if (!zipEntry.dir) {
             const fileName = zipEntry.name.split('/').pop(); // 只保留文件名
+            const folderName = zipEntry.name.split('/')[1]; // 只保留文件夹名
             const fileBlob = await zipEntry.async("blob"); // 使用 async 方法获取 Blob 对象
             const file = new File([fileBlob], fileName, {
               type: fileBlob.type || '', // 可能需要设置 MIME 类型
               lastModified: zipEntry.date ? zipEntry.date.getTime() : Date.now()
             });
             files.push({
+              folderName: folderName,
               name: fileName,
               url: '',
               status: 'ready',
