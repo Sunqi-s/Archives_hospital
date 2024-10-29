@@ -181,15 +181,12 @@ public class CommonController
     public void downloadZip(HttpServletResponse response, String files){
         LoginUser loginUser = SecurityUtils.getLoginUser();
         String zipname=loginUser.getUser().getDept().getDeptName();
-//        System.out.println("files:" + files);
         String[] filesPsths = Convert.toStrArray(files);
         ArrayList<String> filepaths = new ArrayList<>();
         for (String filePath : filesPsths){
             String path=ArchivesConfig.getProfile() + StringUtils.substringAfter(filePath, Constants.RESOURCE_PREFIX);
-//            System.out.println("path:" + path);
             filepaths.add(path);
         }
-//        System.out.println("filepaths:" + filepaths.toString());
         try{
         String encodedFileName = URLEncoder.encode(zipname + ".zip", StandardCharsets.UTF_8.toString()) .replace("+", "%20");
         String fileName = zipname + ".zip";
@@ -204,8 +201,6 @@ public class CommonController
             int len;
             for (String filePath : filepaths) {
                 File file = new File(filePath);
-                System.out.println("file:" + file);
-                System.out.println("====="+file.isFile());
                 if (!file.isFile()) {
                     continue;
                 }

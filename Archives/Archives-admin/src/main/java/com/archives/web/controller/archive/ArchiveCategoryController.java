@@ -47,7 +47,7 @@ public class ArchiveCategoryController extends BaseController
     /**
      * 导出档案分类列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:category:export')")
+//    @PreAuthorize("@ss.hasPermi('archive:category:export')")
     @Log(title = "档案分类", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, ArchiveCategory archiveCategory)
@@ -70,7 +70,7 @@ public class ArchiveCategoryController extends BaseController
     /**
      * 新增档案分类
      */
-    @PreAuthorize("@ss.hasPermi('archive:category:add')")
+//    @PreAuthorize("@ss.hasPermi('archive:category:add')")
     @Log(title = "档案分类", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody ArchiveCategory archiveCategory)
@@ -81,7 +81,7 @@ public class ArchiveCategoryController extends BaseController
     /**
      * 修改档案分类
      */
-    @PreAuthorize("@ss.hasPermi('archive:category:edit')")
+//    @PreAuthorize("@ss.hasPermi('archive:category:edit')")
     @Log(title = "档案分类", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody ArchiveCategory archiveCategory)
@@ -92,7 +92,7 @@ public class ArchiveCategoryController extends BaseController
     /**
      * 删除档案分类
      */
-    @PreAuthorize("@ss.hasPermi('archive:category:remove')")
+//    @PreAuthorize("@ss.hasPermi('archive:category:remove')")
     @Log(title = "档案分类", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{id}")
     public AjaxResult remove(@PathVariable Long id)

@@ -37,7 +37,7 @@ public class ArchiveReportTemplatesController extends BaseController
     /**
      * 查询报表设计列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:list')")
+//    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:list')")
     @GetMapping("/list")
     public TableDataInfo list(ArchiveReportTemplates archiveReportTemplates)
     {
@@ -49,7 +49,7 @@ public class ArchiveReportTemplatesController extends BaseController
     /**
      * 导出报表设计列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:export')")
+//    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:export')")
     @Log(title = "报表设计", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, ArchiveReportTemplates archiveReportTemplates)
@@ -62,7 +62,7 @@ public class ArchiveReportTemplatesController extends BaseController
     /**
      * 获取报表设计详细信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:query')")
+//    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
@@ -72,7 +72,7 @@ public class ArchiveReportTemplatesController extends BaseController
     /**
      * 新增报表设计
      */
-    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:add')")
+//    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:add')")
     @Log(title = "报表设计", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody ArchiveReportTemplates archiveReportTemplates)
@@ -83,7 +83,7 @@ public class ArchiveReportTemplatesController extends BaseController
     /**
      * 修改报表设计
      */
-    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:edit')")
+//    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:edit')")
     @Log(title = "报表设计", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody ArchiveReportTemplates archiveReportTemplates)
@@ -94,7 +94,7 @@ public class ArchiveReportTemplatesController extends BaseController
     /**
      * 删除报表设计
      */
-    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:remove')")
+//    @PreAuthorize("@ss.hasPermi('archive:rpttemplates:remove')")
     @Log(title = "报表设计", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)

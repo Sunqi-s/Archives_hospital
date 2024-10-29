@@ -66,7 +66,7 @@ public class SysOssServiceImpl implements ISysOssService
     @Override
     public int insertSysOssBatch(List<SysOss> sysOssList)
     {
-        if(sysOssList == null || sysOssList.size() == 0) {
+        if(sysOssList == null || sysOssList.isEmpty()) {
             return 1;
         }
         for (SysOss sysOss : sysOssList) {

@@ -76,7 +76,6 @@ public class ArchiveImportLogController extends BaseController
 
         ArchiveImportLog data=archiveImportLogService.insertArchiveImportLog(archiveImportLog);
 
-        System.out.println("data:"+data);
         return success(data);
 //        return toAjax(archiveImportLogService.insertArchiveImportLog(archiveImportLog));
     }

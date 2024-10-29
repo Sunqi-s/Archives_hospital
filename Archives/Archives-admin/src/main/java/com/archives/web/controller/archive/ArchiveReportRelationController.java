@@ -50,7 +50,7 @@ public class ArchiveReportRelationController extends BaseController
     /**
      * 导出档案报表关系列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:relation:export')")
+//    @PreAuthorize("@ss.hasPermi('archive:relation:export')")
     @Log(title = "档案报表关系", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, ArchiveReportRelation archiveReportRelation)
@@ -72,7 +72,7 @@ public class ArchiveReportRelationController extends BaseController
     /**
      * 新增档案报表关系
      */
-    @PreAuthorize("@ss.hasPermi('archive:relation:add')")
+//    @PreAuthorize("@ss.hasPermi('archive:relation:add')")
     @Log(title = "档案报表关系", businessType = BusinessType.INSERT)
     @PostMapping
     public int add(@RequestBody ArchiveReportRelation archiveReportRelation)
@@ -83,7 +83,7 @@ public class ArchiveReportRelationController extends BaseController
     /**
      * 修改档案报表关系
      */
-    @PreAuthorize("@ss.hasPermi('archive:relation:edit')")
+//    @PreAuthorize("@ss.hasPermi('archive:relation:edit')")
     @Log(title = "档案报表关系", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody ArchiveReportRelation archiveReportRelation)
@@ -94,7 +94,7 @@ public class ArchiveReportRelationController extends BaseController
     /**
      * 删除档案报表关系
      */
-    @PreAuthorize("@ss.hasPermi('archive:relation:remove')")
+//    @PreAuthorize("@ss.hasPermi('archive:relation:remove')")
     @Log(title = "档案报表关系", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)

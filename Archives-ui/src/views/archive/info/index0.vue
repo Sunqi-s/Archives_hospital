@@ -666,14 +666,14 @@ export default {
         });
     },
     /** 修改按钮操作 */
-    handleUpdate() {
+    handleUpdate(row) {
       this.choice = 1;
       this.reset();
       try {
         this.$refs['form'].resetFields();
       } catch {
       }
-      const id = this.ids
+      const id = row.id || this.ids
       getInfo(id).then(response => {
         this.form = response.data;
         this.open = true;
@@ -902,12 +902,12 @@ export default {
       }
     },
     //文件查看
-    handleDetail() {
+    handleDetail(row) {
       try {
         this.$refs['form'].resetFields();
       } catch {
       }
-      const id = this.ids
+      const id = row.id || this.ids
       getInfo(id).then(response => {
         this.form = response.data;
         this.open = true;

@@ -59,12 +59,12 @@
               <el-button :type="isUploadDisabled ? 'success disabled' : 'success'"
                          :disabled="isUploadDisabled || isButtonDisabled || !isDisplayOutput"
                          @click="openBatchAttachmentDialog">
-                在线批量挂接
+                本地批量挂接
               </el-button>
               <el-button :type="isUploadDisabled ? 'success disabled' : 'success'"
                          :disabled="isUploadDisabled || isButtonDisabled || !isDisplayOutput"
                          @click="openBatchAttachmentFromFolderDialog">
-                本地批量挂接
+                在线批量挂接
               </el-button>
               <!-- 导出模板 -->
               <el-button type="primary"
@@ -217,7 +217,7 @@
         </el-table>
       </el-dialog>
 
-      <!-- 本地批量挂接弹出页 -->
+      <!-- 在线批量挂接弹出页 -->
       <el-dialog
         title="文件挂接流程"
         :visible.sync="batchAttachmentFromFolderDialogVisible"
@@ -236,8 +236,17 @@
           <!-- 中间按钮区 -->
           <el-col :span="10" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <!-- 文件夹选择 -->
-            <input type="file" id="folder" @change="handleFolderChange" webkitdirectory ref="fileInput">
-            <h3>选择的文件夹名称：{{ folderPath }}</h3>
+            <div v-if="currentStep < 3">
+              <span>请选择需要挂载的文件夹</span>
+              <el-cascader
+                :options="folders"
+                :props="{ checkStrictly: true }"
+                v-model="value"
+                ref="folderCascader"
+                @change="handleFolderChange"
+              >
+              </el-cascader>
+            </div>
           </el-col>
           <div style="padding-left: 50%;">
             <el-button type="primary" @click="submitFolderForm" style="margin-top: 10px;" v-if="currentStep === 0">确定</el-button>
@@ -262,16 +271,16 @@
 </template>
 
 <script>
-import { listCategory } from "@/api/archive/category";
-import { listItemSuccess} from "@/api/archive/item";
+import {listCategory} from "@/api/archive/category";
+import {listItemSuccess} from "@/api/archive/item";
 import * as XLSX from 'xlsx';
-import { bulkAdd } from "@/api/archive/info";
+import {bulkAdd} from "@/api/archive/info";
 import DataDisplay from "@/views/archive/info/DataDisplay.vue";
 import FileUploadStep from "@/views/archive/info/FileUploadStep.vue";
 import {getToken} from "@/utils/auth";
-import JSZip, {folder} from 'jszip';
+import JSZip from 'jszip';
 import axios from "axios";
-import {addImportLog, getImportLog, getServerFolderList, updateImportLog} from "@/api/archive/importLog";
+import {addImportLog, getImportLog, getServerFileList, getServerFolderList, updateImportLog} from "@/api/archive/importLog";
 import {addOss} from "@/api/system/oss";
 import Treeselect from "@riophae/vue-treeselect";
 import categoryTree from "@/views/archive/category/categoryTree.vue";
@@ -284,7 +293,25 @@ export default {
   },
   created() {
     this.getCategoryList(); // 获取分类列表
-
+    getServerFolderList().then(response => {
+      this.folders = response.map(folder => {
+        if(folder.hasChildren && folder.children){
+          folder.children = folder.children.map(child => {
+            if(child.hasChildren === false){
+              delete child.children;
+            }
+            return {
+              ...child,
+              label: `${child.label}`
+            };
+          });
+        }else {
+          delete folder.children;
+          folder.label = `${folder.label}`;
+        }
+        return folder;
+      });
+    });
   },
   data() {
     return {
@@ -357,10 +384,15 @@ export default {
       importChoice:0,
       color:'#FFFFFF',
       exportList:[],
-      batchAttachmentFromFolderDialogVisible: false,// 本地批量挂接弹出页
+      batchAttachmentFromFolderDialogVisible: false,// 在线批量挂接弹出页
+      currentFolder:{
+        path:''
+      }, // 当前选择的在线文件夹
+      folders: [], // 在线文件夹列表
       folderPath:'',//文件夹路径
-      folderList:[], // 本地挂接文件列表
-      toRemoveFolders:[]//本地挂接文件列表（待上传）
+      folderList:[], // 在线挂接文件列表
+      toRemoveFolders:[],//在线挂接文件列表（待上传）
+      value: '', // 在线挂接文件夹选择值
     };
   },
   computed: {
@@ -821,10 +853,11 @@ export default {
       this.batchAttachmentDialogVisible = true;
     },
 
-    //打开本地批量挂接对话框
+    //打开在线批量挂接对话框
     openBatchAttachmentFromFolderDialog(){
       this.batchAttachmentFromFolderDialogVisible = true;
       this.circleStep = 0;
+      this.importChoice = 0;
     },
 
     //选择文件点击事件
@@ -1161,52 +1194,50 @@ export default {
       this.filteredFileList = [];
       this.selectedNodeKey = null;
     },
-    //本地批量挂接选择文件夹
-    handleFolderChange(event){
-      const file = event.target.files;
-      if (file.length > 0) {
-        for (let i = 0; i < file.length; i++){
-          this.folderPath = file[0].webkitRelativePath.split('/')[0];
-          let folder = {
-            name: file[i].name,
-            url: "/profile/handle-upload/"+file[i].webkitRelativePath,
-            size: file[i].size,
-            fid:'',
-            suffix: file[i].name.split('.').pop(),
-            createTime:''
-          }
-          this.folderList.push(folder);
-        }
-      }
-    },
-    //本地批量挂接确认按钮
-    submitFolderForm(){
-      if (this.folderList.length === 0){
-        this.$message.error('请选择文件夹');
+
+    //
+    handleFolderChange(){
+      const selected = this.$refs['folderCascader'].getCheckedNodes();
+      if(selected[0].parent){
+        this.currentFolder.path = String(selected[0].parent.label) + "/" + String(selected[0].label);
       }else {
-        this.logQueryParams.status = "panding"
-        this.logQueryParams.infoImportRecords = this.tableData.length
-        this.logQueryParams.ossImportRecords = this.folderList.length
-        this.logQueryParams.startTime = new Date().toLocaleString();
-        addImportLog(this.logQueryParams).then(response => {
-          this.currentStep = 2;
-          this.logQueryParams.id = response.data.id;
-        })
+        this.currentFolder.path = String(selected[0].label);
       }
     },
-    //本地批量挂接重置按钮
+    //在线批量挂接确认按钮
+    submitFolderForm(){
+      getServerFileList(this.currentFolder).then(response => {
+        this.folderList = response.filter(file => file.hasChildren === true);
+        //判断folderList是否为空
+        if (this.folderList.length === 0){
+          this.$message.error('请选择文件夹');
+        }else {
+          this.logQueryParams.status = "panding"
+          this.logQueryParams.infoImportRecords = this.tableData.length
+          this.logQueryParams.ossImportRecords = this.folderList.length
+          this.logQueryParams.startTime = new Date().toLocaleString();
+          addImportLog(this.logQueryParams).then(response => {
+            this.currentStep = 2;
+            this.logQueryParams.id = response.data.id;
+          })
+        }
+      })
+    },
+    //在线批量挂接重置按钮
     resetFolderForm(){
-      this.$refs.fileInput.value = '';
       this.folderList = [];
       this.folderPath = '';
+      this.currentStep = 0;
+      this.currentFolder = {path:""};
+      this.value = ''
     },
-    // 本地批量挂接开始挂接
+    // 在线批量挂接开始挂接
     attachFolder() {
       try {
         // 清空toRemoveFolders
         this.toRemoveFolders = [];
         // 将文件夹列表的名称存入集合以便快速查找
-        const folderNames = this.folderList.map(folder => this.removeFileExtension(folder.name));
+        const folderNames = this.folderList.map(folder => folder.name);
 
         const formatData = (date) => {
           const year = String(date.getFullYear());
@@ -1217,18 +1248,26 @@ export default {
           const second = String(date.getSeconds()).padStart(2, '0');
           return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
         }
-
+        let conount = 0;
         this.tableData.forEach(tableItem => {
+          conount++;
+          // 处理挂接内容
           tableItem.sysOssList = [];
           tableItem.archiveStatus = 0;
           tableItem.createTime = formatData(new Date());
 
           // 检查当前项是否在文件夹列表中
           const matchedFolders = this.folderList.filter(folder =>
-            this.removeFileExtension(folder.name) === tableItem.archiveNumber
+            folder.name === tableItem.archiveNumber
           );
+          if (matchedFolders.length === 0) {
+            tableItem.sysOssList = [];
+          }else {
+            matchedFolders[0].children.forEach(child => {
+              tableItem.sysOssList.push(child);
+            });
+          }
 
-          tableItem.sysOssList.push(...matchedFolders);
 
           // 根据sysOssList的状态更新toRemoveFolders
           if (tableItem.sysOssList.length > 0) {
@@ -1244,14 +1283,15 @@ export default {
             const ossList = result.data.flatMap(item => item.sysOssList || []);
             this.logQueryParams.ossProcessedRecords = ossList.length;
             this.logQueryParams.status = "completed";
-            return addOss(ossList);
-          }).then(response => {
+            const addOssListResult =addOss(ossList);
+          }).then(() => {
             // 更新导入日志
             return updateImportLog(this.logQueryParams);
           }).then(response => {
             // 重置数据并跳转到完成页面
             this.reset();
             this.complete();
+            this.resetFolderForm();
             this.tableData = [];
             this.toRemoveFolders = [];
             this.folderList = [];
@@ -1264,6 +1304,8 @@ export default {
           }).catch(error => {
             this.$message.error("批量添加发生错误", error);
           });
+        }else {
+          this.$message.error("没有可挂接的文件");
         }
       } catch (e) {
         this.$message.error("处理挂接时出现错误", e);
@@ -1457,7 +1499,5 @@ export default {
 .el-steps .inactive-step .el-step__title {
   color: #c0c4cc !important; /* 非活动步骤的颜色 */
 }
-#folder {
-  padding-left: 50%;
-}
+
 </style>

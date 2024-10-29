@@ -44,9 +44,17 @@ export function delImportLog(id) {
 }
 
 //获取服务器端文件夹列表
-// export function getServerFolderList() {
-//   return request({
-//     url: '/getFolders/api/folders',
-//     method: 'post',
-//   })
-// }
+export function getServerFolderList() {
+  return request({
+    url: '/folders/getFoldersList',
+    method: 'post',
+  })
+}
+//获取服务器端文件列表
+export function getServerFileList(searchJson) {
+  return request({
+    url: '/folders/files/',
+    method: 'get',
+    params: searchJson
+  })
+}
