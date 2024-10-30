@@ -56,7 +56,7 @@ export function bulkAdd(data) {
 export function updatAarchiveStatus(id) {
   return request({
     url:'/archive/info/document/' + id,
-    method: 'put',
+    method: 'get',
   })
 }
 
@@ -71,8 +71,9 @@ export function sendInfo(id) {
 //一键删除档案信息
 export function delAllInfo(categoryId) {
   return request({
-    url:'/archive/info/batchRemove/'+ categoryId,
+    url:'/archive/info/batchRemove/',
     method: 'delete',
+    data: categoryId
   })
 }
 

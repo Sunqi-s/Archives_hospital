@@ -710,14 +710,24 @@ export default {
             archiveStatus: 2,
             searchValue: ''
           }
-          listInfo(ExportQueryParams).then(res => {
+          listInfo(ExportQueryParams).then(async res => {
             let ids = res.rows.map(item => item.id)
-            sendInfo(ids);
-          }).then(() => {
+            let idList = []
+            let count = ids.length / 500;
+            for (let i = 0; i < count; i++) {
+              idList.push(ids.slice(i * 500, i * 500 + 500))
+            }
+            const promises = idList.map(item => {
+              sendInfo(item).then(response => {
+                return response
+              }).catch(error => {
+                throw error;
+              })
+            })
+            await Promise.all(promises);
             this.getList();
             this.$modal.msgSuccess("退回成功");
-          }).catch(() => {
-          });
+          })
         })
       }
     },

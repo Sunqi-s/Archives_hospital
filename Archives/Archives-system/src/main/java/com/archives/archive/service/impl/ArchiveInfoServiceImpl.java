@@ -315,9 +315,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     }
 
     @Override
-    public boolean deleteArchiveInfoAll(Long categoryId){
-        ArchiveInfo archiveInfo = new ArchiveInfo();
-        archiveInfo.setCategoryId(categoryId);
+    public boolean deleteArchiveInfoAll(ArchiveInfo archiveInfo){
         List<ArchiveInfo> archiveInfoList = selectArchiveInfoList(archiveInfo);
         String[] dataPermiList = new String[0];
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
@@ -326,10 +324,10 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         }else {
             dataPermiList = (currentUser.getDataPermi().split(","));
         }
-        if (archiveInfoList == null || archiveInfoList.isEmpty()) {
+        if (archiveInfoList.isEmpty()) {
             return true;
         }else {
-            return archiveInfoMapper.deleteArchiveInfoAll(categoryId,dataPermiList);
+            return archiveInfoMapper.deleteArchiveInfoAll(archiveInfo,dataPermiList);
         }
     }
 

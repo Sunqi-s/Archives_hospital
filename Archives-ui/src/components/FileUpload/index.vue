@@ -150,7 +150,7 @@ export default {
     handleBeforeUpload(file) {
       this.checkFileType(file)
       this.checkFileSize(file)
-      this.$modal.loading("正在上传文件，请稍候...");
+
       this.number++;
       return true;
     },

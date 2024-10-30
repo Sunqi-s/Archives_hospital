@@ -89,7 +89,7 @@ public class ArchiveInfoController extends BaseController
      * 归档档案信息
      */
 //    @PreAuthorize("@ss.hasPermi('archive:info:document')")
-    @PutMapping("/document/{ids}")
+    @GetMapping("/document/{ids}")
     public AjaxResult document(@PathVariable Long[] ids)
     {
         return toAjax(archiveInfoService.updateArchiveStatusByIds(ids));
@@ -136,9 +136,9 @@ public class ArchiveInfoController extends BaseController
      */
 //    @PreAuthorize("@ss.hasPermi('archive:info:batchRemove')")
     @Log(title = "批量删除档案信息", businessType = BusinessType.DELETE)
-    @DeleteMapping("/batchRemove/{categoryId}")
-    public AjaxResult batchRemove(@PathVariable Long categoryId) {
-        return toAjax(archiveInfoService.deleteArchiveInfoAll(categoryId));
+    @DeleteMapping("/batchRemove/")
+    public AjaxResult batchRemove(@RequestBody ArchiveInfo archiveInfo) {
+        return toAjax(archiveInfoService.deleteArchiveInfoAll(archiveInfo));
     }
 
     /**

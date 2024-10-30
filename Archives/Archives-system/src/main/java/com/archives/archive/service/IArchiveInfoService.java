@@ -93,7 +93,7 @@ public interface IArchiveInfoService
      *
      *
      */
-    public boolean deleteArchiveInfoAll(Long categroyId);
+    public boolean deleteArchiveInfoAll(ArchiveInfo archiveInfo);
 
     /**
      * 高级搜索

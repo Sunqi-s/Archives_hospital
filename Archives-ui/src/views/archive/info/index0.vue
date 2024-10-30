@@ -230,7 +230,12 @@
                 </el-descriptions-item>
               </el-descriptions>
               <el-divider dashed v-if="insertFieldsGroup3.length"></el-divider>
-
+              <el-row
+                v-loading="!isElCardBodyLoading"
+                element-loading-text="录入中，请稍候..."
+                element-loading-svg="<svg class='circular' viewBox='25 25 50 50'><circle class='path' cx='50' cy='50' r='20' fill='none' stroke-width='4' stroke-miterlimit='10'/></svg>"
+                element-loading-svg-view-box="0 0 100 100"
+              >
               <el-row>
                 <el-col :span="24">
                   <div>
@@ -258,7 +263,7 @@
                   </el-table>
                 </el-col>
               </el-row>
-
+              </el-row>
               <!--文件上传对话框-->
               <el-dialog title="文件上传" :visible.sync="showDialog" width="800px" append-to-body class="dialog-container">
                 <el-form-item label="" prop="url">
@@ -365,6 +370,11 @@ export default {
       departmentMap:{},
       //选中的数组
       savedids:[],
+      deleteQuery:{},
+      uploadCount:0,
+      successList:[],
+      isElCardBodyLoading:true
+
     };
   },
   created() {
@@ -559,10 +569,9 @@ export default {
       this.queryParams.categoryId = this.categoryId;
       this.queryParams.archiveStatus = 0;
       getBeachList(this.queryParams).then(response => {
-        if (response.rows.length > 0) {
+        this.deleteQuery = this.queryParams
           this.infoList = response.rows;
           this.total = response.total;
-        }
       });
     },
     resetQuery() {
@@ -696,13 +705,16 @@ export default {
       this.$refs["form"].validate(async valid => {
         this.form.categoryId = this.categoryId;
         if (valid) {
+          this.isElCardBodyLoading = false;
           if (this.form.id != null && this.form.id != undefined) {
             const newSysOssList = this.form.sysOssList.slice(this.originalFile)
             if (newSysOssList.length > 0 && this.$refs.fileUpload) {
+              this.uploadCount = newSysOssList.length
               await this.$refs.fileUpload.handleUpload(newSysOssList);
             }
             await updateInfo(this.form)
               .then(() => {
+                this.isElCardBodyLoading = true
                 this.$modal.msgSuccess("修改成功");
                 this.closeAndRefresh();
                 this.reset();
@@ -712,6 +724,7 @@ export default {
                 }
               })
               .catch(error => {
+                this.isElCardBodyLoading = true
                 this.$modal.msgError("修改失败，请重试");
               });
 
@@ -729,9 +742,11 @@ export default {
                 fid: file.fid,
                 suffix: file.suffix,
               }))
+              this.uploadCount = sysOssList.length
               await this.$refs.fileUpload.handleUpload(sysOssList);
             }
             await addInfo(this.form).then(() => {
+              this.isElCardBodyLoading = true
               this.$modal.msgSuccess("新增成功");
               this.closeAndRefresh();
               this.reset();
@@ -740,6 +755,7 @@ export default {
                 this.$refs.fileUpload.resetFileList();
               }
             }).catch(error => {
+              this.isElCardBodyLoading = true
               this.$modal.msgError("录入失败，请重试");
             });
 
@@ -748,15 +764,22 @@ export default {
       });
     },
     returnFiles(fileList) {
+      this.uploadCount--;
       if (this.originalFile > -1) {
-        this.form.sysOssList = this.form.sysOssList.filter(item => item.url)
-        this.form.sysOssList.push(...fileList)
+        this.successList.push(...fileList)
         if(this.$refs.fileUpload){
           this.$refs.fileUpload.resetFileList();
         }
       } else {
-        this.form.sysOssList = fileList;
+        this.successList = fileList;
       }
+      if(this.uploadCount<1){
+        if (this.originalFile > -1) {
+          this.form.sysOssList = this.form.sysOssList.filter(item => item.url)
+        }
+        this.form.sysOssList = this.successList;
+      }
+
     },
 
     closeAndRefresh() {
@@ -992,14 +1015,24 @@ export default {
             archiveStatus: 0,
             searchValue: ''
           }
-          listInfo(ExportQueryParams).then(res => {
+          listInfo(ExportQueryParams).then(async res => {
             let ids = res.rows.map(item => item.id)
-            updatAarchiveStatus(ids);
-          }).then(() => {
+            let idList = []
+            let count = ids.length / 500;
+            for (let i = 0; i < count; i++) {
+              idList.push(ids.slice(i * 500, i * 500 + 500))
+            }
+            const promises = idList.map(item => {
+               updatAarchiveStatus(item).then(response => {
+                 return response
+               }).catch(error => {
+                 throw error;
+               })
+            })
+            await Promise.all(promises);
             this.getList();
             this.$modal.msgSuccess("归档成功");
-          }).catch(() => {
-          });
+          })
         })
       }
     },
@@ -1072,7 +1105,7 @@ export default {
     },
     handleBatchDelete() {
       this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(()=> {
-        return delAllInfo(this.categoryId)
+        return delAllInfo(this.deleteQuery)
           .then((res) => {
             if (res.code === 200) {
               this.$modal.msgSuccess("删除成功");

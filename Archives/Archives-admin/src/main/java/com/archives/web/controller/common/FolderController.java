@@ -28,21 +28,25 @@ public class FolderController {
         List<Map<String, Object>> folders  = new ArrayList<>();
 
         // 检查路径是否存在且为目录
-        if(directory.isDirectory()){
-            int index = 0;
-            for (File file : Objects.requireNonNull(directory.listFiles())) {
-                if (file.isDirectory()) {
-                    Map<String, Object> folderInfo = new HashMap<>();
-                    folderInfo.put("label", file.getName());
-                    folderInfo.put("hasChildren", Objects.requireNonNull(file.listFiles(File::isDirectory)).length > 0);
-                    folderInfo.put("children",getSubFolders(file));
-                    folderInfo.put("value", index++);
-                    folders.add(folderInfo);
+        if(directory.exists()){
+            if(directory.isDirectory()){
+                int index = 0;
+                for (File file : Objects.requireNonNull(directory.listFiles())) {
+                    if (file.isDirectory()) {
+                        Map<String, Object> folderInfo = new HashMap<>();
+                        folderInfo.put("label", file.getName());
+                        folderInfo.put("hasChildren", Objects.requireNonNull(file.listFiles(File::isDirectory)).length > 0);
+                        folderInfo.put("children",getSubFolders(file));
+                        folderInfo.put("value", index++);
+                        folders.add(folderInfo);
+                    }
                 }
             }
-        }
-         else {
-            throw new RuntimeException("无法读取文件夹");
+            else {
+                throw new RuntimeException("无法读取文件夹");
+            }
+        }else {
+            throw new RuntimeException("路径不存在");
         }
         return folders; // 返回文件夹列表
     }
