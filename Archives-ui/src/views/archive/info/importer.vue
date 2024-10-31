@@ -557,18 +557,19 @@ export default {
     parseExcelData(sheet) {
       const data = XLSX.utils.sheet_to_json(sheet, {header: 1, raw: false, dateNF: 'yyyy/MM/dd'});
       const headers = data[0];
-      const rows = data.slice(1);
+      let rows = data.slice(1);
       const yesList = this.columnList.filter(col => headers.includes(col.label));
       const noList = this.columnList.filter(col => !headers.includes(col.label)&&col.isRequired === '1');
       this.exportList = [];
-        rows.forEach(row => {
-          headers.forEach((header, index) => {
-            const column = this.columnList.find(col => col.label === header);
-            if (column && row[index] != null && !this.exportList.includes(column)) {
-              this.exportList.push(column);
-            }
-          });
+      rows = rows.filter(row => row.length !== 0);
+      rows.forEach(row => {
+        headers.forEach((header, index) => {
+          const column = this.columnList.find(col => col.label === header);
+          if (column && row[index] != null && !this.exportList.includes(column)) {
+            this.exportList.push(column);
+          }
         });
+      });
       this.tableData = rows.map(row => {
         const rowData = { validationErrors: [], categoryId: this.itemQueryParams.categoryId };
         yesList.forEach((yes) => {
