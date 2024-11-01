@@ -393,6 +393,7 @@ export default {
       folderList:[], // 在线挂接文件列表
       toRemoveFolders:[],//在线挂接文件列表（待上传）
       value: '', // 在线挂接文件夹选择值
+      unUploadList: []//上传失败文件信息
     };
   },
   computed: {
@@ -433,9 +434,13 @@ export default {
     },
   },
   methods: {
+    //本地批量挂接方法
     formatTableData() {
-      return this.tableData.map(row => {
-        const formattedRow = { ...row ,archiveStatus:0};
+      let upload = []
+      let as = []
+      upload = this.upFileList.filter(file => file.status === '上传至服务器成功');
+      as = this.tableData.map(row => {
+        const formattedRow = { ...row ,archiveStatus:0 ,sysOssList:[]};
         // 如果 archiveDate 有效，则格式化
         if (formattedRow.archiveDate) {
           const date = new Date(formattedRow.archiveDate);
@@ -444,9 +449,13 @@ export default {
           }
         }
         // 基于 archiveNumber 从 upFileList 过滤匹配文件
-        formattedRow.sysOssList = this.upFileList.filter(file =>
-          file.folderName === formattedRow.archiveNumber
-        );
+        upload.forEach(a => {
+          if(a.folderName === formattedRow.archiveNumber){
+            a.message = '挂接成功';
+            formattedRow.sysOssList.push(a);
+          }
+        })
+
         if (formattedRow.sysOssList.length > 0) {
           formattedRow.ossStatus = 1
         }else {
@@ -454,6 +463,13 @@ export default {
         }
         return formattedRow;
       });
+      upload.forEach(a => {
+        if(a.message !== '挂接成功'){
+          a.message = '挂接失败,档号未匹配或没有该档号';
+          this.unUploadList.push(a)
+        }
+      })
+      return as;
     },
     // 获取分类列表并构建分类树
     getCategoryList() {
@@ -960,6 +976,7 @@ export default {
           size: fileResponse.size || '',
           suffix: fileResponse.originalFilename ? fileResponse.originalFilename.split('.').pop() : '',
           folderName: file.folderName || '',
+          message: '上传成功',
         });
       }
     },
@@ -990,21 +1007,31 @@ export default {
       // 循环遍历文件列表，按批次上传
       for (let i = 0; i < this.fileList.length; i += batchSize) {
         const batch = this.fileList[i]; // 获取当前批次的文件
-        // 并行上传当前批次的文件
-        await this.uploadFile(batch);
+         // 并行上传当前批次的文件
+         await this.uploadFile(batch);
         // 进度条服务
         uploadedFiles += 1;
         this.totalUploadProgress = Math.round((uploadedFiles / totalFiles) * 100);
       }
       this.isClick=true;
-      if (this.upLoadErr===0) {
-        this.$message.success('文件上传成功');
-      }else if(this.upLoadErr<this.fileList.length&&this.upLoadErr>0){
-        this.$message.error('部分文件上传失败');
+      if (this.upLoadErr===this.fileList.length) {
+        this.$confirm('文件上传失败', {
+          confirmButtonText: '确定', //确认按钮的文字
+          showCancelButton: false, //是否显示取消按钮
+          showClose: false, //是否显示关闭按钮
+          closeOnClickModal: false, //是否可以通过点击空白处关闭弹窗
+          type: 'info'
+        }).then(() => {
+          this.resetAttachment();
+          this.upLoad = false;
+          this.batchAttachmentDialogVisible = false;
+        })
       }else {
-        this.$message.error('文件上传失败');
+        this.$message.success('文件上传完成');
       }
-
+      const unUpload = this.upFileList.filter(upFile => {upFile.status === '上传失败'});
+      unUpload.forEach(d => d.message = '上传失败');
+      this.unUploadList.concat(unUpload);
       // 解除禁用上传按钮
       this.submitUploadButtonDisabled=false;
       // 流程变化
@@ -1175,8 +1202,8 @@ export default {
     },
     isClose(){
       if (this.upLoad){
-        this.batchAttachmentDialogVisible = true;
-      }
+          this.batchAttachmentDialogVisible = true;
+        }
     },
     resetTree(){
       if(this.$refs.fileTree){
@@ -1259,25 +1286,34 @@ export default {
           tableItem.archiveStatus = 0;
           tableItem.createTime = formatData(new Date());
 
-          // 检查当前项是否在文件夹列表中
-          const matchedFolders = this.folderList.filter(folder =>
-            folder.name === tableItem.archiveNumber
-          );
-          if (matchedFolders.length === 0) {
-            tableItem.sysOssList = [];
-          }else {
-            matchedFolders[0].children.forEach(child => {
-              tableItem.sysOssList.push(child);
-            });
-          }
+          // 遍历文件夹列表
+          this.folderList.forEach(folder => {
+            if (folder.name === tableItem.archiveNumber) {
+              // 清空sysOssList，并根据子文件夹状态更新
+              tableItem.sysOssList = folder.children.length === 0 ? [] : folder.children.map(child => ({
+                ...child,
+                message: '挂接成功'
+              }));
 
+              // 更新toRemoveFolders状态
+              this.toRemoveFolders.push({
+                ...tableItem,
+                ossStatus: tableItem.sysOssList.length > 0 ? 1 : 2
+              });
+            }
+          });
 
-          // 根据sysOssList的状态更新toRemoveFolders
-          if (tableItem.sysOssList.length > 0) {
-            this.toRemoveFolders.push({ ...tableItem,ossStatus:1});
-          } else {
-            this.toRemoveFolders.push({ ...tableItem,ossStatus:2});
-          }
+          // 遍历子文件夹，判断挂接失败的文件
+          this.folderList.forEach(folder => {
+            if (folder.children.length !== 0) {
+              folder.children.forEach(child => {
+                if (child.message !== '挂接成功') {
+                  child.message = '挂接失败';
+                  this.unUploadList.push(child);
+                }
+              });
+            }
+          });
         });
         // 开始上传到数据库
         if (this.toRemoveFolders.length > 0) {
@@ -1286,7 +1322,7 @@ export default {
             const ossList = result.data.flatMap(item => item.sysOssList || []);
             this.logQueryParams.ossProcessedRecords = ossList.length;
             this.logQueryParams.status = "completed";
-            const addOssListResult =addOss(ossList);
+            const addOssListResult = addOss(ossList);
           }).then(() => {
             // 更新导入日志
             return updateImportLog(this.logQueryParams);
@@ -1307,10 +1343,10 @@ export default {
           }).catch(error => {
             this.$message.error("批量添加发生错误", error);
           });
-        }else {
+        } else {
           this.$message.error("没有可挂接的文件");
         }
-      } catch (e) {
+      }catch (e) {
         this.$message.error("处理挂接时出现错误", e);
       }
     }
