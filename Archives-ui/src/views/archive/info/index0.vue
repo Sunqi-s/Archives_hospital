@@ -1009,8 +1009,10 @@ export default {
       if(this.ids.length > 1){
         const ids = this.ids;
         this.$modal.confirm('确认归档选中数据？').then(()=> {
+          this.$modal.loading("正在处理中");
           return updatAarchiveStatus(ids)
         }).then(() => {
+          this.$modal.closeLoading();
           this.getList();
           this.$modal.msgSuccess("归档成功");
         }).catch(() => {
@@ -1024,23 +1026,26 @@ export default {
             archiveStatus: 0,
             searchValue: ''
           }
+          this.$modal.loading("正在处理中");
           listInfo(ExportQueryParams).then(async res => {
             let ids = res.rows.map(item => item.id)
             let idList = []
-            let count = ids.length / 500;
+            let count = ids.length / 1000;
             for (let i = 0; i < count; i++) {
-              idList.push(ids.slice(i * 500, i * 500 + 500))
+              idList.push(ids.slice(i * 1000, i * 1000 + 1000))
             }
-            const promises = idList.map(item => {
-               updatAarchiveStatus(item).then(response => {
-                 return response
-               }).catch(error => {
-                 throw error;
-               })
-            })
-            await Promise.all(promises);
-            this.getList();
-            this.$modal.msgSuccess("归档成功");
+            const promises = async(indexId) => {
+              if(indexId < idList.length){
+                updatAarchiveStatus(idList[indexId]).then(response => {
+                promises(indexId + 1);//传下一批
+              }).catch()
+              }else {
+                this.$modal.closeLoading();
+                this.getList();
+                this.$modal.msgSuccess("归档成功");
+              }
+            }
+            await promises(0)
           })
         })
       }

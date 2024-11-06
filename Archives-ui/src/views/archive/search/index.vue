@@ -76,7 +76,7 @@
         <el-row :gutter="20" v-if="!isEmpty">
           <el-col :span="24">
             <el-tabs v-model="selectedTag" @tab-click="selectedItem" class="fixed-table-container">
-              <el-tab-pane v-for="tag in tagList" :label="tag.name+'('+tag.count+')'" :name="String(tag.category)">
+              <el-tab-pane v-for="tag in tagList" :key="tag.name" :label="tag.name+'('+tag.count+')'" :name="String(tag.category)">
                 <!-- 动态生成的表格 -->
                 <div class="table-container">
                   <el-table :data="FilteredList" :default-sort = "{prop: 'id', order: 'descending'}" height="53vh" ref="dynamicTable" border @row-click="handleRowClick">
