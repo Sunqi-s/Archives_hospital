@@ -1294,15 +1294,13 @@ export default {
                 ...child,
                 message: '挂接成功'
               }));
-
-              // 更新toRemoveFolders状态
-              this.toRemoveFolders.push({
-                ...tableItem,
-                ossStatus: tableItem.sysOssList.length > 0 ? 1 : 2
-              });
             }
           });
-
+          // 更新toRemoveFolders状态
+          this.toRemoveFolders.push({
+            ...tableItem,
+            ossStatus: tableItem.sysOssList.length > 0 ? 1 : 2
+          });
           // 遍历子文件夹，判断挂接失败的文件
           this.folderList.forEach(folder => {
             if (folder.children.length !== 0) {
