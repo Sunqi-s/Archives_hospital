@@ -1237,10 +1237,11 @@ export default {
     //在线批量挂接确认按钮
     submitFolderForm(){
       getServerFileList(this.currentFolder).then(response => {
+        this.folderList = [];
         this.folderList = response.filter(file => file.hasChildren === true);
         //判断folderList是否为空
         if (this.folderList.length === 0){
-          this.$message.error('请选择文件夹');
+          this.$message.error('文件夹为空或不是文件夹，请重新选择');
         }else {
           this.logQueryParams.status = "panding"
           this.logQueryParams.infoImportRecords = this.tableData.length
@@ -1339,10 +1340,10 @@ export default {
             // 更新导入日志显示
             this.importLog = response.data;
           }).catch(error => {
-            this.$message.error("批量添加发生错误", error);
+            this.$message.error("更新日志发生错误", error);
           });
         } else {
-          this.$message.error("没有可挂接的文件");
+          this.$message.error("没有上传的数据，请联系管理员");
         }
       }catch (e) {
         this.$message.error("处理挂接时出现错误", e);
