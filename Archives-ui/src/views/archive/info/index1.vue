@@ -143,7 +143,7 @@
         />
         </div>
         <div  v-else>
-          <el-empty description="未找到搜索内容" class="empty"></el-empty>
+          <el-empty description="未找到内容" class="empty"></el-empty>
         </div>
       </el-col>
     </el-row>
@@ -937,11 +937,7 @@ export default {
   min-height: 300px; /* 可设置最小高度，避免窗口过小 */
 }
 .empty{
-  top: 0;
-  width: 70%;
+  width: 90%;
   height: 100%;
-  position: fixed;
-  min-width: 500px; /* 可设置最小宽度，避免窗口过小 */
-  min-height: 300px; /* 可设置最小高度，避免窗口过小 */
 }
 </style>
