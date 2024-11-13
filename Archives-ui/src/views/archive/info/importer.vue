@@ -1219,14 +1219,20 @@ export default {
       this.selectedNodeKey = null;
     },
 
-    //
-    handleFolderChange(){
+    //选择文件夹方法
+    handleFolderChange() {
       const selected = this.$refs['folderCascader'].getCheckedNodes();
-      if(selected[0].parent){
-        this.currentFolder.path = String(selected[0].parent.label) + "/" + String(selected[0].label);
-      }else {
-        this.currentFolder.path = String(selected[0].label);
+      if (selected.length > 0) {
+        this.currentFolder.path = this.getFullPath(selected[0]);
       }
+    },
+
+    //递归取父节点label拼成路径
+    getFullPath(node) {
+      if (!node.parent) {
+        return node.label;
+      }
+      return this.getFullPath(node.parent) + "/" + node.label;
     },
     //在线批量挂接确认按钮
     submitFolderForm(){
