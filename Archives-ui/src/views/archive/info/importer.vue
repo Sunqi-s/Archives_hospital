@@ -70,7 +70,7 @@
               <el-button type="primary"
                          :disabled="isButtonDisabled || !isDisplayOutput"
                          plain
-                         @click="exportTemplate">导出模板
+                         @click="exportTemplate()">导出模板
               </el-button>
               <!-- 重置按钮 -->
               <el-button @click="resetTree">
@@ -249,12 +249,12 @@
             </div>
           </el-col>
           <div style="padding-left: 50%;">
-            <el-button type="primary" @click="submitFolderForm" style="margin-top: 10px;" v-if="currentStep === 0">确定</el-button>
-            <el-button type="danger" @click="resetFolderForm" v-if="currentStep === 0" style="margin-top: 10px;">重置</el-button>
+            <el-button type="primary" @click="submitFolderForm" style="margin-top: 10px;" v-if="currentStep === 0&&isClick">确定</el-button>
+            <el-button type="danger" @click="resetFolderForm" v-if="currentStep === 0&&isClick" style="margin-top: 10px;">重置</el-button>
           </div>
           <div style="margin-top: 10px;">
             <!-- 开始挂接按钮 -->
-            <el-button type="primary" @click="attachFolder" style="margin-top: 10px;" v-if="currentStep === 2">开始挂接</el-button>
+            <el-button type="primary" @click="attachFolder" style="margin-top: 10px;" v-if="currentStep === 2&&isClick">开始挂接</el-button>
           </div>
           <div v-if="currentStep === 3">
             <el-row>
@@ -262,6 +262,9 @@
                 <el-result icon="success" title="挂接完成" subTitle="请关闭此页面"></el-result>
               </el-col>
             </el-row>
+          </div>
+          <div v-if="!isClick">
+            <i class="el-icon-loading" style="font-size: 40px; color:#1C69DB;"></i>
           </div>
         </el-row>
       </el-dialog>
@@ -831,17 +834,8 @@ export default {
 
     // 导出模板
     exportTemplate() {
-      const excludedColumns = ['主键ID', '创建者', '更新者', '创建时间', '更新时间'];
-      const headers = this.exportList
-        .filter(col => !excludedColumns.includes(col.label))
-        .map(col => col.label);
-
-      const worksheet = XLSX.utils.aoa_to_sheet([headers]);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Template");
-
-      const fileName = `${this.categoryName}模板.xlsx`;
-      XLSX.writeFile(workbook, fileName);
+      this.download('/export/exportTemplate', {categoryId: this.selectedNodeKey,categoryName:this.categoryName
+      }, `${this.categoryName}模版.xlsx`)
     },
 
     // 重置表单
@@ -1236,12 +1230,14 @@ export default {
     },
     //在线批量挂接确认按钮
     submitFolderForm(){
+      this.isClick = false;
       getServerFileList(this.currentFolder).then(response => {
         this.folderList = [];
         this.folderList = response.filter(file => file.hasChildren === true);
         //判断folderList是否为空
         if (this.folderList.length === 0){
           this.$message.error('文件夹为空或不是文件夹，请重新选择');
+          this.isClick = true;
         }else {
           this.logQueryParams.status = "panding"
           this.logQueryParams.infoImportRecords = this.tableData.length
@@ -1250,6 +1246,7 @@ export default {
           addImportLog(this.logQueryParams).then(response => {
             this.currentStep = 2;
             this.logQueryParams.id = response.data.id;
+            this.isClick = true;
           })
         }
       })
@@ -1267,6 +1264,7 @@ export default {
       try {
         // 清空toRemoveFolders
         this.toRemoveFolders = [];
+        this.isClick = false;
         // 将文件夹列表的名称存入集合以便快速查找
         const folderNames = this.folderList.map(folder => folder.name);
 
@@ -1517,7 +1515,7 @@ export default {
   margin-left: -100px;
 }
 .upload-icon {
-  ont-size: 48px; /* 加号图标的大小 */
+  font-size: 48px; /* 加号图标的大小 */
   color: #409EFF;  /* 图标的颜色 */
 }
 .file-item {

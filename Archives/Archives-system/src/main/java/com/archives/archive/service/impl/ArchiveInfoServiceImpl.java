@@ -316,7 +316,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Override
     public boolean deleteArchiveInfoAll(ArchiveInfo archiveInfo){
-        List<ArchiveInfo> archiveInfoList = selectArchiveInfoList(archiveInfo);
         String[] dataPermiList = new String[0];
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
         if("all".equals(currentUser.getDataPermi())){
@@ -324,6 +323,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         }else {
             dataPermiList = (currentUser.getDataPermi().split(","));
         }
+        List<ArchiveInfo> archiveInfoList = archiveInfoMapper.beachSearch(archiveInfo,dataPermiList);
         if (archiveInfoList.isEmpty()) {
             return true;
         }else {

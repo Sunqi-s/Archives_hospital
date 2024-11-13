@@ -59,8 +59,8 @@
           </el-form>
 
           <div class="form-button-wrapper">
-            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach">搜索</el-button>
-            <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
+            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach()">搜索</el-button>
+            <el-button icon="el-icon-refresh" size="small" @click="resetQuery()">重置</el-button>
           </div>
 
         </el-drawer>
@@ -573,6 +573,9 @@ export default {
     handleQueryBeach(){
       this.queryParams.categoryId = this.categoryId;
       this.queryParams.archiveStatus = 0;
+      if(this.queryParams.ossStatus === ""){
+        this.queryParams.ossStatus = null;
+      }
       getBeachList(this.queryParams).then(response => {
         this.deleteQuery = this.queryParams
           this.infoList = response.rows;
@@ -586,6 +589,7 @@ export default {
         pageSize: 10,
         archiveStatus: 0,
       };
+      this.deleteQuery = this.queryParams;
       this.queryFields.forEach(field => {
         this.$set(this.queryParams, field.name, '');
       });
