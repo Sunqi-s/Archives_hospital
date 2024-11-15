@@ -17,7 +17,7 @@ public class YewuJuannei extends BaseEntity {
     private String field20;
 
     @Excel(name = "题名!")
-    private String field2;
+    private String field3;
 
     @Excel(name = "日期!")
     private String field21;
@@ -38,7 +38,7 @@ public class YewuJuannei extends BaseEntity {
     private String category_code;
 
     @Excel(name = "门类名称!")
-    private String field3;
+    private String field2;
 
     @Excel(name = "项目号!")
     private String field6;

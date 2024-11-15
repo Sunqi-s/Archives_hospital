@@ -79,7 +79,7 @@
               <el-tab-pane v-for="tag in tagList" :key="tag.name" :label="tag.name+'('+tag.count+')'" :name="String(tag.category)">
                 <!-- 动态生成的表格 -->
                 <div class="table-container">
-                  <el-table :data="FilteredList" :default-sort = "{prop: 'id', order: 'descending'}" height="53vh" ref="dynamicTable" border @row-click="handleRowClick">
+                  <el-table v-loading="vLoading" :data="FilteredList" :default-sort = "{prop: 'id', order: 'descending'}" height="53vh" ref="dynamicTable" border @row-click="handleRowClick">
                     <el-table-column
                       v-for="field in itemFilteredList"
                       :key="field.name"
@@ -261,6 +261,7 @@
         previewUrl:"",
         open:false,
         title:null,
+        vLoading:false,
       };
     },
     computed:{
@@ -296,6 +297,7 @@
         this.queryParams.pageNum = 1;
         const searchJson = {keyWord: this.searchQuery, value: categoryList};
         searchArchive(searchJson).then(async tagListRes => {
+          this.selectedTag = '0';
           this.tagList = [];
           // 创建一个数组存储所有的Promise
           const promises = tagListRes.map(tagRes => {
@@ -316,9 +318,12 @@
       this.hotTags = this.hotTags.filter(t => t !== tag);
     },
     handleNextPage(){
+      this.vLoading = true;
       getArchiveDetail(this.queryParams).then(infoRes => {
         this.searchResult = infoRes.searchResults;
         this.total = infoRes.total;
+      }).then(()=>{
+        this.vLoading = false;
       })
     },
     handleSizeChange(nowPageSize){
@@ -341,42 +346,11 @@
           this.itemFilteredListGroup3 = this.itemList.filter(field => field.isInsert === '1' && field.htmlGroup === '3').sort((a, b) => a.sort - b.sort);
           this.editFields = this.itemList.filter(field => field.isEdit === '1');
           this.editFields = this.itemList.filter(field => field.isEdit === '1');
-          //初始化校验
-          this.generateRules();
         })
           this.queryParams.keyWord = this.keyWord;
           // this.queryParams.value = this.value;
           this.queryParams.categoryId = this.selectedTag;
           this.handleNextPage();
-    },
-    generateRules() {
-      this.rules = {};
-      const fields = [
-        ...this.itemFilteredListGroup1,
-        ...this.itemFilteredListGroup2,
-        ...this.itemFilteredListGroup3
-      ];
-      fields.forEach(field => {
-        const fieldRules = [];
-
-        // 必填项校验
-        if (field.isRequired==='1') {
-          const parentheseIndex = field.label.indexOf('（');
-          const comment = parentheseIndex !== -1 ? field.label.substring(0, parentheseIndex) : field.label;
-          fieldRules.push({ required: true, message: `${comment}不能为空`, trigger: field.type === 'select'||'treeselect' ? 'change' : 'blur' });
-        }
-
-        // 最大长度校验
-        if (field.type !== 'select' && field.type !== 'treeselect' && field.maxLength) {
-          fieldRules.push({ max: field.maxLength, message: `${field.label}不能超过${field.maxLength}字符`, trigger: 'blur' });
-        }
-         // 类型检查
-        if (field.type === 'date') {
-          fieldRules.push({ type: 'date', message: `${field.label}应为有效日期`, trigger: 'blur' });
-        }
-
-        this.rules[field.name] = fieldRules;
-      });
     },
     mapHtmlType(htmlType) {
       switch (htmlType) {
