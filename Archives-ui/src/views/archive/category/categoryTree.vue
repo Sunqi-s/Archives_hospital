@@ -47,6 +47,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    isClick:{
+      type: Boolean,
+      default:true,
+    }
   },
   data() {
     return {
@@ -61,8 +65,10 @@ export default {
   methods: {
     // 处理节点点击事件，传递节点ID给父组件
     handleNodeClick(data) {
+      if(this.isClick){
         this.clickNode = data.id;
       this.$emit('node-click', data);
+      }
     },
     // 过滤树节点
     fileNode(value, data) {

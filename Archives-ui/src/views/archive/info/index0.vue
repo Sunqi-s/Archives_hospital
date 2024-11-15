@@ -3,7 +3,7 @@
     <el-row :gutter="20" >
       <!-- 档案分类树形结构 -->
       <el-col :span="4" :xs="24">
-        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree"></file-tree>
+        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree" :isClick="isClick"></file-tree>
       </el-col>
 
       <!-- 未选择档案库时显示该画面 -->
