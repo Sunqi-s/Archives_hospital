@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-row :gutter="20">
+    <el-row :gutter="20" >
       <!-- 档案分类树形结构 -->
       <el-col :span="4" :xs="24">
         <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree"></file-tree>
@@ -119,14 +119,10 @@
               @click="handleBatchDelete"
             >一键删除</el-button>
           </el-col>
-<!--          <el-col :span="1.5">-->
-<!--            <i>已选择{{savedids.length+ids.length}}项</i>-->
-<!--          </el-col>-->
-
         </el-row>
 
         <!-- 动态生成的表格 -->
-        <div class="fixed-table-container" v-if="!isEmpty">
+        <div class="fixed-table-container" >
         <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="60%" ref="dynamicTable" border>
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
@@ -135,7 +131,7 @@
             :prop="field.name"
             :label="field.label"
             :sortable="true"
-            :width="field.width || '120px'"
+            :width="field.label.length * 11 + 65+'vh'"
           >
             <template slot-scope="scope">
               <el-tooltip class="item" effect="dark" :content="getTooltipContent(field.name, scope.row)" placement="top">
@@ -164,9 +160,6 @@
           :limit.sync="queryParams.pageSize"
           @pagination="handleNextPage"
         />
-        </div>
-        <div  v-else>
-          <el-empty description="未找到内容" class="empty"></el-empty>
         </div>
       </el-col>
     </el-row>
@@ -377,9 +370,7 @@ export default {
       uploadCount:0,
       successList:[],
       isElCardBodyLoading:true,
-
-      isEmpty:false
-
+      isClick:true,
     };
   },
   created() {
@@ -552,18 +543,21 @@ export default {
       return tree;
     },
     handleNodeClick(nodeData) {
-      this.clearSearch()
-      //选择档案节点不显示列表页面
-      if (nodeData.type === 1) {
-        this.categoryId = nodeData.id;
-      } else {
-        this.categoryId = null;
+      if(this.isClick) {
+        this.clearSearch()
+        //选择档案节点不显示列表页面
+        if (nodeData.type === 1) {
+          this.categoryId = nodeData.id;
+          this.isClick = false;
+        } else {
+          this.categoryId = null;
+        }
+        this.categoryName = nodeData.name;
+        this.parentCategoryName = nodeData.parentName;
+        this.queryParams.categoryId = nodeData.id;
+        this.getFieldDefinitions(nodeData.id);
+        this.getList();
       }
-      this.categoryName = nodeData.name;
-      this.parentCategoryName = nodeData.parentName;
-      this.queryParams.categoryId = nodeData.id;
-      this.getFieldDefinitions(nodeData.id);
-      this.getList();
     },
     handleQuery() {
       this.queryParams.categoryId = this.categoryId;
@@ -612,19 +606,13 @@ export default {
           this.infoList = response.rows;
         }
         this.total = response.total;
-        this.isEmpty = this.total === 0;
-        this.loading = false;
-        if (!this.isEmpty) {
           this.$nextTick(() => {
-            if (this.$refs.dynamicTable && this.$refs.dynamicTable.doLayout) {
-              this.$refs.dynamicTable.doLayout(); // 确保方法存在后再调用
-            } else {
-              setTimeout(() => {
-                this.$refs.dynamicTable.doLayout(); // 延迟0.1秒后调用
-              }, 100); // 100 毫秒
-            }
+            setTimeout(() => {
+                // this.$refs.dynamicTable.doLayout(); // 延迟0.1秒后调用
+                this.isClick = true;
+                this.loading = false;
+              }, 300);
           })
-        }
 
       });
     },
@@ -1010,7 +998,7 @@ export default {
       }
     },
     handleDocument() {
-      if(this.ids.length > 1){
+      if(this.ids.length >= 1){
         const ids = this.ids;
         this.$modal.confirm('确认归档选中数据？').then(()=> {
           this.$modal.loading("正在处理中");
@@ -1243,8 +1231,5 @@ export default {
   min-width: 500px; /* 可设置最小宽度，避免窗口过小 */
   min-height: 300px; /* 可设置最小高度，避免窗口过小 */
 }
-.empty{
-  width: 90%;
-  height: 100%;
-}
+
 </style>

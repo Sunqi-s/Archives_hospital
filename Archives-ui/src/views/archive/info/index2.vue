@@ -86,7 +86,7 @@
         </el-row>
 
         <!-- 动态生成的表格 -->
-        <div class="fixed-table-container" v-if="!isEmpty">
+        <div class="fixed-table-container" >
         <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="60%" ref="dynamicTable" border>
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
@@ -122,9 +122,6 @@
           :limit.sync="queryParams.pageSize"
           @pagination="handleNextPage"
         />
-        </div>
-        <div  v-else>
-          <el-empty description="未找到内容" class="empty"></el-empty>
         </div>
       </el-col>
     </el-row>
@@ -299,7 +296,6 @@ export default {
       //保存的ids
       savedids:[],
 
-      isEmpty:false
     };
   },
   created() {
@@ -513,19 +509,10 @@ export default {
           this.infoList = response.rows;
         }
         this.total = response.total;
-        this.isEmpty = this.total === 0;
         this.loading = false;
-        if (!this.isEmpty) {
           this.$nextTick(() => {
-            if (this.$refs.dynamicTable && this.$refs.dynamicTable.doLayout) {
               this.$refs.dynamicTable.doLayout(); // 确保方法存在后再调用
-            } else {
-              setTimeout(() => {
-                this.$refs.dynamicTable.doLayout(); // 延迟0.1秒后调用
-              }, 100); // 100 毫秒
-            }
           })
-        }
       });
     },
     markMatches(data) {
@@ -697,7 +684,7 @@ export default {
       this.getList();
     },
     handleSendUtilize(){
-      if(this.ids.length > 1){
+      if(this.ids.length >= 1){
         const ids = this.ids;
         this.$modal.confirm('确认退回选中数据？').then(()=> {
           this.$modal.loading("正在处理中");
@@ -826,9 +813,5 @@ export default {
   position: fixed;
   min-width: 500px; /* 可设置最小宽度，避免窗口过小 */
   min-height: 300px; /* 可设置最小高度，避免窗口过小 */
-}
-.empty{
-  width: 90%;
-  height: 100%;
 }
 </style>

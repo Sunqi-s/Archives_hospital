@@ -344,11 +344,11 @@
 
     <insert id="insertArchiveInfoList" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO archive_info (
-        category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date,remarks, archive_status, create_by,create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7,field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status, data_permit
+        category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, remarks, archive_status, create_by,create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7,field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status, data_permit
         ) VALUES
         <foreach collection="list" item="item" separator=",">
             (
-            #{item.categoryId}, #{item.fondsNumber}, #{item.fondsName}, #{item.retentionPeriod}, #{item.itemNumber}, #{item.archiveNumber}, #{item.department}, #{item.archiver}, #{item.archiveDate},#{item.remarks}, #{item.archiveStatus},#{item.createBy},#{item.createTime},#{item.updateBy},#{item.updateTime}, #{item.categoryCode}, #{item.field1}, #{item.field2}, #{item.field3}, #{item.field4}, #{item.field5}, #{item.field6}, #{item.field7},#{item.field8}, #{item.field9}, #{item.field10}, #{item.field11}, #{item.field12}, #{item.field13}, #{item.field14}, #{item.field15}, #{item.field16}, #{item.field17}, #{item.field18}, #{item.field19}, #{item.field20}, #{item.field21},#{item.field22}, #{item.field23}, #{item.field24}, #{item.field25}, #{item.field26}, #{item.field27}, #{item.field28}, #{item.field29}, #{item.field30}, #{item.ossStatus}, #{item.dataPermit}
+            #{item.categoryId}, #{item.fondsNumber}, #{item.fondsName}, #{item.retentionPeriod}, #{item.itemNumber}, #{item.archiveNumber}, #{item.department}, #{item.archiver}, #{item.remarks}, #{item.archiveStatus},#{item.createBy},#{item.createTime},#{item.updateBy},#{item.updateTime}, #{item.categoryCode}, #{item.field1}, #{item.field2}, #{item.field3}, #{item.field4}, #{item.field5}, #{item.field6}, #{item.field7},#{item.field8}, #{item.field9}, #{item.field10}, #{item.field11}, #{item.field12}, #{item.field13}, #{item.field14}, #{item.field15}, #{item.field16}, #{item.field17}, #{item.field18}, #{item.field19}, #{item.field20}, #{item.field21},#{item.field22}, #{item.field23}, #{item.field24}, #{item.field25}, #{item.field26}, #{item.field27}, #{item.field28}, #{item.field29}, #{item.field30}, #{item.ossStatus}, #{item.dataPermit}
             )
         </foreach>
     </insert>
@@ -420,23 +420,21 @@
         UPDATE archive_info
         SET
         archive_date = CASE
-        WHEN archive_status = 0 THEN NOW() -- 修改归档时间
-        ELSE archive_date -- 保持原值
+        WHEN archive_status = 0 THEN #{archiveInfoStatus.archiveDate} -- 修改归档时间
+        ELSE archive_date
         END,
         archive_status = CASE
         WHEN archive_status = 0 THEN 1
         WHEN archive_status = 1 THEN 0
-        ELSE archive_status -- 不是0或1，保持原值
+        ELSE archive_status
         END,
         department = CASE
         WHEN archive_status = 0 THEN #{archiveInfoStatus.department} -- 修改归档部门
-        WHEN archive_status = 1 THEN #{archiveInfoStatus.department} -- 保持原值
-        ELSE department -- 保持原值
+        ELSE department
         END,
         archiver = CASE
         WHEN archive_status = 0 THEN #{archiveInfoStatus.archiver} -- 修改归档人
-        WHEN archive_status = 1 THEN #{archiveInfoStatus.archiver} -- 保持原值
-        ELSE archiver -- 保持原值
+        ELSE archiver
         END
         WHERE id IN
         <foreach item="id" collection="array" open="(" separator="," close=")">

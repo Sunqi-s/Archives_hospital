@@ -56,8 +56,8 @@ public class ArchiveInfo extends BaseEntity
     private String archiver;
 
     /** 归档时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "归档时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "归档时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date archiveDate;
 
     /** 备注 */

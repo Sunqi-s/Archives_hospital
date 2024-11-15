@@ -184,9 +184,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     public int updateArchiveStatusByIds(Long[] ids) {
         SysUser StatusUsers = SecurityUtils.getLoginUser().getUser();
         ArchiveInfo archiveInfoStatus = new ArchiveInfo();
-        archiveInfoStatus.setArchiveStatus(1L);
         archiveInfoStatus.setDepartment(String.valueOf(StatusUsers.getDeptId()));
         archiveInfoStatus.setArchiver(StatusUsers.getNickName());
+        archiveInfoStatus.setArchiveDate(DateUtils.getNowDate());
         return archiveInfoMapper.updateArchiveStatusByIds(ids,archiveInfoStatus);
     }
 
