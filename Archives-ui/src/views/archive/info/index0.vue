@@ -1111,8 +1111,12 @@ export default {
     },
     handleBatchDelete() {
       this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(()=> {
+      this.deleteQuery.categoryId = this.categoryId;
+      this.deleteQuery.archiveStatus = 0;
+      this.$modal.loading("正在处理中");
         return delAllInfo(this.deleteQuery)
           .then((res) => {
+            this.$modal.closeLoading();
             if (res.code === 200) {
               this.$modal.msgSuccess("删除成功");
             } else {
