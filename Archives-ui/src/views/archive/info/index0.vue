@@ -766,21 +766,18 @@ export default {
     },
     returnFiles(fileList) {
       this.uploadCount--;
-      if (this.originalFile > -1) {
-        this.successList.push(...fileList)
-        if(this.$refs.fileUpload){
+      if (this.uploadCount < 1) {
+        this.successList = fileList;
+        if (this.$refs.fileUpload) {
           this.$refs.fileUpload.resetFileList();
         }
-      } else {
-        this.successList = fileList;
-      }
-      if(this.uploadCount<1){
         if (this.originalFile > -1) {
           this.form.sysOssList = this.form.sysOssList.filter(item => item.url)
+          this.form.sysOssList = this.form.sysOssList.concat(this.successList)
+        } else {
+          this.form.sysOssList = this.successList;
         }
-        this.form.sysOssList = this.successList;
       }
-
     },
 
     closeAndRefresh() {
