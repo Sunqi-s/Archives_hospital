@@ -561,8 +561,8 @@ export default {
         this.workbook = XLSX.read(data, {type: 'array', cellDates: true});
         this.sheetNames = this.workbook.SheetNames; // 获取Sheet名称
         this.selectedSheet = this.sheetNames[0]; // 设置选中的Sheet
-        this.parseExcelData(this.workbook.Sheets[this.selectedSheet]); // 解析Excel数据
-        this.active = 2; // 设置步骤条的活动步骤
+        let c = this.parseExcelData(this.workbook.Sheets[this.selectedSheet]); // 解析Excel数据
+        this.active = c; // 设置步骤条的活动步骤
       };
       reader.readAsArrayBuffer(file.raw);
     },
@@ -577,7 +577,14 @@ export default {
       const data = XLSX.utils.sheet_to_json(sheet, {header: 1, raw: false, dateNF: 'yyyy/MM/dd'});
       const headers = data[0];
       let rows = data.slice(1);
-      const yesList = this.columnList.filter(col => headers.includes(col.label));
+      if(rows.length === 0){
+        this.reset();
+        this.isSubmitDateTriggered = true;
+        this.$refs.fileTree.clear();
+        this.$message.error('请上传包含导入信息的Excel文件');
+        return 0;
+      }else{
+        const yesList = this.columnList.filter(col => headers.includes(col.label));
       const noList = this.columnList.filter(col => !headers.includes(col.label)&&col.isRequired === '1');
       this.exportList = [];
       rows = rows.filter(row => row.length !== 0);
@@ -614,6 +621,9 @@ export default {
       if (!hasErrors) {
         this.active = 3; // 设置步骤条的活动步骤
       }
+      return 2;
+      }
+      
     },
 
     // 验证单元格数据
