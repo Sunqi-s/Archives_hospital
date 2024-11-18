@@ -863,6 +863,7 @@ export default {
       this.isClick=true;
       this.resetAttachment();
       this.clearFormData();
+      this.resetFolderForm();
     },
 
 
@@ -1250,6 +1251,12 @@ export default {
       getServerFileList(this.currentFolder).then(response => {
         this.folderList = [];
         this.folderList = response.filter(file => file.hasChildren === true);
+        const totalChildrenCount = this.folderList.reduce((acc, item) => {
+          if (item && item.children) {
+            return acc + item.children.length;
+          }
+          return acc;
+        }, 0);
         //判断folderList是否为空
         if (this.folderList.length === 0){
           this.$message.error('文件夹为空或不是文件夹，请重新选择');
@@ -1257,7 +1264,7 @@ export default {
         }else {
           this.logQueryParams.status = "panding"
           this.logQueryParams.infoImportRecords = this.tableData.length
-          this.logQueryParams.ossImportRecords = this.folderList.length
+          this.logQueryParams.ossImportRecords = totalChildrenCount
           this.logQueryParams.startTime = new Date().toLocaleString();
           addImportLog(this.logQueryParams).then(response => {
             this.currentStep = 2;
