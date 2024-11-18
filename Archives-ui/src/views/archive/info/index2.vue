@@ -3,7 +3,7 @@
     <el-row :gutter="20">
       <!-- 档案分类树形结构 -->
       <el-col :span="4" :xs="24">
-        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree"></file-tree>
+        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree" :isClick="isClick"></file-tree>
       </el-col>
 
       <!-- 未选择档案库时显示该画面 -->
@@ -87,7 +87,7 @@
 
         <!-- 动态生成的表格 -->
         <div class="fixed-table-container" >
-        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="60%" ref="dynamicTable" border>
+        <el-table :data="infoList" v-loading="loading" element-loading-background="rgba(255,255,255,1)" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="80%" ref="dynamicTable" border>
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
             v-for="field in sortedFields"
@@ -95,8 +95,7 @@
             :prop="field.name"
             :label="field.label"
             :sortable="true"
-            :width="field.width || '120px'"
-            :resizable="true"
+            :width="field.label.length * 11 + 65+'vh'"
           >
             <template slot-scope="scope">
               <el-tooltip class="item" effect="dark" :content="getTooltipContent(field.name, scope.row)" placement="top">
@@ -295,7 +294,7 @@ export default {
       departmentMap:{},
       //保存的ids
       savedids:[],
-
+      isClick:true,
     };
   },
   created() {
@@ -453,10 +452,12 @@ export default {
       return tree;
     },
     handleNodeClick(nodeData) {
-      this.clearSearch();
+      if(this.isClick) {
+        this.clearSearch()
       //选择档案节点不显示列表页面
-      if(nodeData.type===1) {
+        if (nodeData.type === 1) {
         this.categoryId = nodeData.id;
+          this.isClick = false;
       } else {
         this.categoryId = null;
       }
@@ -465,6 +466,7 @@ export default {
       this.queryParams.categoryId = nodeData.id;
       this.getFieldDefinitions(nodeData.id);
       this.getList();
+      }
     },
     handleQuery() {
       this.queryParams.categoryId = this.categoryId;
@@ -474,6 +476,9 @@ export default {
     handleQueryBeach(){
       this.queryParams.categoryId = this.categoryId;
       this.queryParams.archiveStatus = 2;
+      if(this.queryParams.ossStatus === ""){
+        this.queryParams.ossStatus = null;
+      }
       getBeachList(this.queryParams).then(response => {
         if (response.rows.length > 0) {
           this.infoList = response.rows;
@@ -509,9 +514,14 @@ export default {
           this.infoList = response.rows;
         }
         this.total = response.total;
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.$refs.dynamicTable.doLayout(); // 延迟0.1秒后调用
+          }, 100);
+          setTimeout(() => {
+            this.isClick = true;
         this.loading = false;
-          this.$nextTick(() => {
-              this.$refs.dynamicTable.doLayout(); // 确保方法存在后再调用
+          }, 300);
           })
       });
     },
@@ -808,10 +818,8 @@ export default {
   top: 200px;
   width: auto;
   max-width: 70%;
-  height: 100%;
-  overflow: auto;
+  height: 80%;
+  overflow-x: auto;
   position: fixed;
-  min-width: 500px; /* 可设置最小宽度，避免窗口过小 */
-  min-height: 300px; /* 可设置最小高度，避免窗口过小 */
 }
 </style>

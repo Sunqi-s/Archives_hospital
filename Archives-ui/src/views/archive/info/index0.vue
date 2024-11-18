@@ -123,7 +123,7 @@
 
         <!-- 动态生成的表格 -->
         <div class="fixed-table-container" >
-        <el-table :data="infoList" v-loading="loading" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="60%" ref="dynamicTable" border>
+        <el-table :data="infoList" v-loading="loading" element-loading-background="rgba(255,255,255,1)" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="80%" ref="dynamicTable" border>
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column
             v-for="field in sortedFields"
@@ -606,13 +606,15 @@ export default {
           this.infoList = response.rows;
         }
         this.total = response.total;
-          this.$nextTick(() => {
-            setTimeout(() => {
-                // this.$refs.dynamicTable.doLayout(); // 延迟0.1秒后调用
-                this.isClick = true;
-                this.loading = false;
-              }, 300);
-          })
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.$refs.dynamicTable.doLayout(); // 延迟0.1秒后调用
+          }, 100);
+          setTimeout(() => {
+            this.isClick = true;
+            this.loading = false;
+          }, 300);
+        })
 
       });
     },
@@ -1226,11 +1228,8 @@ export default {
   top: 200px;
   width: auto;
   max-width: 70%;
-  height: 100%;
-  overflow: auto;
+  height: 80%;
+  overflow-x: auto;
   position: fixed;
-  min-width: 500px; /* 可设置最小宽度，避免窗口过小 */
-  min-height: 300px; /* 可设置最小高度，避免窗口过小 */
 }
-
 </style>
