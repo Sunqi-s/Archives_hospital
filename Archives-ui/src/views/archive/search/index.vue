@@ -75,11 +75,10 @@
         </el-row>
         <el-row :gutter="20" v-if="!isEmpty">
           <el-col :span="24">
-            <el-tabs v-model="selectedTag" @tab-click="selectedItem" class="fixed-table-container">
-              <el-tab-pane v-for="tag in tagList" :key="tag.name" :label="tag.name+'('+tag.count+')'" :name="String(tag.category)">
+                <el-tag v-for="tag in tagList" :key="tag.name" @click="selectedItem(tag)" type="" :effect="selectedTag === tag.category? 'dark':'plain'" size="medium">{{ tag.name+"("+tag.count+")" }}</el-tag>
                 <!-- 动态生成的表格 -->
                 <div class="table-container">
-                  <el-table v-loading="vLoading" :data="FilteredList" :default-sort = "{prop: 'id', order: 'descending'}" height="53vh" ref="dynamicTable" border @row-click="handleRowClick">
+                  <el-table v-loading="vLoading" element-loading-background="rgba(255,255,255,1)" :data="FilteredList" :default-sort = "{prop: 'id', order: 'descending'}" height="53vh" ref="dynamicTable" border @row-click="handleRowClick">
                     <el-table-column
                       v-for="field in itemFilteredList"
                       :key="field.name"
@@ -108,8 +107,6 @@
                     </el-pagination>
                   </div>
                 </div>
-              </el-tab-pane>
-            </el-tabs>
           </el-col>
         </el-row>
         <el-row :gutter="20" v-else>
@@ -262,6 +259,7 @@
         open:false,
         title:null,
         vLoading:false,
+        isClick:false,
       };
     },
     computed:{
@@ -323,7 +321,15 @@
         this.searchResult = infoRes.searchResults;
         this.total = infoRes.total;
       }).then(()=>{
-        this.vLoading = false;
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.$refs.dynamicTable.doLayout(); // 延迟0.1秒后调用
+          }, 100);
+          setTimeout(() => {
+            this.vLoading = false;
+            this.isClick = false;
+          }, 800);
+        })
       })
     },
     handleSizeChange(nowPageSize){
@@ -335,7 +341,10 @@
         this.handleNextPage();
     },
     selectedItem(tag, event){
-        getItemByCategoryId(tag.name).then(res => {
+      if(!this.isClick){
+        this.isClick = true;
+      this.selectedTag = tag.category;
+        getItemByCategoryId(tag.category).then(res => {
           this.itemListOriginal = res.data;
           this.mapFieldData();
           // 根据不同的场景过滤字段
@@ -348,9 +357,9 @@
           this.editFields = this.itemList.filter(field => field.isEdit === '1');
         })
           this.queryParams.keyWord = this.keyWord;
-          // this.queryParams.value = this.value;
           this.queryParams.categoryId = this.selectedTag;
           this.handleNextPage();
+      }
     },
     mapHtmlType(htmlType) {
       switch (htmlType) {
@@ -575,7 +584,7 @@
     margin-left: 0;
   }
   .table-container {
-    max-height: 62vh; /* 限制表格的最大高度 */
+    max-height: 63vh; /* 限制表格的最大高度 */
     overflow-y: auto; /* 添加垂直滚动条 */
   }
   .truncate-text {
