@@ -371,6 +371,7 @@ export default {
       successList:[],
       isElCardBodyLoading:true,
       isClick:true,
+      isCheckBySearch:false,//检查是否为高级搜索
     };
   },
   created() {
@@ -565,6 +566,7 @@ export default {
       this.getList();
     },
     handleQueryBeach(){
+      this.isCheckBySearch=true;
       this.queryParams.categoryId = this.categoryId;
       this.queryParams.archiveStatus = 0;
       if(this.queryParams.ossStatus === ""){
@@ -577,6 +579,7 @@ export default {
       });
     },
     resetQuery() {
+      this.isCheckBySearch=false;
       this.queryParams = {
         categoryId: this.categoryId,
         pageNum: 1,
@@ -1106,7 +1109,11 @@ export default {
     },
     handleNextPage() {
       // this.savedids = this.savedids.concat(this.ids);
-      this.getList();
+      if(this.isCheckBySearch){
+        this.handleQueryBeach();
+      }else {
+        this.getList();
+      }
     },
     handleBatchDelete() {
       this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(()=> {
