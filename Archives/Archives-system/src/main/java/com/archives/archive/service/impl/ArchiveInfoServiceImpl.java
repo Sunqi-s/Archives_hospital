@@ -314,22 +314,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         return archiveInfoMapper.sendArchiveInfo(ids);
     }
 
-    @Override
-    public boolean deleteArchiveInfoAll(ArchiveInfo archiveInfo){
-        String[] dataPermiList = new String[0];
-        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
-        if("all".equals(currentUser.getDataPermi())){
-            dataPermiList = new String[0];
-        }else {
-            dataPermiList = (currentUser.getDataPermi().split(","));
-        }
-        List<ArchiveInfo> archiveInfoList = archiveInfoMapper.beachSearch(archiveInfo,dataPermiList);
-        if (archiveInfoList.isEmpty()) {
-            return true;
-        }else {
-            return archiveInfoMapper.deleteArchiveInfoAll(archiveInfo,dataPermiList);
-        }
-    }
 
     @Override
     public List<ArchiveInfo> beachSearch(ArchiveInfo archiveInfo) {
@@ -341,6 +325,19 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             dataPermiList = (currentUser.getDataPermi().split(","));
         }
         return archiveInfoMapper.beachSearch(archiveInfo, dataPermiList);
+    }
+
+    //获取档案信息数量
+    @Override
+    public List<Integer> getDeleteCount(ArchiveInfo archiveInfo) {
+        String[] dataPermiList = new String[0];
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        if("all".equals(currentUser.getDataPermi())){
+            dataPermiList = new String[0];
+        }else {
+            dataPermiList = (currentUser.getDataPermi().split(","));
+        }
+        return archiveInfoMapper.getArchiveInfoCount(archiveInfo,dataPermiList);
     }
 }
 

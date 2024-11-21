@@ -762,7 +762,7 @@ export default {
     async submitData() {
       const data = this.formatTableData(); // 格式化表格数据
       // 写入Log表，创建任务号
-      const batchSize = 250; // 每批次插入的数据量
+      const batchSize = 1000; // 每批次插入的数据量
       this.logQueryParams.infoImportRecords = data.length;
       this.logQueryParams.startTime = new Date().toLocaleString();
       this.logQueryParams.status = 'pending';

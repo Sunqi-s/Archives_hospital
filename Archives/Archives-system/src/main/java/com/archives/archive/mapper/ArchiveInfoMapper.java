@@ -73,7 +73,7 @@ public interface ArchiveInfoMapper
     public int updateArchiveStatusByIds(@Param("array") Long[] ids,@Param("archiveInfoStatus") ArchiveInfo archiveInfoStatus);
     /**
      * 归档档案信息
-     * @param id
+     * @param archiveInfoStatus 档案信息主键
      * @return
      */
     public int updateArchiveStatusById(ArchiveInfo archiveInfoStatus);
@@ -102,17 +102,25 @@ public interface ArchiveInfoMapper
 
     /**
      * 发送利用档案信息
-     *
+     * @param ids
+     * @return
      */
     public int sendArchiveInfo(Long[] ids);
 
-    /**
-     * 批量删除档案信息
-     */
-    public boolean deleteArchiveInfoAll(@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
 
     /**
      * 高级搜索
+     * @param archiveInfo
+     * @param dataPermiList
+     * @return
      */
     public List<ArchiveInfo> beachSearch(@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
+
+    /**
+     * 获取档案信息数量
+     * @param archiveInfo
+     * @param dataPermiList
+     * @return
+     */
+    public List<Integer> getArchiveInfoCount(@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
 }

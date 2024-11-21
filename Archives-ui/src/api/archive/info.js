@@ -68,20 +68,20 @@ export function sendInfo(id) {
   })
 }
 
-//一键删除档案信息
-export function delAllInfo(categoryId) {
-  return request({
-    url:'/archive/info/batchRemove/',
-    method: 'delete',
-    data: categoryId
-  })
-}
-
 //高级搜索
 export function getBeachList(query) {
   return request({
     url: '/archive/info/beachSearch',
     method: 'post',
+    params: query
+  })
+}
+
+//获取待删除数量
+export function getDelCount(query) {
+  return request({
+    url: '/archive/info/getDeleteCount',
+    method: 'get',
     params: query
   })
 }

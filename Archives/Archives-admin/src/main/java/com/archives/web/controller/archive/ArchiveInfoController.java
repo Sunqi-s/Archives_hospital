@@ -131,15 +131,6 @@ public class ArchiveInfoController extends BaseController
        return toAjax(archiveInfoService.sendArchiveInfo(ids));
     }
 
-    /**
-     * 批量删除档案信息
-     */
-//    @PreAuthorize("@ss.hasPermi('archive:info:batchRemove')")
-    @Log(title = "批量删除档案信息", businessType = BusinessType.DELETE)
-    @DeleteMapping("/batchRemove/")
-    public AjaxResult batchRemove(@RequestBody ArchiveInfo archiveInfo) {
-        return toAjax(archiveInfoService.deleteArchiveInfoAll(archiveInfo));
-    }
 
     /**
      * 高级搜索
@@ -149,5 +140,13 @@ public class ArchiveInfoController extends BaseController
         startPage();
         List<ArchiveInfo> list = archiveInfoService.beachSearch(archiveInfo);
         return getDataTable(list);
+    }
+
+    /**
+     * 获取待删除档案数量
+     */
+    @GetMapping("/getDeleteCount")
+    public List<Integer> getDeleteCount(ArchiveInfo archiveInfo) {
+        return archiveInfoService.getDeleteCount(archiveInfo);
     }
 }

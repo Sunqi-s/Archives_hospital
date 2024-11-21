@@ -300,7 +300,7 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import {addInfo, delAllInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo,getBeachList} from "@/api/archive/info";
+import {addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo,getBeachList,getDelCount} from "@/api/archive/info";
 import { getCategory, listCategory } from '@/api/archive/category'
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
@@ -1152,20 +1152,43 @@ export default {
       }
     },
     handleBatchDelete() {
+      let delRes = 0;
+      let deleteList = [];
       this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(()=> {
       this.deleteQuery.categoryId = this.categoryId;
       this.deleteQuery.archiveStatus = 0;
       this.$modal.loading("正在处理中");
-        return delAllInfo(this.deleteQuery)
-          .then((res) => {
-            this.$modal.closeLoading();
-            if (res.code === 200) {
-              this.$modal.msgSuccess("删除成功");
-            } else {
-              this.$modal.msgError(res.msg);
-            }
-          })
-          .catch((error) => {
+      getDelCount(this.deleteQuery).then(async res => {
+        delRes = Math.ceil(res.length / 400);
+        for (let i = 0; i < delRes; i++) {
+          let start = i * 400;
+          let end = Math.min(start + 400, res.length);
+          let list = res.slice(start, end);
+          deleteList.push(list);
+        }
+        let tasks = [];
+        const taskcount = Math.floor(deleteList.length / 5)
+              const last = deleteList.length % 5
+              for (let index = 0; index < taskcount; index++) {
+                for (let i = 0; i < 5; i++) {
+                  const list = deleteList[i + index * 5];
+                  tasks.push(delInfo(list).then(() => list.length));
+                }
+                await Promise.all(tasks);
+              }
+              if (last !== 0) {
+                for (let i = 0; i < last; i++) {
+                  const list = deleteList[i + taskcount * 5];
+                  tasks.push(delInfo(list).then(() => list.length));
+                }
+                await Promise.all(tasks);
+                this.$modal.closeLoading();
+                this.$modal.msgSuccess("删除成功");
+              }else{
+                this.$modal.closeLoading();
+                this.$modal.msgSuccess("删除成功");
+              }
+      }).catch((error) => {
             this.$modal.msgError("删除过程中发生错误");
           })
           .finally(() => {

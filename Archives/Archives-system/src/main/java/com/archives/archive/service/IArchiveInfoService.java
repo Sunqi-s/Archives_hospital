@@ -88,15 +88,14 @@ public interface IArchiveInfoService
      */
     public int sendArchiveInfo(Long[] ids);
 
-    /**
-     * 批量删除档案信息
-     *
-     *
-     */
-    public boolean deleteArchiveInfoAll(ArchiveInfo archiveInfo);
 
     /**
      * 高级搜索
      */
     public List<ArchiveInfo> beachSearch(ArchiveInfo archiveInfo);
+
+    /**
+     * 获取删除档案信息的数量
+     */
+    public List<Integer> getDeleteCount(ArchiveInfo archiveInfo);
 }
