@@ -396,6 +396,14 @@ export default {
       return this.categoryId===null;
     },
   },
+  watch:{
+    infoList:{
+      handler(newValue, oldValue) {
+        this.$refs.dynamicTable.doLayout();//对table进行重新布局
+      },
+      deep: true//监听对象内部属性变化
+    }
+  },
   methods: {
     mapHtmlType(htmlType) {
       switch (htmlType) {
@@ -611,12 +619,9 @@ export default {
         this.total = response.total;
         this.$nextTick(() => {
           setTimeout(() => {
-            this.$refs.dynamicTable.doLayout(); // 延迟0.1秒后调用
-          }, 100);
-          setTimeout(() => {
             this.isClick = true;
             this.loading = false;
-          }, 300);
+          }, 400);
         })
 
       });
@@ -1194,7 +1199,6 @@ export default {
         });
       }else {}
     },
-
   }
 };
 
