@@ -315,8 +315,9 @@
       // 实现删除标签的逻辑
       this.hotTags = this.hotTags.filter(t => t !== tag);
     },
-    handleNextPage(){
+    handleNextPage(Num){
       this.vLoading = true;
+      this.queryParams.pageNum = Num? Num : this.queryParams.pageNum;
       getArchiveDetail(this.queryParams).then(infoRes => {
         this.searchResult = infoRes.searchResults;
         this.total = infoRes.total;
@@ -358,7 +359,7 @@
         })
           this.queryParams.keyWord = this.keyWord;
           this.queryParams.categoryId = this.selectedTag;
-          this.handleNextPage();
+          this.handleNextPage(1);
       }
     },
     mapHtmlType(htmlType) {
