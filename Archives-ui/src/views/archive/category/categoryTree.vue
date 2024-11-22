@@ -60,6 +60,7 @@ export default {
         label: 'label',
       },
       clickNode: null, // 点击节点的ID
+      parentList:[]// 父级分类ID列表
     };
   },
   methods: {
@@ -73,7 +74,20 @@ export default {
     // 过滤树节点
     fileNode(value, data) {
       if (!value) return true;
-      return data.label.toLowerCase().includes(value.toLowerCase());
+      if(data.parentId===0){
+        const a = data.label.toLowerCase().includes(value.toLowerCase());
+        if(a === true){
+          this.parentList.push(data.id)
+        }
+        return a;
+      }else{
+        const b = this.parentList.indexOf(data.parentId) > -1;
+        if(b === true){
+          return b;
+        }else{
+          return data.label.toLowerCase().includes(value.toLowerCase());
+        }
+      }
     },
     // 防抖处理搜索框输入，防止频繁过滤
     debounceFilterTree: debounce(function (value) {
