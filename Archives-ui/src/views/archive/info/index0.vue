@@ -1159,10 +1159,10 @@ export default {
       this.deleteQuery.archiveStatus = 0;
       this.$modal.loading("正在处理中");
       getDelCount(this.deleteQuery).then(async res => {
-        delRes = Math.ceil(res.length / 400);
+        delRes = Math.ceil(res.length / 300);
         for (let i = 0; i < delRes; i++) {
-          let start = i * 400;
-          let end = Math.min(start + 400, res.length);
+          let start = i * 300;
+          let end = Math.min(start + 300, res.length);
           let list = res.slice(start, end);
           deleteList.push(list);
         }
