@@ -154,32 +154,7 @@ export default {
   },
   created() {
     this.getList();
-    listCategory().then(response => {
-      this.options = response.data.map(item => {
-        return{
-          value: item.id,
-          label: item.name,
-          parentId: item.parentId,
-        }
-      })
-      const x = [];
-      for (let i = 0; i < this.options.length; i++) {
-        if(this.options[i].parentId===0){
-          this.options[i].children = [];
-          x.push(this.options[i])
-        }
-      }
-      for (let j = 0; j < this.options.length; j++) {
-        if (this.options[j].parentId !== 0) {
-          for (let k = 0; k < x.length; k++) {
-            if (x[k].value === this.options[j].parentId) {
-              x[k].children.push(this.options[j])
-            }
-          }
-        }
-      }
-      this.options = x;
-    })
+    this.getListCategory();
   },
   methods: {
     /** 查询报表设计列表 */
@@ -271,7 +246,11 @@ export default {
     // 保存关联模板
     save(){
       this.option = this.option.slice(-1);
+      console.log(this.option);
+      
       this.relation.categoryId=this.option[0]
+      console.log(this.relation);
+      
       addRelation(this.relation).then(response=>{
         if(response===200){
           this.$message.success("关联成功")
@@ -280,7 +259,36 @@ export default {
         }
         this.open=false;
       })
-    }
+    },
+    getListCategory(){
+      listCategory().then(response => {
+      this.options = response.data.map(item => {
+        return{
+          value: item.id,
+          label: item.name,
+          parentId: item.parentId,
+        }
+      })
+      const x = [];
+      for (let i = 0; i < this.options.length; i++) {
+        if(this.options[i].parentId===0){
+          this.options[i].children = [];
+          x.push(this.options[i])
+        }
+      }
+      for (let j = 0; j < this.options.length; j++) {
+        if (this.options[j].parentId !== 0) {
+          for (let k = 0; k < x.length; k++) {
+            if (x[k].value === this.options[j].parentId) {
+              x[k].children.push(this.options[j])
+            }
+          }
+        }
+      }
+      this.options = x;
+    });
+    },
+
   }
 };
 </script>
