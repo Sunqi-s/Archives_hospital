@@ -1290,7 +1290,6 @@ export default {
         this.isClick = false;
         // 将文件夹列表的名称存入集合以便快速查找
         const folderNames = this.folderList.map(folder => folder.name);
-
         const formatData = (date) => {
           const year = String(date.getFullYear());
           const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1314,8 +1313,8 @@ export default {
               // 清空sysOssList，并根据子文件夹状态更新
               tableItem.sysOssList = folder.children.length === 0 ? [] : folder.children.map(child => ({
                 ...child,
-                message: '挂接成功'
               }));
+              folder.message = '挂接成功'
             }
           });
           // 更新toRemoveFolders状态
@@ -1323,17 +1322,16 @@ export default {
             ...tableItem,
             ossStatus: tableItem.sysOssList.length > 0 ? 1 : 2
           });
-          // 遍历子文件夹，判断挂接失败的文件
-          this.folderList.forEach(folder => {
-            if (folder.children.length !== 0) {
-              folder.children.forEach(child => {
-                if (child.message !== '挂接成功') {
-                  child.message = '挂接失败';
-                  this.unUploadList.push(child);
-                }
-              });
+
+        });
+        // 遍历子文件夹，判断挂接失败的文件
+        this.folderList.forEach(folder => {
+          if (folder.children.length !== 0) {
+            if (folder.message !== '挂接成功') {
+              folder.message = '挂接失败';
+              this.unUploadList.push(...folder.children);
             }
-          });
+          }
         });
         // 开始上传到数据库
         if (this.toRemoveFolders.length > 0) {
