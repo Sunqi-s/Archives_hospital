@@ -113,7 +113,7 @@
 <script>
 import { listRpttemplates, delRpttemplates} from "@/api/archive/rpttemplates";
 import {listCategory} from "@/api/archive/category";
-import {addRelation} from "@/api/archive/relation";
+import {addRelation,listRelation} from "@/api/archive/relation";
 export default {
   name: "Rpttemplates",
   data() {
@@ -148,13 +148,16 @@ export default {
       // 弹出层表单参数
       options: [],
       option:0,
-      //
-      relation:{}
+      //需保存的关联对象
+      relation:{},
+      //查询的关联
+      relationList: []
     };
   },
   created() {
     this.getList();
     this.getListCategory();
+    this.getlistRelation();
   },
   methods: {
     /** 查询报表设计列表 */
@@ -170,6 +173,7 @@ export default {
     cancel() {
       this.open = false;
       this.reset();
+      this.option = 0;
     },
     // 表单重置
     reset() {
@@ -198,8 +202,8 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
-      this.tpl_name=selection.map(item => item.name)
-      this.single = selection.length!==1
+      this.tpl_name = selection.map(item => item.name)
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
@@ -212,11 +216,11 @@ export default {
       this.$tab.openPage("设计报表", "/system/biz-settings/designer/" + tpl_name);
     },
     // 报表预览带参数
-   /* previewWithPrams(row) {
-      const tpl_name = row.name;
-      const ids = [8,9];
-      this.$tab.openPage("打印预览", "/system/biz-settings/preview/" + tpl_name, {ids:JSON.stringify(ids)});
-    },*/
+    /* previewWithPrams(row) {
+       const tpl_name = row.name;
+       const ids = [8,9];
+       this.$tab.openPage("打印预览", "/system/biz-settings/preview/" + tpl_name, {ids:JSON.stringify(ids)});
+     },*/
     // 报表预览
     preview(row) {
       const tpl_name = row.name;
@@ -225,12 +229,12 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除编号为"' + ids + '"的报表模板？').then(function() {
+      this.$modal.confirm('是否确认删除编号为"' + ids + '"的报表模板？').then(function () {
         return delRpttemplates(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => { });
     },
     /** 导出按钮操作 */
     handleExport() {
@@ -239,56 +243,89 @@ export default {
       }, `rpttemplates_${new Date().getTime()}.xlsx`)
     },
     // 关联按钮操作
-    handleRelation(row){
-      this.open=true;
-      this.relation.reportId=row.id
-    },
-    // 保存关联模板
-    save(){
-      this.option = this.option.slice(-1);
-      console.log(this.option);
-      
-      this.relation.categoryId=this.option[0]
-      console.log(this.relation);
-      
-      addRelation(this.relation).then(response=>{
-        if(response===200){
-          this.$message.success("关联成功")
-        }else{
-          this.$message.error("关联失败,报表或档案类型已有关联")
-        }
-        this.open=false;
-      })
-    },
-    getListCategory(){
-      listCategory().then(response => {
-      this.options = response.data.map(item => {
-        return{
-          value: item.id,
-          label: item.name,
-          parentId: item.parentId,
-        }
-      })
-      const x = [];
-      for (let i = 0; i < this.options.length; i++) {
-        if(this.options[i].parentId===0){
-          this.options[i].children = [];
-          x.push(this.options[i])
-        }
-      }
-      for (let j = 0; j < this.options.length; j++) {
-        if (this.options[j].parentId !== 0) {
-          for (let k = 0; k < x.length; k++) {
-            if (x[k].value === this.options[j].parentId) {
-              x[k].children.push(this.options[j])
-            }
+    handleRelation(row) {
+      this.open = true;
+      this.relation.reportId = row.id
+      for (let i = 0; i < this.relationList.length; i++) {
+        if (this.relationList[i].reportId === row.id) {
+          const categoryId = [this.relationList[i].categoryId]
+          const path = this.findPath(this.options, categoryId)
+          if (path) {
+            this.option = path.value
           }
         }
       }
-      this.options = x;
-    });
     },
+    // 保存关联模板
+    save() {
+      this.option = this.option.slice(-1);
+      this.relation.categoryId = this.option[0]
+      addRelation(this.relation).then(response => {
+        if (response === 200) {
+          this.$message.success("关联成功")
+        } else {
+          this.$message.error("关联失败,报表或档案类型已有关联")
+        }
+        this.open = false;
+      })
+    },
+    getListCategory() {
+      listCategory().then(response => {
+        this.options = response.data.map(item => {
+          return {
+            value: item.id,
+            label: item.name,
+            parentId: item.parentId,
+          }
+        })
+        const x = [];
+        for (let i = 0; i < this.options.length; i++) {
+          if (this.options[i].parentId === 0) {
+            this.options[i].children = [];
+            x.push(this.options[i])
+          }
+        }
+        for (let j = 0; j < this.options.length; j++) {
+          if (this.options[j].parentId !== 0) {
+            for (let k = 0; k < x.length; k++) {
+              if (x[k].value === this.options[j].parentId) {
+                x[k].children.push(this.options[j])
+              }
+            }
+          }
+        }
+        this.options = x;
+      });
+    },
+    // 递归找到对应的路径
+    findPath(options, categoryId) {
+      // 辅助递归函数
+      const search = (options, categoryId) => {
+        for (const option of options) {
+          // 检查当前选项的值是否是目标值
+          if (option.value === categoryId) {
+            return option; // 找到对应的路径
+          }
 
+          // 如果有子选项，则继续递归查找
+          if (option.children && option.children.length > 0) {
+            const result = search(option.children, categoryId);
+            if (result) {
+              return result; // 返回找到的路径
+            }
+          }
+        }
+        return null; // 未找到
+      };
+
+      // 调用辅助函数
+      return search(options, categoryId[0]);
+    },
+    getlistRelation() {
+      listRelation().then(response => {
+        this.relationList = response.rows;
+      })
+    }
   }
 };
 </script>
