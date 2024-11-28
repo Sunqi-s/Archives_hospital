@@ -106,7 +106,7 @@ export default {
     },
     getViolationMessage(validationErrors, field) {
       const violation = validationErrors.find(v => v.field === field);
-      return violation ? violation.messssage : '';
+      return violation ? violation.messsage : '';
     },
     showAttachments(row) {
       console.log('Attachments for row:', row);

@@ -308,6 +308,7 @@
           await Promise.all(promises);
           // 此时所有的tag已被添加到tagList中
           this.isEmpty = this.tagList.length === 0;
+          this.selectedItem(this.tagList[0])
         });
         this.showTable = true;
       },

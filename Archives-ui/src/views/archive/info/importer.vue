@@ -589,12 +589,10 @@ export default {
       this.exportList = [];
       rows = rows.filter(row => row.length !== 0);
       rows.forEach(row => {
-        headers.forEach((header, index) => {
-          const column = this.columnList.find(col => col.label === header);
-          if (column && row[index] != null && !this.exportList.includes(column)) {
-            this.exportList.push(column);
-          }
-        });
+        const idd = headers.indexOf("档号");
+        if(this.exportList.indexOf(row[idd]) === -1){
+          this.exportList.push(row[idd])
+        }
       });
       this.tableData = rows.map(row => {
         const rowData = { validationErrors: [], categoryId: this.itemQueryParams.categoryId };
@@ -650,6 +648,15 @@ export default {
           return '必须是日期';
         }
 
+      }
+      if(prop==='archiveNumber'){
+        const idx = this.exportList.findIndex(item=>item===value)
+        if(idx===-1){
+          return '档号重复';
+        }else{
+          this.exportList.splice(idx,1)
+          return null;
+        }
       }
 
       return null;
