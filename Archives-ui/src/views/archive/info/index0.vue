@@ -59,7 +59,7 @@
           </el-form>
 
           <div class="form-button-wrapper">
-            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach()">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach(1)">搜索</el-button>
             <el-button icon="el-icon-refresh" size="small" @click="resetQuery()">重置</el-button>
           </div>
 
@@ -573,9 +573,10 @@ export default {
       this.queryParams.archiveStatus = 0;
       this.getList();
     },
-    handleQueryBeach(){
+    handleQueryBeach(pn){
       this.isCheckBySearch=true;
       this.queryParams.categoryId = this.categoryId;
+      this.queryParams.pageNum = pn?pn:this.queryParams.pageNum;
       this.queryParams.archiveStatus = 0;
       if(this.queryParams.ossStatus === ""){
         this.queryParams.ossStatus = null;
