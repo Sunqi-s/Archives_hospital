@@ -34,6 +34,9 @@ public class ArchiveCategory extends TreeEntity
     @Excel(name = "显示状态：0显示，1隐藏")
     private Integer isActive;
 
+    /** 密码 */
+    private String password;
+
     public void setId(Long id)
     {
         this.id = id;
@@ -80,6 +83,10 @@ public class ArchiveCategory extends TreeEntity
         return isActive;
     }
 
+    public void setPassword(String password) {this.password = password;}
+
+    public String getPassword() {return password;}
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -95,6 +102,7 @@ public class ArchiveCategory extends TreeEntity
                 .append("createTime", getCreateTime())
                 .append("updateBy", getUpdateBy())
                 .append("updateTime", getUpdateTime())
+                .append("password", getPassword())
                 .toString();
     }
 }

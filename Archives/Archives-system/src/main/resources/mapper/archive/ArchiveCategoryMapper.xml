@@ -20,7 +20,7 @@
     </resultMap>
 
     <sql id="selectArchiveCategoryVo">
-        select id, name, parent_id, parent_name, level, type, is_active, order_num, create_by, create_time, update_by, update_time from archive_category
+        select id, name, parent_id, parent_name, level, type, is_active, order_num, create_by, create_time, update_by, update_time, password from archive_category
     </sql>
 
     <select id="selectArchiveCategoryList" parameterType="ArchiveCategory" resultMap="ArchiveCategoryResult">
@@ -55,6 +55,7 @@
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
+            <if test="password != null">password,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="name != null and name != ''">#{name},</if>
@@ -68,6 +69,7 @@
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
+            <if test="password != null">#{password},</if>
         </trim>
     </insert>
 
