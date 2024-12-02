@@ -16,7 +16,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectArchiveReportRelationList" parameterType="ArchiveReportRelation" resultMap="ArchiveReportRelationResult">
         <include refid="selectArchiveReportRelationVo"/>
-        <where>  
+        <where>
             <if test="categoryId != null "> or category_id = #{categoryId}</if>
             <if test="reportId != null "> or report_id = #{reportId}</if>
         </where>
