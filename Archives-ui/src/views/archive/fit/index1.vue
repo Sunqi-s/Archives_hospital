@@ -71,8 +71,8 @@
 
     <el-table v-loading="loading" :data="fitList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="年度表的id" align="center" prop="id" />
-      <el-table-column label="存储的字段(文书是年度、科技是类型)" align="center" prop="syllable" />
+      <el-table-column label="id" align="center" prop="id" />
+      <el-table-column label="类型" align="center" prop="syllable" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -200,7 +200,7 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加保存对于文书的年度或科技的类型的";
+      this.title = "添加类型";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -209,7 +209,7 @@ export default {
       getFit(id).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改保存对于文书的年度或科技的类型的";
+        this.title = "修改类型";
       });
     },
     /** 提交按钮 */
@@ -236,7 +236,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除保存对于文书的年度或科技的类型的编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除编号为"' + ids + '"的数据项？').then(function() {
         return delFit(ids);
       }).then(() => {
         this.getList();
