@@ -7,7 +7,7 @@ import com.archives.common.core.domain.BaseEntity;
 
 /**
  * 保存对于文书的年度或科技的类型的对象 archive_fit
- * 
+ *
  * @author é«å°å·
  * @date 2024-12-02
  */
@@ -25,33 +25,39 @@ public class ArchiveFit extends BaseEntity
     @Excel(name = "存储的字段(文书是年度、科技是类型)")
     private String syllable;
 
-    public void setId(Long id) 
+    private String query;
+
+    public void setId(Long id)
     {
         this.id = id;
     }
 
-    public Long getId() 
+    public Long getId()
     {
         return id;
     }
-    public void setCategoryId(Integer categoryId) 
+    public void setCategoryId(Integer categoryId)
     {
         this.categoryId = categoryId;
     }
 
-    public Integer getCategoryId() 
+    public Integer getCategoryId()
     {
         return categoryId;
     }
-    public void setSyllable(String syllable) 
+    public void setSyllable(String syllable)
     {
         this.syllable = syllable;
     }
 
-    public String getSyllable() 
+    public String getSyllable()
     {
         return syllable;
     }
+
+    public String getQuery() {return query;}
+
+    public void setQuery(String query) {this.query = query;}
 
     @Override
     public String toString() {
@@ -59,6 +65,7 @@ public class ArchiveFit extends BaseEntity
             .append("id", getId())
             .append("categoryId", getCategoryId())
             .append("syllable", getSyllable())
+            .append("query", getQuery())
             .toString();
     }
 }

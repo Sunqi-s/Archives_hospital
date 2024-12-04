@@ -262,6 +262,7 @@ import * as XLSX from "xlsx";
 import {getDept, listDept} from "@/api/system/dept";
 import {pointRelation} from "@/api/archive/relation";
 import {Base64} from "js-base64";
+import {listFit} from "@/api/archive/fit";
 
 export default {
   name: "Resources",
@@ -315,6 +316,9 @@ export default {
       //保存的ids
       savedids:[],
       isClick:true,
+      fit:{},
+      fitQuery:'',
+      fitName:'',
     };
   },
   created() {
@@ -446,8 +450,28 @@ export default {
     },
     getCategoryTreeList() {
       listCategory().then(response => {
-        this.fileOptions = this.handleFileOptions(response.data, "id", "parentId");
+        listFit().then(res => {
+        this.fitList = res.rows.map(item => {
+          const parentName = response.data.find(data => data.id === item.categoryId);
+          return {
+            id: item.id,
+            name: item.syllable,
+            parentId: item.categoryId,
+            password: null,
+            type: 2,
+            query: item.query,
+            parentName: parentName.name,
+          };
+        });
+        const data = response.data.concat(this.fitList)
+        this.fileOptions = this.handleFileOptions(data, "id", "parentId");
       });
+      }).then(() => {
+        if(this.$refs.fileTree){
+          this.$refs.fileTree.clear();
+        }
+        // this.getRouterPath();
+      })
     },
     /** 查询部门下拉树结构 */
     getDeptTree() {
@@ -475,47 +499,56 @@ export default {
       return tree;
     },
     handleNodeClick(nodeData) {
-      if(this.isClick) {
+      if (this.isClick) {
         this.clearSearch()
         //选择档案节点不显示列表页面
         if (nodeData.type === 1) {
           this.categoryId = nodeData.id;
           this.isClick = false;
+          if (nodeData.password !== null) {
+            const promptUserForPassword = () => {
+              this.$prompt('请输入密码', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                inputPlaceholder: '密码',
+                type: 'warning'
+              }).then(({ value }) => {
+                // 在这里你可以处理输入的密码，比如验证
+                if (value === nodeData.password) {
+                  this.doList(nodeData)
+                } else {
+                  this.$message.error('密码错误，请重新输入');
+                  promptUserForPassword();
+                }
+              }).catch(() => {
+                this.isClick = true;
+              });
+            };
+            promptUserForPassword();
+          } else {
+            this.doList(nodeData)
+          }
         } else {
           this.categoryId = null;
         }
-        if(nodeData.password !== null){
-          const promptUserForPassword = () => {
-            this.$prompt('请输入密码', '提示', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              inputPlaceholder: '密码',
-              type: 'warning'
-            }).then(({value}) => {
-              // 在这里你可以处理输入的密码，比如验证
-              if (value === nodeData.password) {
-                this.categoryName = nodeData.name;
-                this.parentCategoryName = nodeData.parentName;
-                this.queryParams.categoryId = nodeData.id;
-                this.getFieldDefinitions(nodeData.id);
-                this.getList();
-              } else {
-                this.$message.error('密码错误，请重新输入');
-                promptUserForPassword();
-              }
-            }).catch(() => {
-              this.isClick = true;
-            });
-          };
-          promptUserForPassword();
-        }else {
-          this.categoryName = nodeData.name;
-          this.parentCategoryName = nodeData.parentName;
-          this.queryParams.categoryId = nodeData.id;
-          this.getFieldDefinitions(nodeData.id);
-          this.getList();
-        }
       }
+    },
+    handlePopoverClick(data){
+      this.categoryId = data.parentId;
+      this.categoryName = data.parentName;
+      this.queryParams.categoryId = data.parentId;
+      this.fitQuery = data.query;
+      this.fitName = data.name;
+      this.$set(this.queryParams, data.query, data.name);
+      this.getList();
+    },
+    doList(nodeData) {
+      this.categoryName = nodeData.name;
+      this.queryParams.categoryId = nodeData.id;
+      this.getFieldDefinitions(nodeData.id);
+      this.getList();
+      this.fitName = ''
+      this.isClick = true;
     },
     handleQuery() {
       this.queryParams.categoryId = this.categoryId;
@@ -632,6 +665,7 @@ export default {
           archiveStatus: 1,
           searchValue: ''
         }
+        this.$set(ExportQueryParams,this.fitQuery,this.fitName);
         listInfo(ExportQueryParams).then(res => {
           dataToExport = res.rows;
           this.exportToExcel(dataToExport);
@@ -749,6 +783,7 @@ export default {
             archiveStatus: 1,
             searchValue: ''
           };
+          this.$set(ExportQueryParams, this.fitQuery,this.fitName);
           // 定义递归函数
           const fetchAndProcessPageData = async (pageNum, pageTotal, concurrency = 5) => {
             try {
@@ -836,6 +871,7 @@ export default {
                 archiveStatus: 1,
                 searchValue: ''
               }
+              this.$set(ExportQueryParams, this.fitQuery,this.fitName);
               listInfo(ExportQueryParams).then(res => {
                 listids = res.rows.map(item => item.id)
                 ids = listids.join(',');
@@ -882,6 +918,7 @@ export default {
             archiveStatus: 1,
             searchValue: ''
           };
+          this.$set(ExportQueryParams, this.fitQuery,this.fitName);
           // 定义递归函数
           const sendPageData = async (pageNum, pageTotal, concurrency = 5) => {
             try {

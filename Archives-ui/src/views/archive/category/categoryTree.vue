@@ -23,7 +23,7 @@
         <span >
           <i class="el-icon-document" v-if="data.parentId!==0"></i>
           <i class="el-icon-folder" v-else></i>
-          <span :style="clickNode === data.id && data.parentId>0? 'color:#409eff':''">{{ data.label }}</span>
+          <span :style="clickNode === data.id && clickType === data.type && data.parentId>0? 'color:#409eff':''">{{ data.label }}</span>
         </span>
       </span>
     </el-tree>
@@ -60,6 +60,7 @@ export default {
         label: 'label',
       },
       clickNode: null, // 点击节点的ID
+      clickType: null,
       parentList:[]// 父级分类ID列表
     };
   },
@@ -68,7 +69,13 @@ export default {
     handleNodeClick(data) {
       if(this.isClick){
         this.clickNode = data.id;
-      this.$emit('node-click', data);
+        this.clickType = data.type;
+        if(this.clickType>1){
+          this.$emit('popover-click', data);
+        }else{
+          this.$emit('node-click', data);
+        }
+
       }
     },
     // 过滤树节点
