@@ -1,21 +1,14 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-<!--      <el-form-item label="存储的category_id" prop="categoryId">-->
-<!--&lt;!&ndash;        <el-input&ndash;&gt;-->
-<!--&lt;!&ndash;          v-model="queryParams.categoryId"&ndash;&gt;-->
-<!--&lt;!&ndash;          placeholder="请输入存储的category_id"&ndash;&gt;-->
-<!--&lt;!&ndash;          clearable&ndash;&gt;-->
-<!--&lt;!&ndash;          @keyup.enter.native="handleQuery"&ndash;&gt;-->
-<!--&lt;!&ndash;        />&ndash;&gt;-->
-<!--      </el-form-item>-->
-      <el-form-item label="年度" prop="syllable">
-        <el-input
-          v-model="queryParams.syllable"
-          placeholder="请输入年度"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="档案类型" prop="categoryId">
+        <el-select v-model="queryParams.categoryId" placeholder="请选择档案类型" clearable
+          @keyup.enter.native="handleQuery" >
+          <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>"
+        </el-select>
+      </el-form-item>
+      <el-form-item label="分类名称" prop="syllable">
+        <el-input v-model="queryParams.syllable" placeholder="请输入分类名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -25,90 +18,56 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['archive:fit:add']"
-        >新增</el-button>
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
+          v-hasPermi="['archive:fit:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['archive:fit:edit']"
-        >修改</el-button>
+        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
+          v-hasPermi="['archive:fit:edit']">修改</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['archive:fit:remove']"
-        >删除</el-button>
+        <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete"
+          v-hasPermi="['archive:fit:remove']">删除</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['archive:fit:export']"
-        >导出</el-button>
+        <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport"
+          v-hasPermi="['archive:fit:export']">导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="fitList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="id" align="center" prop="id" />
-      <el-table-column label="年度" align="center" prop="syllable" />
+      <!-- <el-table-column label="id" align="center" prop="id" /> -->
+      <el-table-column label="档案类型" align="center" prop="showCategory" />
+      <el-table-column label="分类名称" align="center" prop="syllable" />
+      <el-table-column label="所属字段" align="center" prop="showQuery" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['archive:fit:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['archive:fit:remove']"
-          >删除</el-button>
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
+            v-hasPermi="['archive:fit:edit']">修改</el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
+            v-hasPermi="['archive:fit:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+    <pagination v-show="total>0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
 
     <!-- 添加或修改保存对于文书的年度或科技的类型的对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-<!--        <el-form-item label="存储的category_id" prop="categoryId">-->
-<!--          <el-input v-model="form.categoryId" placeholder="请输入存储的category_id" />-->
-<!--        </el-form-item>-->
-        <el-form-item label="年度" prop="syllable">
-          <el-input v-model="form.syllable" placeholder="请输入年度" />
+               <el-form-item label="档案类型" prop="categoryId">
+                 <el-select v-model="form.categoryId" placeholder="请选择档案类型" @change="selectedCategory" :disabled="readonly">
+                   <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                 </el-select>
+               </el-form-item>
+        <el-form-item label="分类名称" prop="syllable">
+          <el-input v-model="form.syllable" placeholder="请输入分类名称" />
+        </el-form-item>
+        <el-form-item label="所属字段" prop="query">
+          <el-input v-model="showQuery" readonly/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -148,12 +107,24 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        categoryId: 32,        syllable: null      },
+        categoryId: null,        syllable: null      },
       // 表单参数
-      form: {categoryId: 32},
+      form: {},
       // 表单校验
       rules: {
-      }
+      },
+      categoryOptions:[
+        {value:32,label:'文书',query:'年度'},
+        {value:35,label:'科技',query:'类型'},
+        {value:69,label:'文书(密)',query:'年度'}      
+      ],
+      queryOptions:[
+        {value:'field1',label:'年度'},
+        {value:'field8',label:'类型'},
+        {value:'field1',label:'年度'}
+      ],
+      showQuery:'',
+      readonly:false
     };
   },
   created() {
@@ -164,7 +135,11 @@ export default {
     getList() {
       this.loading = true;
       listFit(this.queryParams).then(response => {
-        this.fitList = response.rows;
+        this.fitList = response.rows.map(item => {
+          const showQuery = this.queryOptions.find(a => a.value === item.query).label;
+          const showCategory = this.categoryOptions.find(a => a.value === item.categoryId).label;
+          return {...item, showCategory:showCategory, showQuery:showQuery}
+        })
         this.total = response.total;
         this.loading = false;
       });
@@ -172,12 +147,13 @@ export default {
     // 取消按钮
     cancel() {
       this.open = false;
+      this.readonly = false;
       this.reset();
     },
     // 表单重置
     reset() {
       this.form = {
-        id: null,        categoryId: 32,        syllable: null      };
+        id: null,        categoryId: null,        syllable: null      };
       this.resetForm("form");
     },
     /** 搜索按钮操作 */
@@ -200,16 +176,20 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加年度";
+      this.readonly = false;
+      this.title = "添加分类";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
       const id = row.id || this.ids
+      
       getFit(id).then(response => {
+        this.selectedCategory(response.data.categoryId);
         this.form = response.data;
         this.open = true;
-        this.title = "修改年度";
+        this.readonly = true;
+        this.title = "修改分类";
       });
     },
     /** 提交按钮 */
@@ -223,9 +203,7 @@ export default {
               this.getList();
             });
           } else {
-            console.log(this.form)
             addFit(this.form).then(response => {
-              console.log(response)
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
@@ -237,7 +215,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除选中的数据项？').then(function() {
         return delFit(ids);
       }).then(() => {
         this.getList();
@@ -249,6 +227,10 @@ export default {
       this.download('archive/fit/export', {
         ...this.queryParams
       }, `fit_${new Date().getTime()}.xlsx`)
+    },
+    selectedCategory(value){
+      this.showQuery = this.categoryOptions.find(item => item.value === value).query
+      this.form.query = this.queryOptions.find(item => item.label === this.showQuery).value
     }
   }
 };
