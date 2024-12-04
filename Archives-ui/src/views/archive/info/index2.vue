@@ -452,21 +452,47 @@ export default {
       return tree;
     },
     handleNodeClick(nodeData) {
-      if(this.isClick) {
+      if (this.isClick) {
         this.clearSearch()
-      //选择档案节点不显示列表页面
+        //选择档案节点不显示列表页面
         if (nodeData.type === 1) {
-        this.categoryId = nodeData.id;
+          this.categoryId = nodeData.id;
           this.isClick = false;
-      } else {
-        this.categoryId = null;
+          if (nodeData.password !== null) {
+            this.loading = false;
+            const promptUserForPassword = () => {
+              this.$prompt('请输入密码', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                inputPlaceholder: '密码',
+                type: 'warning'
+              }).then(({ value }) => {
+                // 在这里你可以处理输入的密码，比如验证
+                if (value === nodeData.password) {
+                  this.doList(nodeData)
+                } else {
+                  this.$message.error('密码错误，请重新输入');
+                  promptUserForPassword();
+                }
+              }).catch(() => {
+                this.isClick = true;
+              });
+            };
+            promptUserForPassword();
+          } else {
+            this.doList(nodeData)
+          }
+        } else {
+          this.categoryId = null;
+        }
       }
+    },
+    doList(nodeData) {
       this.categoryName = nodeData.name;
-      this.parentCategoryName = nodeData.parentName;
       this.queryParams.categoryId = nodeData.id;
       this.getFieldDefinitions(nodeData.id);
       this.getList();
-      }
+      this.isClick = true;
     },
     handleQuery() {
       this.queryParams.categoryId = this.categoryId;
