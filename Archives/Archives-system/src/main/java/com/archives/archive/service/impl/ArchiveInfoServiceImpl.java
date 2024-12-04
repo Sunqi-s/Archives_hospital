@@ -182,10 +182,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Override
     public int updateArchiveStatusByIds(Long[] ids) {
-        SysUser StatusUsers = SecurityUtils.getLoginUser().getUser();
         ArchiveInfo archiveInfoStatus = new ArchiveInfo();
-        archiveInfoStatus.setDepartment(String.valueOf(StatusUsers.getDeptId()));
-        archiveInfoStatus.setArchiver(StatusUsers.getNickName());
         archiveInfoStatus.setArchiveDate(DateUtils.getNowDate());
         return archiveInfoMapper.updateArchiveStatusByIds(ids,archiveInfoStatus);
     }
@@ -193,12 +190,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public int updateArchiveStatusById(Long id)
     {
-        SysUser StatusUser = SecurityUtils.getLoginUser().getUser();
         ArchiveInfo archiveInfoStatus = new ArchiveInfo();
         archiveInfoStatus.setId(id);
         archiveInfoStatus.setArchiveStatus(1L);
-        archiveInfoStatus.setDepartment(String.valueOf(StatusUser.getDeptId()));
-        archiveInfoStatus.setArchiver(StatusUser.getNickName());
         archiveInfoStatus.setArchiveDate(DateUtils.getNowDate());
         return archiveInfoMapper.updateArchiveStatusById(archiveInfoStatus);
     }

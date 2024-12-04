@@ -484,14 +484,6 @@
         WHEN archive_status = 0 THEN 1
         WHEN archive_status = 1 THEN 0
         ELSE archive_status
-        END,
-        department = CASE
-        WHEN archive_status = 0 THEN #{archiveInfoStatus.department} -- 修改归档部门
-        ELSE department
-        END,
-        archiver = CASE
-        WHEN archive_status = 0 THEN #{archiveInfoStatus.archiver} -- 修改归档人
-        ELSE archiver
         END
         WHERE id IN
         <foreach item="id" collection="array" open="(" separator="," close=")">
