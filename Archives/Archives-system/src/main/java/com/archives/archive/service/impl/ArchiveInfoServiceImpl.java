@@ -81,7 +81,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         if (searchValue != null && !searchValue.isEmpty()) {
             return archiveInfoMapper.selectArchiveInfoListByKeyword(searchValue,categoryId,archiveStatus, dataPermiList);
         }
-        return archiveInfoMapper.selectArchiveInfoList(archiveInfo, dataPermiList);
+        return archiveInfoMapper.beachSearch(archiveInfo, dataPermiList);
     }
 
     /**

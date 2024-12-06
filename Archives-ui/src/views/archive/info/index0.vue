@@ -18,7 +18,7 @@
       <el-col :span="20" :xs="24" v-show="categoryId">
         <!-- 单一框的搜索条件 -->
         <div class="archives-style">
-          <el-input class="input" v-model="queryParams.searchValue"
+          <el-input class="input" v-model="saveSearch.searchValue"
                     size="small"
                     placeholder="快速搜索"
                     style="width: 20%; margin-right: 10px;"
@@ -48,9 +48,9 @@
 
         <!-- 高级搜索抽屉 -->
         <el-drawer  class="search-drawer"  title="高级搜索"  :visible.sync="drawer" :with-header="true">
-          <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="100px">
+          <el-form :model="saveSearch" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="100px">
             <el-form-item v-for="field in queryFields" :key="field.name" :label="field.label" :prop="field.name">
-              <component  :is="getComponentType(field.type)" v-model="queryParams[field.name]" v-bind="getComponentProps(field)">
+              <component  :is="getComponentType(field.type)" v-model="saveSearch[field.name]" v-bind="getComponentProps(field)">
                 <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
                 <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
                 <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
@@ -372,6 +372,13 @@ export default {
       isElCardBodyLoading:true,
       isClick:true,
       isCheckBySearch:false,//检查是否为高级搜索
+      saveSearch:{
+        pageNum: 1,
+        pageSize: 10,
+        categoryId: null,
+        archiveStatus: 0, //默认显示待归档数据
+        searchValue: ''
+      },//搜索框内容
     };
   },
   created() {
@@ -595,8 +602,21 @@ export default {
       this.isClick = true;
     },
     handleQuery() {
-      this.queryParams.categoryId = this.categoryId;
-      this.queryParams.archiveStatus = 0;
+      this.queryParams = {
+        categoryId : this.categoryId,
+        archiveStatus : 0,
+        searchValue : this.saveSearch.searchValue,
+        pageNum : 1,
+        pageSize: this.queryParams.pageSize
+      }
+      this.saveSearch = {
+        searchValue : this.saveSearch.searchValue,
+        pageNum : 1,
+        pageSize: 10,
+        archiveStatus : 0,
+        categoryId : this.categoryId
+      }
+      this.deleteQuery.searchValue = this.queryParams.searchValue;
       this.getList();
     },
     handleQueryBeach(pn){
@@ -604,6 +624,11 @@ export default {
       this.queryParams.categoryId = this.categoryId;
       this.queryParams.pageNum = pn?pn:this.queryParams.pageNum;
       this.queryParams.archiveStatus = 0;
+      this.queryFields.forEach(field => {
+        this.$set(this.queryParams, field.name, this.saveSearch[field.name]);
+      });
+      this.saveSearch.searchValue = '';
+      this.queryParams.searchValue = '';
       if(this.queryParams.ossStatus === ""){
         this.queryParams.ossStatus = null;
       }
@@ -620,7 +645,9 @@ export default {
         pageNum: 1,
         pageSize: 10,
         archiveStatus: 0,
+        searchValue: ''
       };
+      this.saveSearch = this.queryParams;
       this.deleteQuery = this.queryParams;
       this.queryFields.forEach(field => {
         this.$set(this.queryParams, field.name, '');
@@ -947,12 +974,12 @@ export default {
         this.exportToExcel(dataToExport);
       } else {
         let ExportQueryParams = {
-          pageNum: 1,
-          pageSize: 10000000,
           categoryId: this.categoryId,
           archiveStatus: 0,
-          searchValue: ''
+          ...this.queryParams
         }
+        ExportQueryParams.pageNum = 1
+        ExportQueryParams.pageSize = 10000000
         listInfo(ExportQueryParams).then(res => {
           dataToExport = res.rows;
           this.exportToExcel(dataToExport);
@@ -1048,12 +1075,12 @@ export default {
           this.$modal.loading("正在处理中");
           const pageTotal = Math.ceil(this.total / 3000);
           const ExportQueryParams = {
-            pageNum: 1,
-            pageSize: 3000,
             categoryId: this.categoryId,
             archiveStatus: 0,
-            searchValue: ''
+            ...this.queryParams
           };
+          ExportQueryParams.pageNum = 1;
+          ExportQueryParams.pageSize = 3000;
           // 定义递归函数
           const fetchAndProcessPageData = async (pageNum, pageTotal, concurrency = 5) => {
             try {
@@ -1145,12 +1172,12 @@ export default {
             else {
               let listids = []
               let ExportQueryParams = {
-                pageNum: 1,
-                pageSize: 10000000,
                 categoryId: this.categoryId,
                 archiveStatus: 0,
-                searchValue: ''
+                ...this.queryParams
               }
+              ExportQueryParams.pageNum = 1;
+              ExportQueryParams.pageSize = 10000000;
               listInfo(ExportQueryParams).then(res => {
                 listids = res.rows.map(item => item.id)
                 ids = listids.join(',');
