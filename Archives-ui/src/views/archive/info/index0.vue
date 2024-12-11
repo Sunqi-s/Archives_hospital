@@ -300,7 +300,7 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import {addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo,getBeachList,getDelCount} from "@/api/archive/info";
+import {addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo,getBeachList,getDelCount,getDeleteCountBySearch} from "@/api/archive/info";
 import { getCategory, listCategory } from '@/api/archive/category'
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
@@ -1205,49 +1205,77 @@ export default {
         this.getList();
       }
     },
+    /**
+    * 批量删除当前分类下的所有数据
+    */
     handleBatchDelete() {
+      // 初始化删除响应变量和删除列表数组
       let delRes = 0;
       let deleteList = [];
-      this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(()=> {
-      this.deleteQuery.categoryId = this.categoryId;
-      this.deleteQuery.archiveStatus = 0;
-      this.$modal.loading("正在处理中");
-      getDelCount(this.deleteQuery).then(async res => {
-        delRes = Math.ceil(res.length / 300);
-        for (let i = 0; i < delRes; i++) {
-          let start = i * 300;
-          let end = Math.min(start + 300, res.length);
-          let list = res.slice(start, end);
-          deleteList.push(list);
+      // 显示确认对话框，确认是否删除
+      this.$modal.confirm('是否确认一键删除当前分类下所有数据？').then(() => {
+        // 设置删除查询参数
+        this.deleteQuery.categoryId = this.categoryId;
+        this.deleteQuery.archiveStatus = 0;
+        // 显示加载中状态
+        this.$modal.loading("正在处理中");
+        /**
+         * 处理删除操作
+         * @param {Array} res - 待删除的数据列表
+         */
+        const handleDeletion = async (res) => {
+          // 计算需要删除的批次
+          delRes = Math.ceil(res.length / 300);
+          // 分批处理删除列表
+          for (let i = 0; i < delRes; i++) {
+            let start = i * 300;
+            let end = Math.min(start + 300, res.length);
+            let list = res.slice(start, end);
+            deleteList.push(list);
+          }
+          // 初始化任务数组
+          let tasks = [];
+          const taskCount = Math.floor(deleteList.length / 5);
+          const last = deleteList.length % 5;
+          // 并发执行删除任务，每次最多5个
+          for (let index = 0; index < taskCount; index++) {
+            for (let i = 0; i < 5; i++) {
+              const list = deleteList[i + index * 5];
+              tasks.push(delInfo(list).then(() => list.length));
+            }
+            await Promise.all(tasks);
+          }
+          // 处理剩余的删除任务
+          if (last !== 0) {
+            for (let i = 0; i < last; i++) {
+              const list = deleteList[i + taskCount * 5];
+              tasks.push(delInfo(list).then(() => list.length));
+            }
+            await Promise.all(tasks);
+          }
+          // 关闭加载中状态，并显示删除成功消息
+          this.$modal.closeLoading();
+          this.$modal.msgSuccess("删除成功");
+        };
+        // 根据是否有搜索值来选择删除操作
+        if (this.deleteQuery.searchValue !== '') {
+          this.deleteQuery.keyWord = this.deleteQuery.searchValue;
+          getDeleteCountBySearch(this.deleteQuery)
+            .then(res => handleDeletion(res))
+            .catch(error => {
+              console.error("删除过程中发生错误:", error);
+              this.$modal.msgError("删除过程中发生错误");
+            })
+            .finally(() => this.getList());
+        } else {
+          getDelCount(this.deleteQuery)
+            .then(res => handleDeletion(res))
+            .catch(error => {
+              console.error("删除过程中发生错误:", error);
+              this.$modal.msgError("删除过程中发生错误");
+            })
+            .finally(() => this.getList());
         }
-        let tasks = [];
-        const taskcount = Math.floor(deleteList.length / 5)
-              const last = deleteList.length % 5
-              for (let index = 0; index < taskcount; index++) {
-                for (let i = 0; i < 5; i++) {
-                  const list = deleteList[i + index * 5];
-                  tasks.push(delInfo(list).then(() => list.length));
-                }
-                await Promise.all(tasks);
-              }
-              if (last !== 0) {
-                for (let i = 0; i < last; i++) {
-                  const list = deleteList[i + taskcount * 5];
-                  tasks.push(delInfo(list).then(() => list.length));
-                }
-                await Promise.all(tasks);
-                this.$modal.closeLoading();
-                this.$modal.msgSuccess("删除成功");
-              }else{
-                this.$modal.closeLoading();
-                this.$modal.msgSuccess("删除成功");
-              }
-      }).catch((error) => {
-            this.$modal.msgError("删除过程中发生错误");
-          })
-          .finally(() => {
-            this.getList(); // 确保无论成功或失败都执行
-          });
       });
     },
     clearSearch() {
@@ -1259,6 +1287,14 @@ export default {
         archiveStatus: 0, //默认显示待归档数据
         searchValue: ''
       }
+      this.deleteQuery = this.queryParams;
+      this.saveSearch={
+        pageNum: 1,
+        pageSize: 10,
+        categoryId: null,
+        archiveStatus: 0, //默认显示待归档数据
+        searchValue: ''
+      }//搜索框内容
     },
     getRouterPath() {
       const cId = this.$route.query.categoryId;
