@@ -16,6 +16,7 @@
                 :show-all-levels="false"
                 :props="{multiple: true}"
                 :collapse-tags="true"
+                v-model="option"
                 ref="cascader"
                 @change="handleCascaderChange"
               ></el-cascader>
@@ -60,6 +61,7 @@
               :show-all-levels="false"
               :props="{multiple: true}"
               :collapse-tags="true"
+              v-model="option"
               ref="cascader"
               @change="handleCascaderChange"
             ></el-cascader>
@@ -223,6 +225,7 @@
   import {getOssByFid} from "@/api/system/oss";
   import {listDept} from "@/api/system/dept";
   import { Base64 } from 'js-base64'
+import { option } from "runjs";
 
   export default {
     name: 'FullText',
@@ -262,6 +265,7 @@
         title:null,
         vLoading:false,
         isClick:false,
+        option:[],
       };
     },
     computed:{
