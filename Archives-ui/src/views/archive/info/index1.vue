@@ -548,7 +548,6 @@ export default {
         archiveStatus : 1,
         categoryId : this.categoryId
       }
-      this.deleteQuery.searchValue = this.queryParams.searchValue;
       this.getList();
     },
     handleQueryBeach(){
@@ -564,10 +563,8 @@ export default {
         this.queryParams.ossStatus = null;
       }
       getBeachList(this.queryParams).then(response => {
-        if (response.rows.length > 0) {
           this.infoList = response.rows;
           this.total = response.total;
-        }
       });
     },
     resetQuery() {
