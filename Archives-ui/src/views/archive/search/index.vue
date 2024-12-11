@@ -15,6 +15,7 @@
                 :options="fileOptions"
                 :show-all-levels="false"
                 :props="{multiple: true}"
+                :collapse-tags="true"
                 ref="cascader"
                 @change="handleCascaderChange"
               ></el-cascader>
@@ -58,6 +59,7 @@
               :options="fileOptions"
               :show-all-levels="false"
               :props="{multiple: true}"
+              :collapse-tags="true"
               ref="cascader"
               @change="handleCascaderChange"
             ></el-cascader>
@@ -308,7 +310,9 @@
           await Promise.all(promises);
           // 此时所有的tag已被添加到tagList中
           this.isEmpty = this.tagList.length === 0;
-          this.selectedItem(this.tagList[0])
+          if(this.tagList.length > 0){
+            this.selectedItem(this.tagList[0])
+          }
         });
         this.showTable = true;
       },
