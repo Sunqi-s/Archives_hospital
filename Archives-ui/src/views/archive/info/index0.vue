@@ -311,6 +311,7 @@ import * as XLSX from 'xlsx'
 import {listDept} from "@/api/system/dept";
 import {pointRelation} from "@/api/archive/relation";
 import {Base64} from "js-base64";
+import {addImportLog,updateImportLog} from "@/api/archive/importLog";
 export default {
   name: "Info",
   components: {
@@ -379,6 +380,15 @@ export default {
         archiveStatus: 0, //默认显示待归档数据
         searchValue: ''
       },//搜索框内容
+      logQueryParams: {
+        status: '',                 // 初始状态
+        infoProcessedRecords: 0,         // info 表的已处理记录数初始化为 0
+        ossProcessedRecords: 0,          // oss 表的已处理记录数初始化为 0
+        infoImportRecords: 0,            // info 表的待导入记录数初始化为 0
+        ossImportRecords: 0,             // oss 表的待导入记录数初始化为 0
+        startTime: '', // 返回包含日期和时间的字符串
+        type: '',
+      },
     };
   },
   created() {
@@ -794,6 +804,11 @@ export default {
               });
 
           } else {
+            this.logQueryParams.infoImportRecords = 1;
+            this.logQueryParams.ossImportRecords = 0;
+            this.logQueryParams.startTime = new Date().toLocaleString();
+            this.logQueryParams.status = 'pending';
+            this.logQueryParams.type = 'luru';
             if (this.form.sysOssList.length > 0 && this.$refs.fileUpload) {
               const sysOssList = this.form.sysOssList.map(file => ({
                 deleteFlg: file.deleteFlg,
@@ -808,11 +823,17 @@ export default {
                 suffix: file.suffix,
               }))
               this.uploadCount = sysOssList.length
+              this.logQueryParams.ossImportRecords = sysOssList.length;
               await this.$refs.fileUpload.handleUpload(sysOssList);
             }
+            await addImportLog(this.logQueryParams)
             await addInfo(this.form).then(() => {
               this.isElCardBodyLoading = true
               this.$modal.msgSuccess("新增成功");
+              this.logQueryParams.infoProcessedRecords = 1;
+              this.logQueryParams.ossProcessedRecords = this.form.sysOssList.length;
+              this.logQueryParams.status = 'completed';
+              updateImportLog(this.logQueryParams)
               this.closeAndRefresh();
               this.reset();
               this.getList();
