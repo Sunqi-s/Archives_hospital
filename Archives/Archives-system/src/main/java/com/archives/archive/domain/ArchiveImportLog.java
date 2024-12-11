@@ -52,6 +52,9 @@ public class ArchiveImportLog extends BaseEntity
     @Excel(name = "oss表的插入数")
     private Long ossImportRecords;
 
+    @Excel(name = "导入类型")
+    private String type;
+
     public void setId(Long id)
     {
         this.id = id;
@@ -132,6 +135,10 @@ public class ArchiveImportLog extends BaseEntity
         this.ossImportRecords = ossImpoertRecords;
     }
 
+    public String getType() {return type;}
+
+    public void setType(String type) {this.type = type;}
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -148,6 +155,7 @@ public class ArchiveImportLog extends BaseEntity
             .append("updateTime", getUpdateTime())
             .append("infoImportRecords", getInfoImportRecords())
             .append("ossImportRecords", getOssImportRecords())
+            .append("type", getType())
             .toString();
     }
 }

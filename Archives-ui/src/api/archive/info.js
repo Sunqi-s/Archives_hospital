@@ -85,3 +85,11 @@ export function getDelCount(query) {
     params: query
   })
 }
+
+export function getDeleteCountBySearch(query) {
+  return request({
+    url: '/archive/info/getDeleteCountByQuickSearch',
+    method: 'get',
+    params: query
+  })
+}

@@ -296,6 +296,57 @@
             </otherwise>
         </choose>
     </select>
+    <select id="getDeleteCountByQuerySearch" resultType="java.lang.Integer">
+        SELECT id FROM archive_info
+        <where>
+        and CONCAT_WS('|',
+        fonds_number,
+        fonds_name,
+        retention_period,
+        item_number,
+        archive_number,
+        department,
+        archiver,
+        remarks,
+        create_by,
+        update_by,
+        field1,
+        field2,
+        field3,
+        field4,
+        field5,
+        field6,
+        field7,
+        field8,
+        field9,
+        field10,
+        field11,
+        field12,
+        field13,
+        field14,
+        field15,
+        field16,
+        field17,
+        field18,
+        field19,
+        field20,
+        field21,
+        field22,
+        field23,
+        field24,
+        field25,
+        field26,
+        field27,
+        field28,
+        field29,
+        field30,
+        oss_status
+        ) LIKE CONCAT('%', #{searchJson.keyWord}, '%')
+        and category_id = #{searchJson.categoryId}
+        and archive_status = #{searchJson.archiveStatus}
+        <include refid="selectArchiveInfoDataPermit"/>
+        </where>
+    </select>
 
     <insert id="insertArchiveInfo" parameterType="ArchiveInfo" useGeneratedKeys="true" keyProperty="id">
         insert into archive_info

@@ -1,6 +1,7 @@
 package com.archives.archive.service.impl;
 
 import com.archives.archive.domain.ArchiveInfo;
+import com.archives.archive.domain.SearchJson;
 import com.archives.archive.mapper.ArchiveInfoMapper;
 import com.archives.archive.service.IArchiveInfoService;
 import com.archives.common.core.domain.entity.SysUser;
@@ -332,6 +333,18 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             dataPermiList = (currentUser.getDataPermi().split(","));
         }
         return archiveInfoMapper.getArchiveInfoCount(archiveInfo,dataPermiList);
+    }
+
+    @Override
+    public List<Integer> getDeleteCountByQuerySearch(SearchJson searchJson) {
+        String[] dataPermiList = new String[0];
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        if("all".equals(currentUser.getDataPermi())){
+            dataPermiList = new String[0];
+        }else {
+            dataPermiList = (currentUser.getDataPermi().split(","));
+        }
+        return archiveInfoMapper.getDeleteCountByQuerySearch(searchJson,dataPermiList);
     }
 }
 

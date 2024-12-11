@@ -1,6 +1,7 @@
 package com.archives.archive.mapper;
 
 import com.archives.archive.domain.ArchiveInfo;
+import com.archives.archive.domain.SearchJson;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -123,4 +124,9 @@ public interface ArchiveInfoMapper
      * @return
      */
     public List<Integer> getArchiveInfoCount(@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
+
+    /**
+     * 获取快速搜索删除档案信息数量
+     */
+    public List<Integer> getDeleteCountByQuerySearch(@Param("searchJson") SearchJson searchJson, @Param("dataPermit") String[] dataPermiList);
 }

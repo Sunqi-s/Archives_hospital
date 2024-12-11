@@ -375,6 +375,7 @@ export default {
         infoImportRecords: 0,            // info 表的待导入记录数初始化为 0
         ossImportRecords: 0,             // oss 表的待导入记录数初始化为 0
         startTime: '', // 返回包含日期和时间的字符串
+        type: '',
       },
       ossList:[],
       circleStep:0,
@@ -621,7 +622,7 @@ export default {
       }
       return 2;
       }
-      
+
     },
 
     // 验证单元格数据
@@ -692,6 +693,7 @@ export default {
       this.logQueryParams.ossImportRecords = ossImportRecords;
       this.logQueryParams.startTime = new Date().toLocaleString();
       this.logQueryParams.status = 'pending';
+      this.logQueryParams.type = 'bendi';
       addImportLog(this.logQueryParams).then(response => {
         this.logQueryParams.id = response.data.id;
       }).catch(error => {
@@ -773,6 +775,7 @@ export default {
       this.logQueryParams.infoImportRecords = data.length;
       this.logQueryParams.startTime = new Date().toLocaleString();
       this.logQueryParams.status = 'pending';
+      this.logQueryParams.type = 'dandao';
       addImportLog(this.logQueryParams).then(response => {
         this.logQueryParams.id = response.data.id;
       }).catch(error => {
@@ -1273,6 +1276,7 @@ export default {
           this.logQueryParams.infoImportRecords = this.tableData.length
           this.logQueryParams.ossImportRecords = totalChildrenCount
           this.logQueryParams.startTime = new Date().toLocaleString();
+          this.logQueryParams.type = 'zaixian';
           addImportLog(this.logQueryParams).then(response => {
             this.currentStep = 2;
             this.logQueryParams.id = response.data.id;

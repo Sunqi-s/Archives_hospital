@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.archives.archive.domain.ArchiveInfo;
+import com.archives.archive.domain.SearchJson;
 
 /**
  * 档案信息Service接口
@@ -98,4 +99,9 @@ public interface IArchiveInfoService
      * 获取删除档案信息的数量
      */
     public List<Integer> getDeleteCount(ArchiveInfo archiveInfo);
+
+    /**
+     * 获取快速搜索删除档案信息的数量
+     */
+    public List<Integer> getDeleteCountByQuerySearch(SearchJson searchJson);
 }

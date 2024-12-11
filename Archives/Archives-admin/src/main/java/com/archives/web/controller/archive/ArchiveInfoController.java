@@ -3,6 +3,8 @@ package com.archives.web.controller.archive;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.servlet.http.HttpServletResponse;
+
+import com.archives.archive.domain.SearchJson;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -148,5 +150,14 @@ public class ArchiveInfoController extends BaseController
     @GetMapping("/getDeleteCount")
     public List<Integer> getDeleteCount(ArchiveInfo archiveInfo) {
         return archiveInfoService.getDeleteCount(archiveInfo);
+    }
+
+    /**
+     *
+     * 获取快速搜索后待删除档案数量
+     */
+    @GetMapping("/getDeleteCountByQuickSearch")
+    public List<Integer> getDeleteCountByQuerySearch(SearchJson searchJson) {
+        return archiveInfoService.getDeleteCountByQuerySearch(searchJson);
     }
 }

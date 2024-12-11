@@ -18,10 +18,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="infoImportRecords" column="info_import_records" />
         <result property="ossImportRecords" column="oss_import_records" />
+        <result property="type" column="type" />
     </resultMap>
 
     <sql id="selectArchiveImportLogVo">
-        select id, status, info_processed_records, oss_processed_records, start_time, end_time, error_message, create_by, create_time, update_by, update_time ,info_import_records, oss_import_records from archive_import_log
+        select id, status, info_processed_records, oss_processed_records, start_time, end_time, error_message, create_by, create_time, update_by, update_time ,info_import_records, oss_import_records, type from archive_import_log
     </sql>
 
     <select id="selectArchiveImportLogList" parameterType="ArchiveImportLog" resultMap="ArchiveImportLogResult">
@@ -35,6 +36,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="errorMessage != null  and errorMessage != ''"> and error_message = #{errorMessage}</if>
             <if test="infoImportRecords != null "> and info_import_records = #{infoImportRecords}</if>
             <if test="ossImportRecords != null "> and oss_import_records = #{ossImportRecords}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
         </where>
     </select>
 
@@ -58,6 +60,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateTime != null">update_time,</if>
             <if test="infoImportRecords != null">info_import_records,</if>
             <if test="ossImportRecords != null">oss_import_records,</if>
+            <if test="type != null">type,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="status != null and status != ''">#{status},</if>
@@ -72,6 +75,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateTime != null">#{updateTime},</if>
             <if test="infoImportRecords != null">#{infoImportRecords},</if>
             <if test="ossImportRecords != null">#{ossImportRecords},</if>
+            <if test="type != null">#{type},</if>
          </trim>
     </insert>
 
@@ -88,6 +92,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="type != null">type = #{type},</if>
         </trim>
         where id = #{id}
     </update>
