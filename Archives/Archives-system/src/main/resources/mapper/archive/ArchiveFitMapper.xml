@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.archive.mapper.ArchiveFitMapper">
+    
+    <resultMap type="ArchiveFit" id="ArchiveFitResult">
+        <result property="id"    column="id"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="syllable"    column="syllable"    />
+        <result property="query"    column="query"    />
+    </resultMap>
+
+    <sql id="selectArchiveFitVo">
+        select id, category_id, syllable, query from archive_fit
+    </sql>
+
+    <select id="selectArchiveFitList" parameterType="ArchiveFit" resultMap="ArchiveFitResult">
+        <include refid="selectArchiveFitVo"/>
+        <where>  
+            <if test="categoryId != null "> and category_id = #{categoryId}</if>
+            <if test="syllable != null  and syllable != ''"> and syllable = #{syllable}</if>
+        </where>
+    </select>
+    
+    <select id="selectArchiveFitById" parameterType="Long" resultMap="ArchiveFitResult">
+        <include refid="selectArchiveFitVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertArchiveFit" parameterType="ArchiveFit" useGeneratedKeys="true" keyProperty="id">
+        insert into archive_fit
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="categoryId != null">category_id,</if>
+            <if test="syllable != null and syllable != ''">syllable,</if>
+            <if test="query != null">query,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="syllable != null and syllable != ''">#{syllable},</if>
+            <if test="query != null">#{query},</if>
+         </trim>
+    </insert>
+
+    <update id="updateArchiveFit" parameterType="ArchiveFit">
+        update archive_fit
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="syllable != null and syllable != ''">syllable = #{syllable},</if>
+            <if test="query != null">query = #{query},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveFitById" parameterType="Long">
+        delete from archive_fit where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveFitByIds" parameterType="String">
+        delete from archive_fit where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

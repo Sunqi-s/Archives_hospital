@@ -14,8 +14,22 @@
         </div>
       </el-col>
 
+      <el-col :span="20" :xs="24" v-show="showPasswordPrompt">
+        <div class="password-prompt">
+          <div>
+            <div>请输入密码</div>
+            <div>
+              <el-input v-model="passwordInput" placeholder="请输入密码" show-password></el-input>
+            </div>
+            <div>
+              <el-button type="primary" @click="handleConfirmPassword">确定</el-button>
+            </div>
+          </div>
+        </div>
+      </el-col>
+
       <!-- 档案信息展示 -->
-      <el-col :span="20" :xs="24" v-show="categoryId">
+      <el-col :span="20" :xs="24" v-show="categoryId && !showPasswordPrompt">
         <!-- 单一框的搜索条件 -->
         <div class="archives-style">
           <el-input class="input" v-model="saveSearch.searchValue"
@@ -389,6 +403,8 @@ export default {
         startTime: '', // 返回包含日期和时间的字符串
         type: '',
       },
+      showPasswordPrompt: false,//是否显示密码输入框
+      passwordInput: ''//密码
     };
   },
   created() {
@@ -577,25 +593,8 @@ export default {
           this.isClick = false;
           if (nodeData.password !== null) {
             this.loading = false;
-            const promptUserForPassword = () => {
-              this.$prompt('请输入密码', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                inputPlaceholder: '密码',
-                type: 'warning'
-              }).then(({ value }) => {
-                // 在这里你可以处理输入的密码，比如验证
-                if (value === nodeData.password) {
-                  this.doList(nodeData)
-                } else {
-                  this.$message.error('密码错误，请重新输入');
-                  promptUserForPassword();
-                }
-              }).catch(() => {
-                this.isClick = true;
-              });
-            };
-            promptUserForPassword();
+            this.isClick = true;
+            this.showPasswordPrompt = true; // 显示密码输入框
           } else {
             this.doList(nodeData)
           }
@@ -603,6 +602,20 @@ export default {
           this.categoryId = null;
         }
       }
+    },
+    handleConfirmPassword(){
+      getCategory(this.categoryId).then(response => {
+        if(response.data.password === this.passwordInput){
+          this.loading = false;
+          this.isClick = true;
+          this.showPasswordPrompt = false;
+          const nodeData = response.data;
+          this.doList(nodeData)
+        }else{
+          this.$message.error("密码错误");
+          this.passwordInput = '';
+        }
+      })
     },
     doList(nodeData) {
       this.categoryName = nodeData.name;
@@ -1407,5 +1420,14 @@ export default {
   height: 80%;
   overflow-x: auto;
   position: fixed;
+}
+.password-prompt {
+  display: flex; /* 使用Flexbox布局 */
+  flex-direction: column; /* 垂直排列子元素 */
+  align-items: center; /* 水平居中子元素 */
+  justify-content: center; /* 垂直居中子元素 */
+  height: 100%; /* 确保容器高度占满父元素 */
+  text-align: center; /* 文字居中对齐 */
+  min-height: 500px; /* 设置最小高度，以确保居中效果 */
 }
 </style>
