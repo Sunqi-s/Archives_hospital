@@ -1,6 +1,10 @@
 package com.archives.archive.service.impl;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.archives.archive.mapper.ArchiveFitMapper;
@@ -39,8 +43,20 @@ public class ArchiveFitServiceImpl implements IArchiveFitService
      */
     @Override
     public List<ArchiveFit> selectArchiveFitList(ArchiveFit archiveFit)
+    //对列表进行排序
     {
-        return archiveFitMapper.selectArchiveFitList(archiveFit);
+        List<ArchiveFit> list = archiveFitMapper.selectArchiveFitList(archiveFit);
+        List<ArchiveFit> result = list.stream().sorted(Comparator.comparing(ArchiveFit::getCategoryId)
+                .thenComparing(
+                        Comparator.comparing((ArchiveFit a) -> {
+                            if(Pattern.matches("\\d+", a.getSyllable())) {
+                                return Integer.valueOf(a.getSyllable());
+                            }
+                            return Integer.MAX_VALUE;
+                        })
+                )).collect(Collectors.toList());
+        System.out.println("list = " + result);
+        return result;
     }
 
     /**

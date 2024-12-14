@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.archive.mapper.CategoryFitMapper">
+    
+    <resultMap type="CategoryFit" id="CategoryFitResult">
+        <result property="id"    column="id"    />
+        <result property="categoryId"    column="categoryId"    />
+        <result property="query"    column="query"    />
+    </resultMap>
+
+    <sql id="selectCategoryFitVo">
+        select id, categoryId, query from category_fit
+    </sql>
+
+    <select id="selectCategoryFitList" parameterType="CategoryFit" resultMap="CategoryFitResult">
+        <include refid="selectCategoryFitVo"/>
+        <where>  
+            <if test="categoryId != null "> and categoryId = #{categoryId}</if>
+            <if test="query != null  and query != ''"> and query = #{query}</if>
+        </where>
+    </select>
+    
+    <select id="selectCategoryFitById" parameterType="Long" resultMap="CategoryFitResult">
+        <include refid="selectCategoryFitVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertCategoryFit" parameterType="CategoryFit">
+        insert into category_fit
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="categoryId != null">categoryId,</if>
+            <if test="query != null">query,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="query != null">#{query},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCategoryFit" parameterType="CategoryFit">
+        update category_fit
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="categoryId != null">categoryId = #{categoryId},</if>
+            <if test="query != null">query = #{query},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCategoryFitById" parameterType="Long">
+        delete from category_fit where id = #{id}
+    </delete>
+
+    <delete id="deleteCategoryFitByIds" parameterType="String">
+        delete from category_fit where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
