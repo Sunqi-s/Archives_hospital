@@ -397,7 +397,8 @@ export default {
       folderList:[], // 在线挂接文件列表
       toRemoveFolders:[],//在线挂接文件列表（待上传）
       value: '', // 在线挂接文件夹选择值
-      unUploadList: []//上传失败文件信息
+      unUploadList: [],//上传失败文件信息
+      folderscountList:new Map(),
     };
   },
   computed: {
@@ -471,6 +472,14 @@ export default {
         if(a.message !== '挂接成功'){
           a.message = '挂接失败,档号未匹配或没有该档号';
           this.unUploadList.push(a)
+        }else {
+          let idx = this.folderscountList.has(a.folderName)
+          if(!idx){
+            const abc = {name:a.folderName,count:1}
+            this.folderscountList.set(a.folderName,1)
+          }else{
+            this.folderscountList.set(a.folderName,this.folderscountList.get(a.folderName)+1)
+          }
         }
       })
       return as;
@@ -683,11 +692,11 @@ export default {
 
     // 批量上传数据
     async batchInsertData(data) {
-      this.displayOutput=false;
+      this.displayOutput = false;
       // 写入Log表，创建任务号
       const batchSize = 250; // 每批次插入的数据量
       const infoImportRecords = data.length;
-      const ossImportRecords = this.fileList.length;
+      const ossImportRecords = this.folderscountList.size;
       const totalBatches = Math.ceil(data.length / batchSize);
       this.logQueryParams.infoImportRecords = infoImportRecords;
       this.logQueryParams.ossImportRecords = ossImportRecords;
@@ -700,9 +709,15 @@ export default {
       });
       const insertBatch = async (batchIndex) => {
         if (batchIndex >= totalBatches) {
-
+          let success = 0;
+          for (const item of this.folderscountList.values()) {
+            if (item === 0) {
+              success += 1;
+            }
+          }
           // 更新log表
           this.logQueryParams.status = 'completed';
+          this.logQueryParams.ossProcessedRecords = success;
           updateImportLog(this.logQueryParams).then(response => {
             getImportLog(this.logQueryParams.id).then(response => {
               this.importLog = response.data;
@@ -711,46 +726,49 @@ export default {
             })
 
           }).catch(error => {
+            this.$message.error('更新Log表失败', error);
           });
-        }else {
+        } else {
           const start = batchIndex * batchSize;
           const end = Math.min(start + batchSize, data.length);
           const batchData = data.slice(start, end);
 
-          // 统计当前批次中所有项的 sysOssList 长度总和
-          const ossProcessedRecordsInBatch = batchData.reduce((sum, item) => {
-            return sum + (item.sysOssList ? item.sysOssList.length : 0);
-          }, 0);
 
           try {
             const response = await bulkAdd(batchData);
-            for(let i = 0; i < response.data.length; i++) {
+            for (let i = 0; i < response.data.length; i++) {
               this.ossList = this.ossList.concat(response.data[i].sysOssList);
             }
+            batchData.forEach(item => {
+              if (item.sysOssList.length > 0) {
+                let idx = this.folderscountList.has(item.sysOssList[0].folderName)
+                this.folderscountList.set(item.sysOssList[0].folderName, this.folderscountList.get(item.sysOssList[0].folderName) - item.sysOssList.length);
+              }
+            })
             this.ossList = this.ossList.map(item => {
               return {
-                createBy : item.createBy,
-                createTime : item.createTime,
-                deleteDate : item.deleteDate,
-                fid : item.fid,
-                deleteFlg : item.deleteFlg,
-                name : item.name,
-                path : item.path,
-                size : item.size,
-                suffix : item.suffix,
-                updateBy : item.updateBy,
-                updateTime : item.updateTime,
-                url : item.url
+                createBy: item.createBy,
+                createTime: item.createTime,
+                deleteDate: item.deleteDate,
+                fid: item.fid,
+                deleteFlg: item.deleteFlg,
+                name: item.name,
+                path: item.path,
+                size: item.size,
+                suffix: item.suffix,
+                updateBy: item.updateBy,
+                updateTime: item.updateTime,
+                url: item.url
               }
             })
             // 上传文件到OSS
             addOss(this.ossList).then(response => {
               this.ossList = [];
-              this.updateLog(batchIndex, ossProcessedRecordsInBatch, batchData) // 更新log表状态和已处理记录数
+              this.updateLog(batchIndex, 0, batchData) // 更新log表状态和已处理记录数
               insertBatch(batchIndex + 1)// 插入下一批
             })
           } catch (error) {
-            this.$message.error('数据插入失败'+error);
+            this.$message.error('数据插入失败' + error);
           }
         }
 
@@ -1200,6 +1218,7 @@ export default {
       this.attach = false;
       this.upLoadErr=0;
       this.color = '#FFFFFF';
+      this.folderscountList = new Map();
     },
 
     // 辅助函数：去掉文件名的后缀
@@ -1261,20 +1280,14 @@ export default {
       getServerFileList(this.currentFolder).then(response => {
         this.folderList = [];
         this.folderList = response.filter(file => file.hasChildren === true);
-        const totalChildrenCount = this.folderList.reduce((acc, item) => {
-          if (item && item.children) {
-            return acc + item.children.length;
-          }
-          return acc;
-        }, 0);
         //判断folderList是否为空
         if (this.folderList.length === 0){
           this.$message.error('文件夹为空或不是文件夹，请重新选择');
           this.isClick = true;
         }else {
-          this.logQueryParams.status = "panding"
-          this.logQueryParams.infoImportRecords = this.tableData.length
-          this.logQueryParams.ossImportRecords = totalChildrenCount
+          this.logQueryParams.status = "panding";
+          this.logQueryParams.infoImportRecords = this.tableData.length;
+          this.logQueryParams.ossImportRecords = this.folderList.length;
           this.logQueryParams.startTime = new Date().toLocaleString();
           this.logQueryParams.type = 'zaixian';
           addImportLog(this.logQueryParams).then(response => {
@@ -1291,7 +1304,8 @@ export default {
       this.folderPath = '';
       this.currentStep = 0;
       this.currentFolder = {path:""};
-      this.value = ''
+      this.value = '';
+      this.folderscountList = new Map();
     },
     // 在线批量挂接开始挂接
     attachFolder() {
@@ -1341,15 +1355,34 @@ export default {
             if (folder.message !== '挂接成功') {
               folder.message = '挂接失败';
               this.unUploadList.push(...folder.children);
+            }else{
+              let idx = this.folderscountList.has(folder.name)
+              if(!idx){
+                this.folderscountList.set(folder.name,folder.children.length)
+              }else{
+                this.folderscountList.set(folder.name,this.folderscountList.get(folder.name) + folder.children.length)
+              }
             }
           }
         });
         // 开始上传到数据库
         if (this.toRemoveFolders.length > 0) {
           bulkAdd(this.toRemoveFolders).then(result => {
+            result.data.forEach(item => {
+              if(item.sysOssList.length > 0) {
+                let idx = this.folderscountList.has(item.archiveNumber)
+                this.folderscountList.set(item.archiveNumber, this.folderscountList.get(item.archiveNumber) - item.sysOssList.length)
+              }
+            })
+            let success = 0;
+            for(const item of this.folderscountList.value()){
+              if(item === 0) {
+                success += 1;
+              }
+            }
             this.logQueryParams.infoProcessedRecords = result.data.length;
             const ossList = result.data.flatMap(item => item.sysOssList || []);
-            this.logQueryParams.ossProcessedRecords = ossList.length;
+            this.logQueryParams.ossProcessedRecords = success;
             this.logQueryParams.status = "completed";
             const addOssListResult = addOss(ossList);
           }).then(() => {
