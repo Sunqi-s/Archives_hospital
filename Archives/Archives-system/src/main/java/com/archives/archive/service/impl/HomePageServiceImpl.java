@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -111,5 +112,21 @@ public class HomePageServiceImpl implements IHomePageService {
         HomeData homeData = new HomeData();
         homeData.setValue(homePageMapper.importOss());
         return homeData;
+    }
+
+    @Override
+    public List<HomeData> getStatus(){
+        List<HomeData> homeDataList = new ArrayList<>();
+        HomeData homeData1 = new HomeData();
+        HomeData homeData2 = new HomeData();
+        HomeData homeData3 = new HomeData();
+        homeData1.setValue(homePageMapper.getStatus1());
+        homeData1.setName("未归档");
+        homeData2.setValue(homePageMapper.getStatus2());
+        homeData2.setName("已归档");
+        homeData3.setValue(homePageMapper.getStatus3());
+        homeData3.setName("利用");
+        homeDataList.addAll(Arrays.asList(homeData1, homeData2, homeData3));
+        return homeDataList;
     }
 }

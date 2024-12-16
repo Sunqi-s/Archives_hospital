@@ -16,4 +16,6 @@ public interface IHomePageService {
     public HomeData importData();
 
     public HomeData importOss();
+
+    public List<HomeData> getStatus();
 }

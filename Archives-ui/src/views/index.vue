@@ -3,8 +3,8 @@
     <el-row :gutter="4" type="flex">
       <el-col :span="5" :xs="24">
         <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <span>整理库档案统计</span>
+          <div slot="header" class="clearfix" @click="goToZhengli()">
+            <span >整理库档案统计</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
           <el-row>
@@ -43,7 +43,7 @@
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">全宗数量</div>
+                    <div class="grid-content bg-purple" style="float: right;color: #909399">数量</div>
                   </el-col>
                 </el-row>
               </div>
@@ -53,8 +53,8 @@
       </el-col>
       <el-col :span="5" :xs="24">
         <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <span>资源库档案统计</span>
+          <div slot="header" class="clearfix" @click="goToZiyuan">
+            <span >资源库档案统计</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
           <el-row>
@@ -93,7 +93,7 @@
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">全宗数量</div>
+                    <div class="grid-content bg-purple" style="float: right;color: #909399">数量</div>
                   </el-col>
                 </el-row>
               </div>
@@ -104,7 +104,7 @@
       <el-col :span="5" :xs="24">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
-            <span>利用库档案统计</span>
+            <span @click="goToLiyong">利用库档案统计</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
           <el-row>
@@ -143,7 +143,7 @@
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">全宗数量</div>
+                    <div class="grid-content bg-purple" style="float: right;color: #909399">数量</div>
                   </el-col>
                 </el-row>
               </div>
@@ -154,7 +154,7 @@
       <el-col :span="5" :xs="24">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
-            <span>借阅统计</span>
+            <span>待审批统计</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
           <el-row>
@@ -165,21 +165,21 @@
             <el-col :span="12">
               <div class="grid-content bg-purple-light">
                 <el-row>
-                  <el-col :span="6">
+                  <!-- <el-col :span="6">
                     <div class="grid-content bg-purple" style="float: right">
                       <el-button type="text">上月</el-button>
                     </div>
-                  </el-col>
-                  <el-col :span="6">
+                  </el-col> -->
+                  <!-- <el-col :span="6">
                     <div class="grid-content bg-purple-light" style="float: right">
                       <el-button type="text">本月</el-button>
                     </div>
-                  </el-col>
-                  <el-col :span="6">
+                  </el-col> -->
+                  <!-- <el-col :span="6">
                     <div class="grid-content bg-purple" style="float: right">
                       <el-button type="text">本年</el-button>
                     </div>
-                  </el-col>
+                  </el-col> -->
                   <el-col :span="6">
                     <div class="grid-content bg-purple-light" style="float: right">
                       <el-button type="text">全部</el-button>
@@ -188,12 +188,12 @@
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple card-font" style="float: right">{{ borrowcount }}</div>
+                    <div class="grid-content bg-purple card-font" style="float: right">{{ Approvalcount }}</div>
                   </el-col>
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">全宗数量</div>
+                    <div class="grid-content bg-purple" style="float: right;color: #909399">数量</div>
                   </el-col>
                 </el-row>
               </div>
@@ -269,24 +269,22 @@
             <span>本年档案入库数据分析</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
-          <div  id="main" style="width: 100%;height:35vh;">
-
-          </div>
+          <div class="echart" id="main" style="float: left; width: 100%; height: 39vh;"></div>
         </el-card>
       </el-col>
     </el-row>
 
-    <el-row :gutter="12">
+    <!-- <el-row :gutter="12">
       <el-col :lg="24" :xs="24">
         <el-card class="box-card" style="height: 200px">
           <div slot="header" class="clearfix">
             <span>档案数据</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
-          </div>
+          </div> -->
 <!------------------------------------------------------------------------------------------------------------------------->
-          <el-row :gutter="24" style="margin-top: 30px">
+          <!-- <el-row :gutter="24" style="margin-top: 30px"> -->
             <!--文件条目-->
-            <el-col :span="8">
+            <!-- <el-col :span="8">
               <div class="grid-content bg-purple">
                 <el-col :span="4">
                   <div class="grid-content bg-purple"><img src="../assets/images/文件条目.png"
@@ -297,9 +295,9 @@
                   <div class="grid-content bg-purple" style="color: #909399;">归档申请</div>
                 </el-col>
               </div>
-            </el-col>
+            </el-col> -->
             <!--文件条目-->
-            <el-col :span="8">
+            <!-- <el-col :span="8">
               <div class="grid-content bg-purple">
                 <el-col :span="4">
                   <div class="grid-content bg-purple"><img src="../assets/images/利用申请.png" style="width: 50px;height: 50px"></div>
@@ -322,7 +320,7 @@
                 </el-col>
               </div>
             </el-col>
-          </el-row>
+          </el-row> -->
 <!-------------------------------------------------------------------------------------------------------------------------->
           <!-- <el-row :gutter="24" style="margin-top: 30px"> -->
             <!--文件条目-->
@@ -364,15 +362,15 @@
             </el-col>
           </el-row> -->
 <!-------------------------------------------------------------------------------------------------------------------------->
-        </el-card>
+        <!-- </el-card>
       </el-col>
-    </el-row>
+    </el-row> -->
   </div>
 </template>
 
 <script>
 import * as echarts from 'echarts'
-import {getData, getList, getImportData, getImpertOssData} from "@/api/archive/homePage";
+import {getData, getList, getStatusList, getImpertOssData} from "@/api/archive/homePage";
 
 export default {
   name: "Index",
@@ -385,6 +383,7 @@ export default {
       chartInstance2: null,
       count: 20,
       pieChartData: [],//饼状图数据
+      pieChartData2: [],
       importData1:[],//柱状图数据1
       importData2:[],//柱状图数据2
       importData3:[],//柱状图数据3
@@ -392,7 +391,7 @@ export default {
       archivecount0: 0,//整理库存数量
       archivecount1: 0,//资源库数量
       archivecount2: 0,//利用库数
-      borrowcount: 0,//借阅数量
+      Approvalcount: 0,//待审批数量
       contractCount: 0,//合同数量
       guidang: 0,//归档申请数量
       liyong: 0,//利用申请数量
@@ -405,7 +404,7 @@ export default {
     })
     this.fetchPieChartData();
     this.fetchSourceData();
-    this.fetchOssData();
+    // this.fetchOssData();
     this.getCount('0','本月');
     this.getCount('1','本月');
     this.getCount('2','本月');
@@ -471,64 +470,53 @@ export default {
         this.updateChart1();//更新图表
       })
     },
-    // 获取柱状图数据
+    // 获取数据
     fetchSourceData() {
-      getImportData().then(res => {
-        this.importData1 = res.data.list1;
-        this.importData2 = res.data.list2;
-        this.updateChart2();//更新图表
+      getStatusList().then(res => {
+        this.pieChartData2 = res.data.map(item => {
+          return {
+            value:item.value,
+            name:item.name
+          }
+        })
+        this.updateChart2();
       })
     },
     // 更新图表
     updateChart2() {
+      const color = ['#ff4d4d','#ffd11a','#47d147']
       // 指定图表的配置项和数据
       const option2 = {
+        color: color,
         tooltip: {
-          trigger: 'axis'
+          trigger: 'item'
         },
         legend: {
-          data: ['文件接收', '手工录入', 'OA系统接收', '合同系统接收', '用友财务系统']
+          top: '5%',
+          orient: 'vertical',
+          left: 'left'
         },
-        toolbox: {
-          show: true,
-        },
-        calculable: true,
-        xAxis: [
-          {
-            type: 'category',
-            data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-          }
-        ],
-        yAxis: [
-          {
-            type: 'value'
-          }
-        ],
         series: [
           {
-            name: '文件接收',
-            type: 'bar',
-            data: this.importData1,
-          },
-          {
-            name: '手工录入',
-            type: 'bar',
-            data: this.importData2,
-          },
-          {
-            name: 'OA系统接收',
-            type: 'bar',
-            data: [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3],
-          },
-          {
-            name: '合同系统接收',
-            type: 'bar',
-            data: [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3],
-          },
-          {
-            name: '用友财务系统',
-            type: 'bar',
-            data: [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3],
+            name: '状态分类',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            label: {
+              show: false,
+              position: 'center'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 40,
+                fontWeight: 'bold'
+              }
+            },
+            labelLine: {
+              show: false
+            },
+            data: this.pieChartData2,
           }
         ]
       };
@@ -554,12 +542,27 @@ export default {
         }
       })
     },
-    // 获取oss数据
-    fetchOssData(){
-      getImpertOssData().then(response => {
-        this.wenjian = response.data.value
-      })
+    goToZhengli(){
+      this.$router.push({
+        path: '/ArchiveManagement/info0',
+      });
+    },
+    goToZiyuan(){
+      this.$router.push({
+        path: '/ArchiveManagement/info1',
+      });
+    },
+    goToLiyong(){
+      this.$router.push({
+        path: '/ArchiveManagement/info2',
+      });
     }
+    // 获取oss数据
+    // fetchOssData(){
+    //   getImpertOssData().then(response => {
+    //     this.wenjian = response.data.value
+    //   })
+    // }
   }
 };
 

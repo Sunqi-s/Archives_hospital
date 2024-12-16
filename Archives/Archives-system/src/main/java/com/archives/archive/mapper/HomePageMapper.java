@@ -21,4 +21,8 @@ public interface HomePageMapper {
     public List<HomeData> importData2();
 
     public int importOss();
+
+    public int getStatus1();
+    public int getStatus2();
+    public int getStatus3();
 }

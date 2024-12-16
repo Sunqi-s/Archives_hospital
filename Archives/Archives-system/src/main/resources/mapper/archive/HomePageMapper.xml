@@ -57,4 +57,19 @@
             SUM(oss_processed_records) as value
         FROM archive_import_log
     </select>
+    <select id="getStatus1" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM archive_info
+        WHERE archive_status = 0
+    </select>
+    <select id="getStatus2" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM archive_info
+        WHERE archive_status = 1
+    </select>
+    <select id="getStatus3" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM archive_info
+        WHERE archive_status = 2
+    </select>
 </mapper>

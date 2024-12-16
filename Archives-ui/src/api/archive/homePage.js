@@ -28,3 +28,10 @@ export function getImpertOssData(){
         method:'get',
     })
 }
+
+export function getStatusList(){
+    return request({
+        url:'/home/getStatus',
+        method:'get',
+    })
+}
