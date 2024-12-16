@@ -1,10 +1,10 @@
 <template>
   <div class="app-container home">
-    <el-row :gutter="12">
-      <el-col :lg="6" :xs="24">
+    <el-row :gutter="4" type="flex">
+      <el-col :span="5" :xs="24">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
-            <span>档案全宗</span>
+            <span>整理库档案统计</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
           <el-row>
@@ -17,28 +17,28 @@
                 <el-row>
                   <el-col :span="6">
                     <div class="grid-content bg-purple" style="float: right">
-                      <el-button type="text">上月</el-button>
+                      <el-button type="text" @click="getCount('0','上月')">上月</el-button>
                     </div>
                   </el-col>
                   <el-col :span="6">
                     <div class="grid-content bg-purple-light" style="float: right">
-                      <el-button type="text">本月</el-button>
+                      <el-button type="text" @click="getCount('0','本月')">本月</el-button>
                     </div>
                   </el-col>
                   <el-col :span="6">
                     <div class="grid-content bg-purple" style="float: right">
-                      <el-button type="text">本年</el-button>
+                      <el-button type="text" @click="getCount('0','本年')">本年</el-button>
                     </div>
                   </el-col>
                   <el-col :span="6">
                     <div class="grid-content bg-purple-light" style="float: right">
-                      <el-button type="text">全部</el-button>
+                      <el-button type="text" @click="getCount('0','全部')">全部</el-button>
                     </div>
                   </el-col>
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple card-font" style="float: right">123</div>
+                    <div class="grid-content bg-purple card-font" style="float: right">{{ archivecount0 }}</div>
                   </el-col>
                 </el-row>
                 <el-row>
@@ -51,60 +51,10 @@
           </el-row>
         </el-card>
       </el-col>
-      <el-col :lg="6" :xs="24">
+      <el-col :span="5" :xs="24">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
-            <span>档案入库统计</span>
-            <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
-          </div>
-          <el-row>
-            <el-col :span="12">
-              <div class="grid-content bg-purple" style="margin-top: 18px"><img src="../assets/images/入库统计.png"
-                                                                                style="right: 50px;width: 50px"></div>
-            </el-col>
-            <el-col :span="12">
-              <div class="grid-content bg-purple-light">
-                <el-row>
-                  <el-col :span="6">
-                    <div class="grid-content bg-purple" style="float: right">
-                      <el-button type="text">上月</el-button>
-                    </div>
-                  </el-col>
-                  <el-col :span="6">
-                    <div class="grid-content bg-purple-light" style="float: right">
-                      <el-button type="text">本月</el-button>
-                    </div>
-                  </el-col>
-                  <el-col :span="6">
-                    <div class="grid-content bg-purple" style="float: right">
-                      <el-button type="text">本年</el-button>
-                    </div>
-                  </el-col>
-                  <el-col :span="6">
-                    <div class="grid-content bg-purple-light" style="float: right">
-                      <el-button type="text">全部</el-button>
-                    </div>
-                  </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple card-font" style="float: right">123</div>
-                  </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">全宗数量</div>
-                  </el-col>
-                </el-row>
-              </div>
-            </el-col>
-          </el-row>
-        </el-card>
-      </el-col>
-      <el-col :lg="6" :xs="24">
-        <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <span>档案分类</span>
+            <span>资源库档案统计</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
           <el-row>
@@ -117,28 +67,28 @@
                 <el-row>
                   <el-col :span="6">
                     <div class="grid-content bg-purple" style="float: right">
-                      <el-button type="text">上月</el-button>
+                      <el-button type="text" @click="getCount('1','上月')">上月</el-button>
                     </div>
                   </el-col>
                   <el-col :span="6">
                     <div class="grid-content bg-purple-light" style="float: right">
-                      <el-button type="text">本月</el-button>
+                      <el-button type="text" @click="getCount('1','本月')">本月</el-button>
                     </div>
                   </el-col>
                   <el-col :span="6">
                     <div class="grid-content bg-purple" style="float: right">
-                      <el-button type="text">本年</el-button>
+                      <el-button type="text" @click="getCount('1','本年')">本年</el-button>
                     </div>
                   </el-col>
                   <el-col :span="6">
                     <div class="grid-content bg-purple-light" style="float: right">
-                      <el-button type="text">全部</el-button>
+                      <el-button type="text" @click="getCount('1','全部')">全部</el-button>
                     </div>
                   </el-col>
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple card-font" style="float: right">123</div>
+                    <div class="grid-content bg-purple card-font" style="float: right">{{ archivecount1 }}</div>
                   </el-col>
                 </el-row>
                 <el-row>
@@ -151,7 +101,57 @@
           </el-row>
         </el-card>
       </el-col>
-      <el-col :lg="6" :xs="24">
+      <el-col :span="5" :xs="24">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>利用库档案统计</span>
+            <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
+          </div>
+          <el-row>
+            <el-col :span="12">
+              <div class="grid-content bg-purple" style="margin-top: 18px"><img src="../assets/images/入库统计.png"
+                                                                                style="right: 50px;width: 50px"></div>
+            </el-col>
+            <el-col :span="12">
+              <div class="grid-content bg-purple-light">
+                <el-row>
+                  <el-col :span="6">
+                    <div class="grid-content bg-purple" style="float: right">
+                      <el-button type="text" @click="getCount('2','上月')">上月</el-button>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="grid-content bg-purple-light" style="float: right">
+                      <el-button type="text" @click="getCount('2','本月')">本月</el-button>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="grid-content bg-purple" style="float: right">
+                      <el-button type="text" @click="getCount('2','本年')">本年</el-button>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="grid-content bg-purple-light" style="float: right">
+                      <el-button type="text" @click="getCount('2','全部')">全部</el-button>
+                    </div>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="10" :offset="14">
+                    <div class="grid-content bg-purple card-font" style="float: right">{{ archivecount2 }}</div>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="10" :offset="14">
+                    <div class="grid-content bg-purple" style="float: right;color: #909399">全宗数量</div>
+                  </el-col>
+                </el-row>
+              </div>
+            </el-col>
+          </el-row>
+        </el-card>
+      </el-col>
+      <el-col :span="5" :xs="24">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
             <span>借阅统计</span>
@@ -188,7 +188,57 @@
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple card-font" style="float: right">123</div>
+                    <div class="grid-content bg-purple card-font" style="float: right">{{ borrowcount }}</div>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="10" :offset="14">
+                    <div class="grid-content bg-purple" style="float: right;color: #909399">全宗数量</div>
+                  </el-col>
+                </el-row>
+              </div>
+            </el-col>
+          </el-row>
+        </el-card>
+      </el-col>
+      <el-col :span="5" :xs="24">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix">
+            <span>合同统计</span>
+            <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
+          </div>
+          <el-row>
+            <el-col :span="12">
+              <div class="grid-content bg-purple" style="margin-top: 18px"><img src="../assets/images/文档1.png"
+                                                                                style="right: 50px;width: 50px"></div>
+            </el-col>
+            <el-col :span="12">
+              <div class="grid-content bg-purple-light">
+                <el-row>
+                  <el-col :span="6">
+                    <div class="grid-content bg-purple" style="float: right">
+                      <el-button type="text">上月</el-button>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="grid-content bg-purple-light" style="float: right">
+                      <el-button type="text">本月</el-button>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="grid-content bg-purple" style="float: right">
+                      <el-button type="text">本年</el-button>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <div class="grid-content bg-purple-light" style="float: right">
+                      <el-button type="text">全部</el-button>
+                    </div>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="10" :offset="14">
+                    <div class="grid-content bg-purple card-font" style="float: right">{{ contractCount }}</div>
                   </el-col>
                 </el-row>
                 <el-row>
@@ -206,44 +256,20 @@
       <el-col :lg="12" :xs="24" >
         <el-card class="box-card" style="height: 400px">
           <div slot="header" class="clearfix">
-            <span>工作中心</span>
+            <span>档案分类占比</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
-          <el-tabs v-model="activeName" @tab-click="handleClick">
-            <el-tab-pane label="用户管理" name="first">
-              <el-table
-                :data="tableData"
-                style="width: 100%">
-                <el-table-column
-                  prop="date"
-                  label="日期"
-                  width="180">
-                </el-table-column>
-                <el-table-column
-                  prop="name"
-                  label="姓名"
-                  width="180">
-                </el-table-column>
-                <el-table-column
-                  prop="address"
-                  label="地址">
-                </el-table-column>
-              </el-table>
-            </el-tab-pane>
-            <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
-            <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
-            <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
-          </el-tabs>
+          <div class="echart" id="mychart" style="float: left; width: 100%; height: 39vh;"></div>
         </el-card>
       </el-col>
 
       <el-col :lg="12" :xs="24">
         <el-card class="box-card" style="height: 400px">
           <div slot="header" class="clearfix">
-            <span>数据分析</span>
+            <span>本年档案入库数据分析</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
-          <div  id="main" style="width: 100%;height:273px;">
+          <div  id="main" style="width: 100%;height:35vh;">
 
           </div>
         </el-card>
@@ -252,7 +278,7 @@
 
     <el-row :gutter="12">
       <el-col :lg="24" :xs="24">
-        <el-card class="box-card" style="height: 250px">
+        <el-card class="box-card" style="height: 200px">
           <div slot="header" class="clearfix">
             <span>档案数据</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
@@ -262,46 +288,45 @@
             <!--文件条目-->
             <el-col :span="8">
               <div class="grid-content bg-purple">
-                <el-col :span="10">
+                <el-col :span="4">
                   <div class="grid-content bg-purple"><img src="../assets/images/文件条目.png"
                                                            style="width: 50px;height: 50px"></div>
                 </el-col>
                 <el-col :span="14">
-                  <div class="grid-content bg-purple card-font">123</div>
-                  <div class="grid-content bg-purple" style="color: #909399;">文件条目</div>
+                  <div class="grid-content bg-purple card-font">{{guidang}}</div>
+                  <div class="grid-content bg-purple" style="color: #909399;">归档申请</div>
                 </el-col>
               </div>
             </el-col>
             <!--文件条目-->
             <el-col :span="8">
               <div class="grid-content bg-purple">
-                <el-col :span="10">
-                  <div class="grid-content bg-purple"><img src="../assets/images/案卷条目.png"
-                                                           style="width: 50px;height: 50px"></div>
+                <el-col :span="4">
+                  <div class="grid-content bg-purple"><img src="../assets/images/利用申请.png" style="width: 50px;height: 50px"></div>
                 </el-col>
                 <el-col :span="14">
-                  <div class="grid-content bg-purple card-font">123</div>
-                  <div class="grid-content bg-purple" style="color: #909399;">案卷条目</div>
+                  <div class="grid-content bg-purple card-font">{{liyong}}</div>
+                  <div class="grid-content bg-purple" style="color: #909399;">利用申请</div>
                 </el-col>
               </div>
             </el-col>
             <el-col :span="8">
               <div class="grid-content bg-purple">
-                <el-col :span="10">
+                <el-col :span="4">
                   <div class="grid-content bg-purple"><img src="../assets/images/电子文件.png"
                                                            style="width: 50px;height: 50px"></div>
                 </el-col>
                 <el-col :span="14">
-                  <div class="grid-content bg-purple card-font">123</div>
+                  <div class="grid-content bg-purple card-font">{{wenjian}}</div>
                   <div class="grid-content bg-purple" style="color: #909399;">电子文件</div>
                 </el-col>
               </div>
             </el-col>
           </el-row>
 <!-------------------------------------------------------------------------------------------------------------------------->
-          <el-row :gutter="24" style="margin-top: 30px">
+          <!-- <el-row :gutter="24" style="margin-top: 30px"> -->
             <!--文件条目-->
-            <el-col :span="8">
+            <!-- <el-col :span="8">
               <div class="grid-content bg-purple">
                 <el-col :span="10">
                   <div class="grid-content bg-purple"><img src="../assets/images/资源占用.png"
@@ -312,9 +337,9 @@
                   <div class="grid-content bg-purple" style="color: #909399;">资源占用</div>
                 </el-col>
               </div>
-            </el-col>
+            </el-col> -->
             <!--文件条目-->
-            <el-col :span="8">
+            <!-- <el-col :span="8">
               <div class="grid-content bg-purple">
                 <el-col :span="10">
                   <div class="grid-content bg-purple"><img src="../assets/images/利用申请.png" style="width: 50px;height: 50px"></div>
@@ -337,7 +362,7 @@
                 </el-col>
               </div>
             </el-col>
-          </el-row>
+          </el-row> -->
 <!-------------------------------------------------------------------------------------------------------------------------->
         </el-card>
       </el-col>
@@ -347,6 +372,7 @@
 
 <script>
 import * as echarts from 'echarts'
+import {getData, getList, getImportData, getImpertOssData} from "@/api/archive/homePage";
 
 export default {
   name: "Index",
@@ -355,79 +381,185 @@ export default {
       // 版本号
       version: "3.8.7",
       activeName: 'first',
-      tableData: [{
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1517 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1519 弄'
-      }, {
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1516 弄'
-      }],
-      chartInit: null,
-      count: 20
+      chartInstance1: null,
+      chartInstance2: null,
+      count: 20,
+      pieChartData: [],//饼状图数据
+      importData1:[],//柱状图数据1
+      importData2:[],//柱状图数据2
+      importData3:[],//柱状图数据3
+      importData4:[],//柱状图数据4
+      archivecount0: 0,//整理库存数量
+      archivecount1: 0,//资源库数量
+      archivecount2: 0,//利用库数
+      borrowcount: 0,//借阅数量
+      contractCount: 0,//合同数量
+      guidang: 0,//归档申请数量
+      liyong: 0,//利用申请数量
+      wenjian: 0,//文件总数
     };
   },
   mounted() {
-    this.initChart();
+    this.$nextTick(() => {
+      this.initChart()
+    })
+    this.fetchPieChartData();
+    this.fetchSourceData();
+    this.fetchOssData();
   },
   methods: {
     goTarget(href) {
       window.open(href, "_blank");
     },
-    handleClick(tab, event) {
-      console.log(tab, event);
-    },
+    // 获取图表数据
     initChart() {
-      this.chartInit = echarts.init(document.getElementById('main'));
-      this.chartInit.setOption(option);
+      this.$nextTick(() => {
+        this.chartInstance1 = echarts.init(document.getElementById('mychart'));
+        if (this.chartInstance1) {
+          this.updateChart1();
+        }
+      })
+      
+      this.$nextTick(() => {
+        this.chartInstance2 = echarts.init(document.getElementById('main'));
+        if (this.chartInstance2) {
+          this.updateChart2();
+        }
+      })
+      
     },
+    // 更新图表
+    updateChart1(){
+      const option1 = {
+        tooltip:{
+          trigger: 'item'
+        },
+        legend:{
+          orient:'vertical',
+          left:'left'
+        },
+        series:[
+          {
+            name:'档案分类',
+            type:'pie',
+            radius:'110vh',
+            data:this.pieChartData,
+            itemStyle:{
+              emphasis:{
+                shadowBlur:10,
+                shadowOffsetX:0,
+                shadowColor:'rgba(0,0,0,0.5)'
+              }
+            }
+          }
+        ]
+      };
+      this.chartInstance1.setOption(option1);
+    },
+    // 获取饼图数据
+    fetchPieChartData(){
+      getList().then(res => {
+        this.pieChartData = res.data.map(item => {
+          return {
+            value:item.value,
+            name:item.name
+          }
+        })
+        this.updateChart1();//更新图表
+      })
+    },
+    // 获取柱状图数据
+    fetchSourceData() {
+      getImportData().then(res => {
+        this.importData1 = res.data.list1;
+        this.importData2 = res.data.list2;
+        this.updateChart2();//更新图表
+      })
+    },
+    // 更新图表
+    updateChart2() {
+      // 指定图表的配置项和数据
+      const option2 = {
+        tooltip: {
+          trigger: 'axis'
+        },
+        legend: {
+          data: ['文件接收', '手工录入', 'OA系统接收', '合同系统接收', '用友财务系统']
+        },
+        toolbox: {
+          show: true,
+        },
+        calculable: true,
+        xAxis: [
+          {
+            type: 'category',
+            data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value'
+          }
+        ],
+        series: [
+          {
+            name: '文件接收',
+            type: 'bar',
+            data: this.importData1,
+          },
+          {
+            name: '手工录入',
+            type: 'bar',
+            data: this.importData2,
+          },
+          {
+            name: 'OA系统接收',
+            type: 'bar',
+            data: [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3],
+          },
+          {
+            name: '合同系统接收',
+            type: 'bar',
+            data: [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3],
+          },
+          {
+            name: '用友财务系统',
+            type: 'bar',
+            data: [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3],
+          }
+        ]
+      };
+      this.chartInstance2.setOption(option2)
+    },
+    // 加载数据
     load() {
       this.count += 2
+    },
+    // 获取数据
+    getCount(status,time){
+      const params = {
+        status: status,
+        time: time
+      }
+      getData(params).then(response => {
+        if (status == 0) {
+          this.archivecount0 = response.data
+        }else if (status == 1) {
+          this.archivecount1 = response.data
+        }else if (status == 2) {
+          this.archivecount2 = response.data
+        }
+      })
+    },
+    // 获取oss数据
+    fetchOssData(){
+      getImpertOssData().then(response => {
+        this.wenjian = response.data.value
+      })
     }
   }
 };
-// 指定图表的配置项和数据
-var option = {
-  title: {
-    text: '月份'
-  },
-  tooltip: {
-    trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          }
-  },
-  legend: {
-   // Try 'horizontal'
-   orient: 'vertical',
-          right: 10,
-          top: 'center'
-  },
-  dataset: {
-          source: [
-            ['product', '接口接收', '批量挂接', '手工著录','离线导入'],
-            ['1月', 43.3, 85.8, 93.7, 30.3],
-            ['2月', 83.1, 73.4, 55.1, 65.2],
-            ['3月', 86.4, 65.2, 82.5, 39.1],
-            ['4月', 72.4, 53.9, 39.1, 72.4],
-            ['5月', 72.4, 53.9, 39.1, 85.8],
-            ['6月', 72.4, 53.9, 39.1, 93.7]
-          ]
-        },
-        xAxis: { type: 'category' },
-        yAxis: {},
-        series: [{ type: 'bar' }, { type: 'bar' }, { type: 'bar' },{ type: 'bar' }],
 
-};
 </script>
 
 <style scoped lang="scss">
