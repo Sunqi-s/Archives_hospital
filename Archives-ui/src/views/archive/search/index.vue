@@ -25,7 +25,7 @@
                 @keyup.enter.native="handleSearch"
                 class="full_input"
                 >
-                <el-button slot="append" icon="el-icon-search" class="full_search" type="primary" @click="handleSearch"></el-button>
+                <el-button slot="append" icon="el-icon-search" class="full_search" type="primary" @click="handleSearch" :disabled="isSearch"></el-button>
               </el-input>
             </el-col>
           </el-row>
@@ -73,13 +73,15 @@
                       class="full_input"
                       style="width: 100%; margin-bottom: 50px; "
             >
-              <el-button slot="append" icon="el-icon-search" class="full_search" type="primary" @click="handleSearch"></el-button>
+              <el-button slot="append" icon="el-icon-search" class="full_search" type="primary" @click="handleSearch" :disabled="isSearch"></el-button>
             </el-input>
           </el-col>
         </el-row>
         <el-row :gutter="20" v-if="!isEmpty">
           <el-col :span="24">
-                <el-tag v-for="tag in tagList" :key="tag.name" @click="selectedItem(tag)" type="" :effect="selectedTag === tag.category? 'dark':'plain'" size="medium">{{ tag.name+"("+tag.count+")" }}</el-tag>
+            <el-tag class="tag-item" v-for="tag in tagList" :key="tag.name" @click="selectedItem(tag)" type="" :effect="selectedTag === tag.category? 'dark':'plain'" >{{ tag.name+"("+tag.count+")" }}</el-tag>
+          </el-col>
+          <el-col :span="24">
                 <!-- 动态生成的表格 -->
                 <div class="table-container">
                   <el-table v-loading="vLoading" element-loading-background="rgba(255,255,255,1)" :data="FilteredList" :default-sort = "{prop: 'id', order: 'descending'}" height="53vh" ref="dynamicTable" border @row-click="handleRowClick">
@@ -90,10 +92,13 @@
                       :label="field.label"
                       :sortable="true"
                       :width="field.label.length * 11 + 65+'vh'"
+                      :align="'center'"
                     >
                       <template slot-scope="scope">
                         <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{getArchiveStatus(scope.row.archiveStatus)}}</span>
                         <span class="truncate-text" v-else-if="field.name === 'department'">{{ getDepartmentName(scope.row.department) }}</span>
+                        <span class="truncate-text" v-else-if="field.name === 'ossStatus' && scope.row.ossStatus === 1"><i class="el-icon-connection" style="font-size: larger;"></i></span>
+                        <span class="truncate-text" v-else-if="field.name === 'ossStatus' && scope.row.ossStatus === 2"></span>
                         <span class="truncate-text" v-else v-html="scope.row[field.name]"></span>
                       </template>
                     </el-table-column>
@@ -225,7 +230,6 @@
   import {getOssByFid} from "@/api/system/oss";
   import {listDept} from "@/api/system/dept";
   import { Base64 } from 'js-base64'
-import { option } from "runjs";
 
   export default {
     name: 'FullText',
@@ -265,6 +269,7 @@ import { option } from "runjs";
         title:null,
         vLoading:false,
         isClick:false,
+        isSearch:false,
         option:[],
       };
     },
@@ -273,7 +278,7 @@ import { option } from "runjs";
         let filteredResults  =this.searchResult.filter(item => {
           return item.categoryId === Number(this.selectedTag);
         });
-        return filteredResults.map(item => {
+        const a = filteredResults.map(item => {
           let hightLightedContent = {...item};
           for(let key in hightLightedContent){
             if(typeof hightLightedContent[key] === "string"){
@@ -282,6 +287,7 @@ import { option } from "runjs";
           }
           return hightLightedContent;
         });
+        return a
       },
     },
     created() {
@@ -293,6 +299,8 @@ import { option } from "runjs";
         this.$router.push('/hot');
       },
       handleSearch() {
+        const az = [];
+        this.isSearch = true;
         this.keyWord = this.searchQuery;
         const categoryList = this.selectedNodes.map(item => {
           return item.data.id;
@@ -302,20 +310,24 @@ import { option } from "runjs";
         const searchJson = {keyWord: this.searchQuery, value: categoryList};
         searchArchive(searchJson).then(async tagListRes => {
           this.selectedTag = '0';
-          this.tagList = [];
           // 创建一个数组存储所有的Promise
           const promises = tagListRes.map(tagRes => {
             return getCategory(tagRes.categoryId).then(nameFromCategory => {
               const tag = { name: nameFromCategory.data.name, category: nameFromCategory.data.id, count: tagRes.length };
-              this.tagList.push(tag);
+              az.push(tag);
             });
           });
           // 等待所有的Promise执行完成
           await Promise.all(promises);
+          this.tagList = az;
           // 此时所有的tag已被添加到tagList中
           this.isEmpty = this.tagList.length === 0;
           if(this.tagList.length > 0){
             this.selectedItem(this.tagList[0])
+          }else{
+            setTimeout(() => {
+          this.isSearch = false;
+          }, 1000);
           }
         });
         this.showTable = true;
@@ -338,6 +350,7 @@ import { option } from "runjs";
           setTimeout(() => {
             this.vLoading = false;
             this.isClick = false;
+            this.isSearch = false;
           }, 800);
         })
       })
@@ -360,10 +373,11 @@ import { option } from "runjs";
           // 根据不同的场景过滤字段
           this.queryFields = this.itemList.filter(field => field.isQuery === '1');
           this.itemFilteredList = this.itemList.filter(field => field.isList === '1');
+          let ossStatus = this.itemList.filter(field => field.name === 'ossStatus');
+          this.itemFilteredList.unshift(...ossStatus);
           this.itemFilteredListGroup1 = this.itemList.filter(field => field.isInsert === '1' && field.htmlGroup === '1').sort((a, b) => a.sort - b.sort);
           this.itemFilteredListGroup2 = this.itemList.filter(field => field.isInsert === '1' && field.htmlGroup === '2').sort((a, b) => a.sort - b.sort);
           this.itemFilteredListGroup3 = this.itemList.filter(field => field.isInsert === '1' && field.htmlGroup === '3').sort((a, b) => a.sort - b.sort);
-          this.editFields = this.itemList.filter(field => field.isEdit === '1');
           this.editFields = this.itemList.filter(field => field.isEdit === '1');
         })
           this.queryParams.keyWord = this.keyWord;
@@ -603,5 +617,11 @@ import { option } from "runjs";
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%; /* Adjust as needed */
+  }
+  .tag-item {
+    margin-right: 1%;
+    font-size: medium;
+    font-style: italic;
+    margin-bottom: 1%;
   }
   </style>
