@@ -406,6 +406,9 @@ export default {
     this.fetchPieChartData();
     this.fetchSourceData();
     this.fetchOssData();
+    this.getCount('0','本月');
+    this.getCount('1','本月');
+    this.getCount('2','本月');
   },
   methods: {
     goTarget(href) {
