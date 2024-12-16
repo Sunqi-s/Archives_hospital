@@ -524,52 +524,62 @@ export default {
       this.isClick = true;
     },
     handleQuery() {
-      this.queryParams = {
-        categoryId : this.categoryId,
-        archiveStatus : 2,
-        searchValue : this.saveSearch.searchValue,
-        pageNum : 1,
-        pageSize: this.queryParams.pageSize
+      if (this.isClick) {
+        this.isClick = false;
+        this.queryParams = {
+          categoryId: this.categoryId,
+          archiveStatus: 2,
+          searchValue: this.saveSearch.searchValue,
+          pageNum: 1,
+          pageSize: this.queryParams.pageSize
+        }
+        this.saveSearch = {
+          searchValue: this.saveSearch.searchValue,
+          pageNum: 1,
+          pageSize: 10,
+          archiveStatus: 2,
+          categoryId: this.categoryId
+        }
+        this.getList();
       }
-      this.saveSearch = {
-        searchValue : this.saveSearch.searchValue,
-        pageNum : 1,
-        pageSize: 10,
-        archiveStatus : 2,
-        categoryId : this.categoryId
-      }
-      this.getList();
     },
-    handleQueryBeach(){
-      this.queryParams.categoryId = this.categoryId;
-      this.queryParams.pageNum = this.queryParams.pageNum;
-      this.queryParams.archiveStatus = 2;
-      this.queryFields.forEach(field => {
-        this.$set(this.queryParams, field.name, this.saveSearch[field.name]);
-      });
-      this.saveSearch.searchValue = '';
-      this.queryParams.searchValue = '';
-      if(this.queryParams.ossStatus === ""){
-        this.queryParams.ossStatus = null;
-      }
-      getBeachList(this.queryParams).then(response => {
+    handleQueryBeach() {
+      if (this.isClick) {
+        this.isClick = false;
+        this.queryParams.categoryId = this.categoryId;
+        this.queryParams.pageNum = this.queryParams.pageNum;
+        this.queryParams.archiveStatus = 2;
+        this.queryFields.forEach(field => {
+          this.$set(this.queryParams, field.name, this.saveSearch[field.name]);
+        });
+        this.saveSearch.searchValue = '';
+        this.queryParams.searchValue = '';
+        if (this.queryParams.ossStatus === "") {
+          this.queryParams.ossStatus = null;
+        }
+        getBeachList(this.queryParams).then(response => {
           this.infoList = response.rows;
           this.total = response.total;
-      });
+          this.isClick = true;
+        });
+      }
     },
     resetQuery() {
-      this.queryParams = {
-        categoryId: this.categoryId,
-        pageNum: 1,
-        pageSize: 10,
-        archiveStatus: 2,
-        searchValue: ''
-      };
-      this.saveSearch = this.queryParams;
-      this.queryFields.forEach(field => {
-        this.$set(this.queryParams, field.name, '');
-      });
-      this.getList();
+      if (this.isClick) {
+        this.isClick = false;
+        this.queryParams = {
+          categoryId: this.categoryId,
+          pageNum: 1,
+          pageSize: 10,
+          archiveStatus: 2,
+          searchValue: ''
+        };
+        this.saveSearch = this.queryParams;
+        this.queryFields.forEach(field => {
+          this.$set(this.queryParams, field.name, '');
+        });
+        this.getList();
+      }
     },
     /** 查询档案信息列表 */
     getList() {

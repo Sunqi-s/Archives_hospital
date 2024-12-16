@@ -298,7 +298,7 @@
         </div>
       </div>
       <div slot="footer" class="dialog1-footer">
-        <el-button type="primary" @click="submitForm" v-if="notCheck()">确 定</el-button>
+        <el-button type="primary" @click="submitForm" v-if="notCheck()" :disabled="isSubmit">确 定</el-button>
         <el-button @click="cancel" v-if="notCheck()">取 消</el-button>
         <el-button @click="close" v-if="isCheck()">关 闭</el-button>
       </div>
@@ -326,6 +326,7 @@ import {listDept} from "@/api/system/dept";
 import {pointRelation} from "@/api/archive/relation";
 import {Base64} from "js-base64";
 import {addImportLog,updateImportLog} from "@/api/archive/importLog";
+import {listFit} from "@/api/archive/fit";
 export default {
   name: "Info",
   components: {
@@ -404,7 +405,11 @@ export default {
         type: '',
       },
       showPasswordPrompt: false,//是否显示密码输入框
-      passwordInput: ''//密码
+      passwordInput: '',//密码
+      optionsPass:[],
+      fitList:[],
+      fitData:[],
+      isSubmit:false,
     };
   },
   created() {
@@ -551,7 +556,24 @@ export default {
     },
     getCategoryTreeList() {
       listCategory().then(response => {
-        this.fileOptions = this.handleFileOptions(response.data, "id", "parentId");
+        listFit().then(res => {
+          this.fitList = res.rows.map(item => {
+            const parentName = response.data.find(data => data.id === item.categoryId);
+            return {
+              id: item.id,
+              name: item.syllable,
+              parentId: item.categoryId,
+              password: null,
+              type: 2,
+              query: item.query,
+              parentName: parentName.name,
+            };
+          });
+          // this.fitData = response.data.concat(this.fitList);
+          // this.optionsPass = this.fitData.filter(i => i.password !== null).map(i => {return {...i, status:''}})
+          // this.fileOptions = this.handleFileOptions(this.fitData, "id", "parentId");
+          this.fileOptions = this.handleFileOptions(response.data, "id", "parentId");
+        });
       }).then(() => {
         if(this.$refs.fileTree){
           this.$refs.fileTree.clear();
@@ -596,26 +618,43 @@ export default {
             this.isClick = true;
             this.showPasswordPrompt = true; // 显示密码输入框
           } else {
+            this.showPasswordPrompt = false;
             this.doList(nodeData)
           }
-        } else {
+        }else if(nodeData.type === 0) {
           this.categoryId = null;
+          this.showPasswordPrompt = false;
+        }else {
+          this.categoryId = nodeData.parentId;
+          if(this.optionsPass.find(t => t.id === nodeData.parentId)){
+            this.showPasswordPrompt = true;
+            if(this.optionsPass.find(p => p.status === 'pass')){
+              this.queryParams.categoryId = nodeData.parentId;
+            this.categoryName = nodeData.parentName;
+            this.$set(this.queryParams, nodeData.query, nodeData.label);
+            this.getList();
+            }
+          }else {
+            this.queryParams.categoryId = nodeData.parentId;
+            this.categoryName = nodeData.parentName;
+            this.$set(this.queryParams, nodeData.query, nodeData.label);
+            this.getList();
+          }
         }
       }
     },
-    handleConfirmPassword(){
-      getCategory(this.categoryId).then(response => {
-        if(response.data.password === this.passwordInput){
-          this.loading = false;
-          this.isClick = true;
-          this.showPasswordPrompt = false;
-          const nodeData = response.data;
-          this.doList(nodeData)
-        }else{
-          this.$message.error("密码错误");
-          this.passwordInput = '';
-        }
-      })
+    handleConfirmPassword() {
+      const fit = this.fitData.find(f => f.id === this.categoryId);
+      if (fit.password === this.passwordInput) {
+        this.loading = false;
+        this.isClick = true;
+        this.showPasswordPrompt = false;
+        const nodeData = fit.map(f => {return{}})
+        this.doList(nodeData)
+      } else {
+        this.$message.error("密码错误");
+        this.passwordInput = '';
+      }
     },
     doList(nodeData) {
       this.categoryName = nodeData.name;
@@ -625,7 +664,9 @@ export default {
       this.isClick = true;
     },
     handleQuery() {
-      this.queryParams = {
+      if(this.isClick){
+        this.isClick = false;
+        this.queryParams = {
         categoryId : this.categoryId,
         archiveStatus : 0,
         searchValue : this.saveSearch.searchValue,
@@ -641,41 +682,49 @@ export default {
       }
       this.deleteQuery.searchValue = this.queryParams.searchValue;
       this.getList();
-    },
-    handleQueryBeach(pn){
-      this.isCheckBySearch=true;
-      this.queryParams.categoryId = this.categoryId;
-      this.queryParams.pageNum = pn?pn:this.queryParams.pageNum;
-      this.queryParams.archiveStatus = 0;
-      this.queryFields.forEach(field => {
-        this.$set(this.queryParams, field.name, this.saveSearch[field.name]);
-      });
-      this.saveSearch.searchValue = '';
-      this.queryParams.searchValue = '';
-      if(this.queryParams.ossStatus === ""){
-        this.queryParams.ossStatus = null;
       }
-      getBeachList(this.queryParams).then(response => {
-        this.deleteQuery = this.queryParams
+    },
+    handleQueryBeach(pn) {
+      if (this.isClick) {
+        this.isClick = false;
+        this.isCheckBySearch = true;
+        this.queryParams.categoryId = this.categoryId;
+        this.queryParams.pageNum = pn ? pn : this.queryParams.pageNum;
+        this.queryParams.archiveStatus = 0;
+        this.queryFields.forEach(field => {
+          this.$set(this.queryParams, field.name, this.saveSearch[field.name]);
+        });
+        this.saveSearch.searchValue = '';
+        this.queryParams.searchValue = '';
+        if (this.queryParams.ossStatus === "") {
+          this.queryParams.ossStatus = null;
+        }
+        getBeachList(this.queryParams).then(response => {
+          this.deleteQuery = this.queryParams
           this.infoList = response.rows;
           this.total = response.total;
-      });
+          this.isClick = true;
+        });
+      }
     },
     resetQuery() {
-      this.isCheckBySearch=false;
-      this.queryParams = {
-        categoryId: this.categoryId,
-        pageNum: 1,
-        pageSize: 10,
-        archiveStatus: 0,
-        searchValue: ''
-      };
-      this.saveSearch = this.queryParams;
-      this.deleteQuery = this.queryParams;
-      this.queryFields.forEach(field => {
-        this.$set(this.queryParams, field.name, '');
-      });
-      this.getList();
+      if (this.isClick) {
+        this.isClick = false;
+        this.isCheckBySearch = false;
+        this.queryParams = {
+          categoryId: this.categoryId,
+          pageNum: 1,
+          pageSize: 10,
+          archiveStatus: 0,
+          searchValue: ''
+        };
+        this.saveSearch = this.queryParams;
+        this.deleteQuery = this.queryParams;
+        this.queryFields.forEach(field => {
+          this.$set(this.queryParams, field.name, '');
+        });
+        this.getList();
+      }
     },
     /** 查询档案信息列表 */
     getList() {
@@ -790,77 +839,85 @@ export default {
     },
     /** 提交按钮 */
     async submitForm() {
-      this.$refs["form"].validate(async valid => {
-        this.form.categoryId = this.categoryId;
-        if (valid) {
-          this.isElCardBodyLoading = false;
-          if (this.form.id != null && this.form.id != undefined) {
-            const newSysOssList = this.form.sysOssList.slice(this.originalFile)
-            if (newSysOssList.length > 0 && this.$refs.fileUpload) {
-              this.uploadCount = newSysOssList.length
-              await this.$refs.fileUpload.handleUpload(newSysOssList);
-            }
-            await updateInfo(this.form)
-              .then(() => {
+      if (!this.isSubmit) {
+        this.$refs["form"].validate(async valid => {
+          this.form.categoryId = this.categoryId;
+          if (valid) {
+            this.isSubmit = true;
+            this.isElCardBodyLoading = false;
+            if (this.form.id != null && this.form.id != undefined) {
+              const newSysOssList = this.form.sysOssList.slice(this.originalFile)
+              if (newSysOssList.length > 0 && this.$refs.fileUpload) {
+                this.uploadCount = newSysOssList.length
+                await this.$refs.fileUpload.handleUpload(newSysOssList);
+              }
+              await updateInfo(this.form)
+                .then(() => {
+                  this.isElCardBodyLoading = true
+                  this.$modal.msgSuccess("修改成功");
+                  this.closeAndRefresh();
+                  this.reset();
+                  this.getList();
+                  this.isSubmit = false;
+                  if (this.$refs.fileUpload) {
+                    this.$refs.fileUpload.resetFileList();
+                  }
+                })
+                .catch(error => {
+                  this.isElCardBodyLoading = true
+                  this.$modal.msgError("修改失败，请重试");
+                });
+
+            } else {
+              this.logQueryParams.infoImportRecords = 1;
+              this.logQueryParams.ossImportRecords = 0;
+              this.logQueryParams.startTime = new Date().toLocaleString();
+              this.logQueryParams.status = 'pending';
+              this.logQueryParams.type = 'luru';
+              if (this.form.sysOssList.length > 0 && this.$refs.fileUpload) {
+                const sysOssList = this.form.sysOssList.map(file => ({
+                  deleteFlg: file.deleteFlg,
+                  name: file.name,
+                  percentage: file.percentage,
+                  raw: file.raw,
+                  size: file.size,
+                  status: file.status,
+                  uid: file.uid,
+                  url: file.url,
+                  fid: file.fid,
+                  suffix: file.suffix,
+                }))
+                this.uploadCount = sysOssList.length
+                this.logQueryParams.ossImportRecords = sysOssList.length;
+                await this.$refs.fileUpload.handleUpload(sysOssList);
+              }
+              await addImportLog(this.logQueryParams).then(res => {
+                this.logQueryParams.id = res.data.id;
+              });
+              await addInfo(this.form).then(() => {
                 this.isElCardBodyLoading = true
-                this.$modal.msgSuccess("修改成功");
+                this.$modal.msgSuccess("新增成功");
+                this.logQueryParams.infoProcessedRecords = 1;
+                this.logQueryParams.ossProcessedRecords = this.form.sysOssList.length;
+                this.logQueryParams.status = 'completed';
+                updateImportLog(this.logQueryParams)
                 this.closeAndRefresh();
                 this.reset();
                 this.getList();
-                if(this.$refs.fileUpload){
+                this.isSubmit = false;
+                if (this.$refs.fileUpload) {
                   this.$refs.fileUpload.resetFileList();
                 }
-              })
-              .catch(error => {
-                this.isElCardBodyLoading = true
-                this.$modal.msgError("修改失败，请重试");
+              }).catch(error => {
+                this.isSubmit = false;
+                this.isElCardBodyLoading = true;
+                this.$modal.msgError("录入失败，请重试");
               });
 
-          } else {
-            this.logQueryParams.infoImportRecords = 1;
-            this.logQueryParams.ossImportRecords = 0;
-            this.logQueryParams.startTime = new Date().toLocaleString();
-            this.logQueryParams.status = 'pending';
-            this.logQueryParams.type = 'luru';
-            if (this.form.sysOssList.length > 0 && this.$refs.fileUpload) {
-              const sysOssList = this.form.sysOssList.map(file => ({
-                deleteFlg: file.deleteFlg,
-                name: file.name,
-                percentage: file.percentage,
-                raw: file.raw,
-                size: file.size,
-                status: file.status,
-                uid: file.uid,
-                url: file.url,
-                fid: file.fid,
-                suffix: file.suffix,
-              }))
-              this.uploadCount = sysOssList.length
-              this.logQueryParams.ossImportRecords = sysOssList.length;
-              await this.$refs.fileUpload.handleUpload(sysOssList);
             }
-            await addImportLog(this.logQueryParams)
-            await addInfo(this.form).then(() => {
-              this.isElCardBodyLoading = true
-              this.$modal.msgSuccess("新增成功");
-              this.logQueryParams.infoProcessedRecords = 1;
-              this.logQueryParams.ossProcessedRecords = this.form.sysOssList.length;
-              this.logQueryParams.status = 'completed';
-              updateImportLog(this.logQueryParams)
-              this.closeAndRefresh();
-              this.reset();
-              this.getList();
-              if(this.$refs.fileUpload){
-                this.$refs.fileUpload.resetFileList();
-              }
-            }).catch(error => {
-              this.isElCardBodyLoading = true
-              this.$modal.msgError("录入失败，请重试");
-            });
-
           }
-        }
-      });
+        });
+      }
     },
     returnFiles(fileList) {
       this.uploadCount--;
