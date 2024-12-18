@@ -243,7 +243,7 @@
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">全宗数量</div>
+                    <div class="grid-content bg-purple" style="float: right;color: #909399">数量</div>
                   </el-col>
                 </el-row>
               </div>
@@ -266,7 +266,7 @@
       <el-col :lg="12" :xs="24">
         <el-card class="box-card" style="height: 400px">
           <div slot="header" class="clearfix">
-            <span>本年档案入库数据分析</span>
+            <span>档案状态占比</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
           <div class="echart" id="main" style="float: left; width: 100%; height: 39vh;"></div>

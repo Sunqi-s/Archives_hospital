@@ -265,7 +265,7 @@
 <script>
 import {getDicts} from "@/api/system/dict/data";
 import {getItemByCategoryId} from "@/api/archive/item";
-import {listCategory} from "@/api/archive/category";
+import {listCategory,getCategory} from "@/api/archive/category";
 import {deptTreeSelect} from "@/api/system/user";
 import { getBeachList, getInfo, listInfo, sendInfo, updatAarchiveStatus } from '@/api/archive/info'
 import categoryTree from "@/views/archive/category/categoryTree.vue";
@@ -518,6 +518,7 @@ export default {
             this.isClick = true;
             this.showPasswordPrompt = true; // 显示密码输入框
           } else {
+            this.showPasswordPrompt = false;
             this.doList(nodeData)
           }
         } else {
