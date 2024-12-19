@@ -815,6 +815,7 @@ export default {
                 return;
               }
               ExportQueryParams.pageNum = pageNum;
+              ExportQueryParams.archiveStatus = 1;
               const res = await listInfo(ExportQueryParams);
               const ids = res.rows ? res.rows.map(item => item.id) : [];
               const batchSize = 400;
@@ -948,6 +949,7 @@ export default {
                 return;
               }
               ExportQueryParams.pageNum = pageNum;
+              ExportQueryParams.archiveStatus = 1;
               const res = await listInfo(ExportQueryParams);
               const ids = res.rows ? res.rows.map(item => item.id) : [];
               const batchSize = 400;

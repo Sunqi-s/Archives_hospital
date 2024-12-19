@@ -1183,6 +1183,7 @@ export default {
                 return;
               }
               ExportQueryParams.pageNum = pageNum;
+              ExportQueryParams.archiveStatus = 0;
               const res = await listInfo(ExportQueryParams);
               const ids = res.rows ? res.rows.map(item => item.id) : [];
               const batchSize = 400;
