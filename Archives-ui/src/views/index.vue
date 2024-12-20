@@ -1,6 +1,6 @@
 <template>
   <div class="app-container home">
-    <el-row :gutter="4" type="flex">
+    <el-row :gutter="4" type="flex" style="margin-top: 10px;margin-bottom: 10px;">
       <el-col :span="5" :xs="24">
         <el-card class="box-card">
           <div slot="header" class="clearfix" @click="goToZhengli()">
@@ -9,7 +9,7 @@
           </div>
           <el-row>
             <el-col :span="12">
-              <div class="grid-content bg-purple" style="margin-top: 18px"><img src="../assets/images/档案全宗.png"
+              <div class="grid-content bg-purple" style="margin-top: 35px"><img src="../assets/images/档案全宗.png"
                                                                                 style="right: 50px;width: 50px"></div>
             </el-col>
             <el-col :span="12">
@@ -37,13 +37,13 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="10" :offset="14">
+                  <el-col :span="10" :offset="14" style="margin-top: 5px;">
                     <div class="grid-content bg-purple card-font" style="float: right">{{ archivecount0 }}</div>
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">数量</div>
+                  <el-col :span="10" :offset="14" style="margin-top: 10px;margin-bottom: 5px;">
+                    <span class="grid-content bg-purple" style="float: right;color: #909399;font-size: 15px;width: 60px;">{{ timeClick1 }}数量</span>
                   </el-col>
                 </el-row>
               </div>
@@ -59,7 +59,7 @@
           </div>
           <el-row>
             <el-col :span="12">
-              <div class="grid-content bg-purple" style="margin-top: 18px"><img src="../assets/images/档案分类.png"
+              <div class="grid-content bg-purple" style="margin-top: 35px"><img src="../assets/images/档案分类.png"
                                                                                 style="right: 50px;width: 50px"></div>
             </el-col>
             <el-col :span="12">
@@ -87,13 +87,13 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="10" :offset="14">
+                  <el-col :span="10" :offset="14" style="margin-top: 5px;">
                     <div class="grid-content bg-purple card-font" style="float: right">{{ archivecount1 }}</div>
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">数量</div>
+                  <el-col :span="10" :offset="14" style="margin-top: 10px;margin-bottom: 5px;">
+                    <span class="grid-content bg-purple" style="float: right;color: #909399;font-size: 15px;width: 60px;">{{ timeClick2 }}数量</span>
                   </el-col>
                 </el-row>
               </div>
@@ -109,7 +109,7 @@
           </div>
           <el-row>
             <el-col :span="12">
-              <div class="grid-content bg-purple" style="margin-top: 18px"><img src="../assets/images/入库统计.png"
+              <div class="grid-content bg-purple" style="margin-top: 35px"><img src="../assets/images/入库统计.png"
                                                                                 style="right: 50px;width: 50px"></div>
             </el-col>
             <el-col :span="12">
@@ -137,13 +137,13 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="10" :offset="14">
+                  <el-col :span="10" :offset="14" style="margin-top: 5px;">
                     <div class="grid-content bg-purple card-font" style="float: right">{{ archivecount2 }}</div>
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">数量</div>
+                  <el-col :span="10" :offset="14" style="margin-top: 10px;margin-bottom: 5px;">
+                    <span class="grid-content bg-purple" style="float: right;color: #909399;font-size: 15px;width: 60px;">{{ timeClick3 }}数量</span>
                   </el-col>
                 </el-row>
               </div>
@@ -159,7 +159,7 @@
           </div>
           <el-row>
             <el-col :span="12">
-              <div class="grid-content bg-purple" style="margin-top: 18px"><img src="../assets/images/档案统计.png"
+              <div class="grid-content bg-purple" style="margin-top: 35px"><img src="../assets/images/档案统计.png"
                                                                                 style="right: 50px;width: 50px"></div>
             </el-col>
             <el-col :span="12">
@@ -187,13 +187,13 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="10" :offset="14">
+                  <el-col :span="10" :offset="14" style="margin-top: 5px;">
                     <div class="grid-content bg-purple card-font" style="float: right">{{ Approvalcount }}</div>
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">数量</div>
+                  <el-col :span="10" :offset="14" style="margin-top: 10px;margin-bottom: 5px;">
+                    <span class="grid-content bg-purple" style="float: right;color: #909399;font-size: 15px;width: 60px;">{{ timeClick4 }}数量</span>
                   </el-col>
                 </el-row>
               </div>
@@ -209,7 +209,7 @@
           </div>
           <el-row>
             <el-col :span="12">
-              <div class="grid-content bg-purple" style="margin-top: 18px"><img src="../assets/images/文档1.png"
+              <div class="grid-content bg-purple" style="margin-top: 35px"><img src="../assets/images/文档1.png"
                                                                                 style="right: 50px;width: 50px"></div>
             </el-col>
             <el-col :span="12">
@@ -237,13 +237,13 @@
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="10" :offset="14">
+                  <el-col :span="10" :offset="14" style="margin-top: 5px;">
                     <div class="grid-content bg-purple card-font" style="float: right">{{ contractCount }}</div>
                   </el-col>
                 </el-row>
                 <el-row>
-                  <el-col :span="10" :offset="14">
-                    <div class="grid-content bg-purple" style="float: right;color: #909399">数量</div>
+                  <el-col :span="10" :offset="14" style="margin-top: 10px;margin-bottom: 5px;">
+                    <span class="grid-content bg-purple" style="float: right;color: #909399;font-size: 15px; width: 60px;">{{ timeClick5 }}数量</span>
                   </el-col>
                 </el-row>
               </div>
@@ -254,22 +254,22 @@
     </el-row>
     <el-row :gutter="12">
       <el-col :lg="12" :xs="24" >
-        <el-card class="box-card" style="height: 400px">
+        <el-card class="box-card" style="height: 550px">
           <div slot="header" class="clearfix">
             <span>档案分类占比</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
-          <div class="echart" id="mychart" style="float: left; width: 100%; height: 39vh;"></div>
+          <div class="echart" id="mychart" style="float: left; width: 100%; height: 450px;"></div>
         </el-card>
       </el-col>
 
       <el-col :lg="12" :xs="24">
-        <el-card class="box-card" style="height: 400px">
+        <el-card class="box-card" style="height: 550px">
           <div slot="header" class="clearfix">
             <span>档案状态占比</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
-          <div class="echart" id="main" style="float: left; width: 100%; height: 39vh;"></div>
+          <div class="echart" id="main" style="float: left; width: 100%; height: 450px;"></div>
         </el-card>
       </el-col>
     </el-row>
@@ -393,9 +393,11 @@ export default {
       archivecount2: 0,//利用库数
       Approvalcount: 0,//待审批数量
       contractCount: 0,//合同数量
-      guidang: 0,//归档申请数量
-      liyong: 0,//利用申请数量
-      wenjian: 0,//文件总数
+      timeClick1: '本月',
+      timeClick2: '本月',
+      timeClick3: '本月',
+      timeClick4: '本月',
+      timeClick5: '本月',
     };
   },
   mounted() {
@@ -444,7 +446,7 @@ export default {
           {
             name:'档案分类',
             type:'pie',
-            radius:'110vh',
+            radius:'160px',
             data:this.pieChartData,
             itemStyle:{
               emphasis:{
@@ -535,28 +537,31 @@ export default {
       getData(params).then(response => {
         if (status == 0) {
           this.archivecount0 = response.data
+          this.timeClick1 = time
         }else if (status == 1) {
           this.archivecount1 = response.data
+          this.timeClick2 = time
         }else if (status == 2) {
           this.archivecount2 = response.data
+          this.timeClick3 = time
         }
       })
     },
-    goToZhengli(){
-      this.$router.push({
-        path: '/ArchiveManagement/info0',
-      });
-    },
-    goToZiyuan(){
-      this.$router.push({
-        path: '/ArchiveManagement/info1',
-      });
-    },
-    goToLiyong(){
-      this.$router.push({
-        path: '/ArchiveManagement/info2',
-      });
-    }
+    // goToZhengli(){
+    //   this.$router.push({
+    //     path: '/ArchiveManagement/info0',
+    //   });
+    // },
+    // goToZiyuan(){
+    //   this.$router.push({
+    //     path: '/ArchiveManagement/info1',
+    //   });
+    // },
+    // goToLiyong(){
+    //   this.$router.push({
+    //     path: '/ArchiveManagement/info2',
+    //   });
+    // }
     // 获取oss数据
     // fetchOssData(){
     //   getImpertOssData().then(response => {
@@ -679,10 +684,11 @@ export default {
   margin-block-end: 1em;
   margin-inline-start: 0;
   margin-inline-end: 0;
+  height: 200px;
 }
 
 .card-font {
-  font-size: 20px;
+  font-size: 35px;
   line-height: 1.3;
   font-weight: bold;
 }
