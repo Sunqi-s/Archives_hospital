@@ -1,7 +1,7 @@
 <template class="container">
-  <el-main >
+  <el-main>
     <el-row type="flex" :gutter="4" style="margin-bottom:20px">
-      <el-col :span="4" >
+      <el-col :span="4">
         <el-date-picker v-model="value" type="year" placeholder="选择年">
         </el-date-picker>
       </el-col>
@@ -13,18 +13,16 @@
       </el-col>
     </el-row>
 
+    <div v-if="loading" class="loading">
+      <i class="el-icon-loading"></i>
+    </div>
+
     <div id="main" style="float: left; width: 100%; height: 350px;margin-bottom:20px"></div>
-    <el-table :data="tableData" style="width: 170vh;margin-left:40px" >
+    <el-table :data="tableData" style="width: 170vh;margin-left:40px">
       <el-table-column type="index" :index="indexMethod" :width="'80px'" :label="'类型'">
       </el-table-column>
-      <el-table-column
-      v-for="(month,idx) in monthList"
-                      :key="month"
-                      :prop="idx+''"
-                      :label="month"
-                      :width="'85px'"
-                      :align="'center'"
-      >
+      <el-table-column v-for="(month, idx) in monthList" :key="month" :prop="idx + ''" :label="month" :width="'85px'"
+        :align="'center'">
       </el-table-column>
     </el-table>
   </el-main>
@@ -63,6 +61,7 @@ export default {
         this.$message.error('请选择年份')
         return
       }
+      this.loading = true
       this.year = this.value.getFullYear()
       this.importCount = []
       this.imporDatacount = []
@@ -75,6 +74,7 @@ export default {
         this.makeTable(this.importCount)
         this.makeTable(this.imporDatacount)
         this.updateMain()
+        this.loading = false
       })
     },
     updateMain() {
@@ -162,3 +162,18 @@ export default {
 }
 
 </script>
+<style>
+.loading{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    color: #606266;
+}
+</style>

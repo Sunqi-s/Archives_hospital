@@ -85,11 +85,15 @@ export default {
             charData: [],
             myEcharts: null,
             loading: false,
-            able: true,
         };
     },
     mounted() {
         this.charChange();
+    },
+    computed: {
+        able(){
+           return !(this.tableHeaders.length && this.tableData.length && this.categoryData.length);
+        }
     },
     methods: {
 
@@ -179,7 +183,6 @@ export default {
                             return item.name
                         }
                     });
-                    this.able = !(this.tableHeaders.length && this.tableData.length && this.categoryData.length);
                     this.updateChart()
                     
                 } else {

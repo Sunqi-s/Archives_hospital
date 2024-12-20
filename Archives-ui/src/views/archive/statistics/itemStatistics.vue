@@ -92,7 +92,6 @@ export default {
             ],
             loading: false,
             categoryId: null,
-            able: true,
             Select: null,
             archiveItem: null,
             selection: [],
@@ -105,6 +104,11 @@ export default {
     },
     created() {
         this.getCategoryTreeList();
+    },
+    computed: {
+        able() {
+            return this.tableData.length === 0;
+        }
     },
     methods: {
         getCategoryTreeList() {
@@ -196,7 +200,6 @@ export default {
                     totalSize: (item.totalSize /(1024 * 1024)).toFixed(2) + 'MB'
                 }))
                 this.loading = false;
-                this.able = false;
             })
             
             
@@ -209,7 +212,6 @@ export default {
             this.tableData = [],
             this.loading = false,
             this.selection = [],
-            this.able = true,
             this.Select= null,
             this.archiveItem = null,
             this.$refs.fileTree.clear();

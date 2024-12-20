@@ -102,6 +102,7 @@ export default {
                 this.$message.error('请选择年份');
                 return;
             };
+            this.loading = true;
             queryParams.dataCountList = a.map(item => item.id);
             queryParams.typeList = this.yearList;
             getCategoryStatistics(queryParams).then(response => {
@@ -121,6 +122,7 @@ export default {
                 {label:'文件数量[合计' + this.fileCount + ']',name:'fileCount'},
                 {label:'文件大小[合计' + this.totalSize + 'MB]',name:'totalSize'}]
                 this.updateChart()
+                this.loading = false;
             });
         },
         handleCheckChange(data, checked, indeterminate) {
@@ -282,5 +284,18 @@ export default {
 .box-item {
     display: flex;
     align-items: center;
+}
+.loading{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    color: #606266;
 }
 </style>
