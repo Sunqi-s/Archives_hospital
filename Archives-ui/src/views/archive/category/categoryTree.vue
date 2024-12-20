@@ -15,8 +15,11 @@
       :data="fileOptions"
       :props="fileProps"
       @node-click="handleNodeClick"
+      :node-key="'id'"
+      @check-change="handleCheckChange"
       :default-expand-all="defaultExpandAll"
       :filter-node-method="fileNode"
+      :show-checkbox="show"
       ref="tree"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
@@ -50,7 +53,12 @@ export default {
     isClick:{
       type: Boolean,
       default:true,
-    }
+    },
+    show:{
+      type: Boolean,
+      default:false,
+    },
+
   },
   data() {
     return {
@@ -71,6 +79,9 @@ export default {
       this.$emit('node-click', data);
       }
     },
+    handleCheckChange(data, checked, indeterminate) {
+      this.$emit('check-change', data, checked, indeterminate);
+      },
     // 过滤树节点
     fileNode(value, data) {
       if (!value) return true;
@@ -95,6 +106,11 @@ export default {
     }, 300),
     clear(){
       this.clickNode = null;
+    },
+    reset() {
+      this.$nextTick(() => {
+        this.$refs.tree.setCheckedKeys([]);
+      });
     },
     setNode(id){
       this.clickNode = id;

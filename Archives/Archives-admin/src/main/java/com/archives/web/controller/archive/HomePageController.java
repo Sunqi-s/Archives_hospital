@@ -4,7 +4,6 @@ import com.archives.archive.domain.HomeData;
 import com.archives.archive.service.IHomePageService;
 import com.archives.common.core.controller.BaseController;
 import com.archives.common.core.domain.AjaxResult;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,5 +30,8 @@ public class HomePageController extends BaseController {
 
     @GetMapping("/importOss")
     public AjaxResult importOss() {return AjaxResult.success(homePageService.importOss());}
+
+    @GetMapping("/getStatus")
+    public AjaxResult getStatus() {return AjaxResult.success(homePageService.getStatus());}
 
 }
