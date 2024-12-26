@@ -60,12 +60,13 @@
 
     <select id="importData" resultType="com.archives.archive.domain.Statistics">
         select
+            MONTH(create_time) as startData,
             COUNT(*) as logCount,
             SUM(info_processed_records) as dataCount
         FROM archive_import_log
         WHERE YEAR(create_time) = #{year} AND type in ('dandao','bendi','zaixian')
-        GROUP BY DAY(create_time)
-        ORDER BY DAY(create_time)
+        GROUP BY MONTH(create_time)
+        ORDER BY MONTH(create_time)
     </select>
 
     <select id="getCategoryStatistics" resultType="com.archives.archive.domain.Statistics">

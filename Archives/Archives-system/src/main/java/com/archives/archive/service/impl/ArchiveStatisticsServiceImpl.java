@@ -42,9 +42,22 @@ public class ArchiveStatisticsServiceImpl implements ArchiveStatisticsService {
     }
 
     public  List<Statistics> getStatistics(int year) {
-
+        List<Statistics> result = new ArrayList<>(12);
+        for (int i = 1; i <= 12; i++) {
+            Statistics statistics = new Statistics();
+            statistics.setLogCount(0);
+            statistics.setDataCount(0);
+            result.add(statistics);
+        }
         List<Statistics> statistics = archiveStatisticsMapper.importData(year);
-        return statistics;
+        for (Statistics s : statistics) {
+            int index = Integer.parseInt(s.getStartData())-1;
+            if(index >= 0 && index < 12){
+                result.get(index).setDataCount(s.getDataCount());
+                result.get(index).setLogCount(s.getLogCount());
+            }
+        }
+        return result;
     }
 
     @Override
