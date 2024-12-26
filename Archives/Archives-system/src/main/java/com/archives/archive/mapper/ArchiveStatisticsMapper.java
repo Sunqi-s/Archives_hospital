@@ -21,4 +21,9 @@ public interface ArchiveStatisticsMapper {
 
     public List<Statistics> getCategoryStatistics(@Param("categoryIds") List<Integer> category, @Param("startData") String startData, @Param("endData") String endData);
 
+    List<Statistics> getPageColumn(@Param("itemName") String itemName);
+
+
+    List<Statistics> getYearPageCount(@Param("item") Statistics s, @Param("sta") Statistics statistics);
+
 }

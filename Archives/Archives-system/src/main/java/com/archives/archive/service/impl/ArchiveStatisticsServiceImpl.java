@@ -25,6 +25,12 @@ public class ArchiveStatisticsServiceImpl implements ArchiveStatisticsService {
             yearStatistics = archiveStatisticsMapper.getYearfileCount(statistics);
         }else if (statistics.getSelect() == 3) {
             yearStatistics = archiveStatisticsMapper.getYearfileSize(statistics);
+        }else if (statistics.getSelect() == 4) {
+            List<Statistics> columnList = archiveStatisticsMapper.getPageColumn("页数");
+            for(Statistics s : columnList){
+                List<Statistics> column = archiveStatisticsMapper.getYearPageCount(s,statistics);
+                yearStatistics.addAll(column);
+            }
         }
         for (Statistics s : yearStatistics) {
             s.setSelect(statistics.getSelect());

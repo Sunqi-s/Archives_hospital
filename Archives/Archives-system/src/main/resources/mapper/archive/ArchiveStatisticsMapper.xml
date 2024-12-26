@@ -85,5 +85,19 @@
         </foreach>
         GROUP BY ac.name
     </select>
+    <select id="getYearPageCount" resultType="com.archives.archive.domain.Statistics">
+        SELECT YEAR(ai.create_time) AS year,
+            SUM(ai.${item.endData}) AS totalSize,
+            ac.name AS category
+        FROM archive_info ai JOIN archive_category ac ON ai.category_id = ac.id
+        WHERE YEAR(ai.create_time) BETWEEN #{sta.startData} AND #{sta.endData}
+          AND ai.category_id = #{item.startData}
+        GROUP BY YEAR(ai.create_time), ai.category_id;
+    </select>
+    <select id="getPageColumn" resultType="com.archives.archive.domain.Statistics">
+        SELECT category_id AS startData,column_name AS endData
+        FROM archive_item
+        WHERE item_name = #{itemName}
+    </select>
 
 </mapper>
