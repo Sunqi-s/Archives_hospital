@@ -313,7 +313,7 @@
           // 创建一个数组存储所有的Promise
           const promises = tagListRes.map(tagRes => {
             return getCategory(tagRes.categoryId).then(nameFromCategory => {
-              const tag = { name: nameFromCategory.data.name, category: nameFromCategory.data.id, count: tagRes.length };
+              const tag = { name: nameFromCategory.data.name, category: nameFromCategory.data.id, count: tagRes.length,password:nameFromCategory.data.password };
               az.push(tag);
             });
           });
@@ -364,9 +364,26 @@
         this.handleNextPage();
     },
     selectedItem(tag, event){
-      if(!this.isClick){
+      if (!this.isClick) {
+        if (tag.password) {
+          this.$prompt('请输入密码', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+          }).then(({ value }) => {
+            if (value === tag.password) {
+              this.getItemList(tag);
+            } else {
+              this.$message.error('密码错误');
+            }
+          })
+        }else{
+          this.getItemList(tag);
+        }
+      }
+    },
+      getItemList(tag) {
         this.isClick = true;
-      this.selectedTag = tag.category;
+        this.selectedTag = tag.category;
         getItemByCategoryId(tag.category).then(res => {
           this.itemListOriginal = res.data;
           this.mapFieldData();
@@ -380,11 +397,10 @@
           this.itemFilteredListGroup3 = this.itemList.filter(field => field.isInsert === '1' && field.htmlGroup === '3').sort((a, b) => a.sort - b.sort);
           this.editFields = this.itemList.filter(field => field.isEdit === '1');
         })
-          this.queryParams.keyWord = this.keyWord;
-          this.queryParams.categoryId = this.selectedTag;
-          this.handleNextPage(1);
-      }
-    },
+        this.queryParams.keyWord = this.keyWord;
+        this.queryParams.categoryId = this.selectedTag;
+        this.handleNextPage(1);
+      },
     mapHtmlType(htmlType) {
       switch (htmlType) {
         case 'input':

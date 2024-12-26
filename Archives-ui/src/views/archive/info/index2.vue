@@ -861,6 +861,7 @@ export default {
         archiveStatus: 2, //默认显示待归档数据
         searchValue: ''
       }
+      this.passwordInput = '';
     },
   }
 };

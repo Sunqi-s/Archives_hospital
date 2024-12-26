@@ -547,27 +547,27 @@ export default {
         }
       })
     },
-    // goToZhengli(){
-    //   this.$router.push({
-    //     path: '/ArchiveManagement/info0',
-    //   });
-    // },
-    // goToZiyuan(){
-    //   this.$router.push({
-    //     path: '/ArchiveManagement/info1',
-    //   });
-    // },
-    // goToLiyong(){
-    //   this.$router.push({
-    //     path: '/ArchiveManagement/info2',
-    //   });
-    // }
+    goToZhengli(){
+      this.$router.push({
+        path: '/ArchiveManagement/info0',
+      });
+    },
+    goToZiyuan(){
+      this.$router.push({
+        path: '/ArchiveManagement/info1',
+      });
+    },
+    goToLiyong(){
+      this.$router.push({
+        path: '/ArchiveManagement/info2',
+      });
+    },
     // 获取oss数据
-    // fetchOssData(){
-    //   getImpertOssData().then(response => {
-    //     this.wenjian = response.data.value
-    //   })
-    // }
+    fetchOssData(){
+      getImpertOssData().then(response => {
+        this.wenjian = response.data.value
+      })
+    }
   }
 };
 

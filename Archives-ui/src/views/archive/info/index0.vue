@@ -408,7 +408,6 @@ export default {
       passwordInput: '',//密码
       optionsPass:[],
       fitList:[],
-      fitData:[],
       isSubmit:false,
     };
   },
@@ -569,9 +568,6 @@ export default {
               parentName: parentName.name,
             };
           });
-          // this.fitData = response.data.concat(this.fitList);
-          // this.optionsPass = this.fitData.filter(i => i.password !== null).map(i => {return {...i, status:''}})
-          // this.fileOptions = this.handleFileOptions(this.fitData, "id", "parentId");
           this.fileOptions = this.handleFileOptions(response.data, "id", "parentId");
         });
       }).then(() => {
@@ -644,17 +640,18 @@ export default {
       }
     },
     handleConfirmPassword() {
-      const fit = this.fitData.find(f => f.id === this.categoryId);
-      if (fit.password === this.passwordInput) {
-        this.loading = false;
-        this.isClick = true;
-        this.showPasswordPrompt = false;
-        const nodeData = fit.map(f => {return{}})
-        this.doList(nodeData)
-      } else {
-        this.$message.error("密码错误");
-        this.passwordInput = '';
-      }
+      getCategory(this.categoryId).then(response => {
+        if (response.data.password === this.passwordInput) {
+          this.loading = false;
+          this.isClick = true;
+          this.showPasswordPrompt = false;
+          const nodeData = {id:response.data.id,name:response.data.name}
+          this.doList(nodeData)
+        } else {
+          this.$message.error("密码错误");
+          this.passwordInput = '';
+        }
+      })
     },
     doList(nodeData) {
       this.categoryName = nodeData.name;
@@ -1387,6 +1384,7 @@ export default {
         archiveStatus: 0, //默认显示待归档数据
         searchValue: ''
       }//搜索框内容
+      this.passwordInput = '';
     },
     getRouterPath() {
       const cId = this.$route.query.categoryId;

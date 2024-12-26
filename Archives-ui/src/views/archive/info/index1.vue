@@ -1000,6 +1000,7 @@ export default {
         archiveStatus: 1, //默认显示待归档数据
         searchValue: ''
       }
+      this.passwordInput = '';
     },
   }
 };
