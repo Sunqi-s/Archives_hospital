@@ -637,7 +637,6 @@
   .tag-item {
     margin-right: 1%;
     font-size: medium;
-    font-style: italic;
     margin-bottom: 1%;
   }
   </style>

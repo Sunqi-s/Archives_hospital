@@ -862,6 +862,10 @@ export default {
         searchValue: ''
       }
       this.passwordInput = '';
+      this.saveSearch = this.queryParams;
+      this.queryFields.forEach(field => {
+        this.$set(this.queryParams, field.name, '');
+      });
     },
   }
 };

@@ -1385,6 +1385,10 @@ export default {
         searchValue: ''
       }//搜索框内容
       this.passwordInput = '';
+      this.isCheckBySearch = false;
+      this.queryFields.forEach(field => {
+        this.$set(this.queryParams, field.name, '');
+      });
     },
     getRouterPath() {
       const cId = this.$route.query.categoryId;
