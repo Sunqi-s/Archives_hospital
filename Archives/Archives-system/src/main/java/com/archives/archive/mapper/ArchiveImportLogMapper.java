@@ -2,6 +2,7 @@ package com.archives.archive.mapper;
 
 import java.util.List;
 import com.archives.archive.domain.ArchiveImportLog;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 数据导入日志Mapper接口

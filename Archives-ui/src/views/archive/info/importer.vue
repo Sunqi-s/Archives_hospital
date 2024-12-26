@@ -1375,7 +1375,7 @@ export default {
               }
             })
             let success = 0;
-            for(const item of this.folderscountList.value()){
+            for(const item of this.folderscountList.values()){
               if(item === 0) {
                 success += 1;
               }

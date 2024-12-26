@@ -3,26 +3,27 @@ package com.archives.archive.mapper;
 import com.archives.archive.domain.ArchiveImportLog;
 import com.archives.archive.domain.HomeData;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 @Mapper
 public interface HomePageMapper {
 
-    public int thisMonth(int archiveStatus);
-    public int thisYear(int archiveStatus);
-    public int lastMonth(int archiveStatus);
-    public int all(int archiveStatus);
+    public int thisMonth(@Param("archiveStatus") int archiveStatus,@Param("dataPermiList")String[] dataPermiList);
+    public int thisYear(@Param("archiveStatus") int archiveStatus,@Param("dataPermiList")String[] dataPermiList);
+    public int lastMonth(@Param("archiveStatus") int archiveStatus,@Param("dataPermiList")String[] dataPermiList);
+    public int all(@Param("archiveStatus") int archiveStatus,@Param("dataPermiList")String[] dataPermiList);
 
 
-    public int selectHomeData(Long id);
+    public int selectHomeData(@Param("categoryId") Long id,@Param("dataPermiList") String[] dataPermiList);
 
-    public List<HomeData> importData1();
-    public List<HomeData> importData2();
+    public List<HomeData> importData1(@Param("dataPermiList") String[] dataPermiList);
+    public List<HomeData> importData2(@Param("dataPermiList") String[] dataPermiList);
 
-    public int importOss();
+    public int importOss(@Param("dataPermiList")String[] dataPermiList);
 
-    public int getStatus1();
-    public int getStatus2();
-    public int getStatus3();
+    public int getStatus1(@Param("dataPermiList") String[] dataPermiList);
+    public int getStatus2(@Param("dataPermiList") String[] dataPermiList);
+    public int getStatus3(@Param("dataPermiList") String[] dataPermiList);
 }

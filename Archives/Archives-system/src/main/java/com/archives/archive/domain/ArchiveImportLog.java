@@ -55,6 +55,8 @@ public class ArchiveImportLog extends BaseEntity
     @Excel(name = "导入类型")
     private String type;
 
+    private String dataPermit;
+
     public void setId(Long id)
     {
         this.id = id;
@@ -139,6 +141,14 @@ public class ArchiveImportLog extends BaseEntity
 
     public void setType(String type) {this.type = type;}
 
+    public String getDataPermit() {
+        return dataPermit;
+    }
+
+    public void setDataPermit(String dataPermit) {
+        this.dataPermit = dataPermit;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -156,6 +166,7 @@ public class ArchiveImportLog extends BaseEntity
             .append("infoImportRecords", getInfoImportRecords())
             .append("ossImportRecords", getOssImportRecords())
             .append("type", getType())
+            .append("dataPermit", getDataPermit())
             .toString();
     }
 }

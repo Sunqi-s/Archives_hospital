@@ -19,10 +19,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="infoImportRecords" column="info_import_records" />
         <result property="ossImportRecords" column="oss_import_records" />
         <result property="type" column="type" />
+        <result property="dataPermit" column="data_permit" />
     </resultMap>
 
     <sql id="selectArchiveImportLogVo">
-        select id, status, info_processed_records, oss_processed_records, start_time, end_time, error_message, create_by, create_time, update_by, update_time ,info_import_records, oss_import_records, type from archive_import_log
+        select id, status, info_processed_records, oss_processed_records, start_time, end_time, error_message, create_by, create_time, update_by, update_time ,info_import_records, oss_import_records, type, data_Permit from archive_import_log
+    </sql>
+
+    <sql id="selectSearchListBydataPermiList">
+        <if test="dataPermiList.length > 0" >
+            and data_permit in
+            <foreach collection="dataPermiList" item="itemDataPermi" open="(" separator="," close=")">
+                #{itemDataPermi}
+            </foreach>
+        </if>
     </sql>
 
     <select id="selectArchiveImportLogList" parameterType="ArchiveImportLog" resultMap="ArchiveImportLogResult">
@@ -61,6 +71,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="infoImportRecords != null">info_import_records,</if>
             <if test="ossImportRecords != null">oss_import_records,</if>
             <if test="type != null">type,</if>
+            <if test="dataPermit != null">data_permit,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="status != null and status != ''">#{status},</if>
@@ -76,6 +87,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="infoImportRecords != null">#{infoImportRecords},</if>
             <if test="ossImportRecords != null">#{ossImportRecords},</if>
             <if test="type != null">#{type},</if>
+            <if test="dataPermit != null">#{dataPermit},</if>
          </trim>
     </insert>
 

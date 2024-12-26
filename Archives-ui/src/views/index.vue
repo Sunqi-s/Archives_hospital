@@ -193,7 +193,7 @@
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14" style="margin-top: 10px;margin-bottom: 5px;">
-                    <span class="grid-content bg-purple" style="float: right;color: #909399;font-size: 15px;width: 60px;">{{ timeClick4 }}数量</span>
+                    <span class="grid-content bg-purple" style="float: right;color: #909399;font-size: 15px;width: 60px;">数量</span>
                   </el-col>
                 </el-row>
               </div>
@@ -563,11 +563,11 @@ export default {
       });
     },
     // 获取oss数据
-    fetchOssData(){
-      getImpertOssData().then(response => {
-        this.wenjian = response.data.value
-      })
-    }
+    // fetchOssData(){
+    //   getImpertOssData().then(response => {
+    //     this.wenjian = response.data.value
+    //   })
+    // }
   }
 };
 

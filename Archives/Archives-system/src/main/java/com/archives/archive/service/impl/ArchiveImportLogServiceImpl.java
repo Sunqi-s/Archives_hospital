@@ -1,7 +1,9 @@
 package com.archives.archive.service.impl;
 
 import java.util.List;
+import com.archives.common.core.domain.entity.SysUser;
 import com.archives.common.utils.DateUtils;
+import com.archives.common.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.archives.archive.mapper.ArchiveImportLogMapper;
@@ -29,6 +31,7 @@ public class ArchiveImportLogServiceImpl implements IArchiveImportLogService
     @Override
     public ArchiveImportLog selectArchiveImportLogById(Long id)
     {
+        String dataPermit = selectSearchByDataPermit().toString();
         return archiveImportLogMapper.selectArchiveImportLogById(id);
     }
 
@@ -53,10 +56,11 @@ public class ArchiveImportLogServiceImpl implements IArchiveImportLogService
     @Override
     public ArchiveImportLog insertArchiveImportLog(ArchiveImportLog archiveImportLog)
     {
+        String dataPermit = selectSearchByDataPermit().toString();
         archiveImportLog.setCreateTime(DateUtils.getNowDate());
+        archiveImportLog.setDataPermit(dataPermit);
         archiveImportLogMapper.insertArchiveImportLog(archiveImportLog);
         return archiveImportLog;
-//        return archiveImportLogMapper.insertArchiveImportLog(archiveImportLog);
     }
 
     /**
@@ -94,5 +98,11 @@ public class ArchiveImportLogServiceImpl implements IArchiveImportLogService
     public int deleteArchiveImportLogById(Long id)
     {
         return archiveImportLogMapper.deleteArchiveImportLogById(id);
+    }
+
+    public Long selectSearchByDataPermit() {
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        Long dataPermit = currentUser.getDeptId();
+        return dataPermit;
     }
 }
