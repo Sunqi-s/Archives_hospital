@@ -136,12 +136,7 @@ export default {
             return tree;
         },
         handleNodeClick(nodeData) {
-            this.categoryId = null;
-            this.queryParams = {
-                pageNum: 1,
-                pageSize: 10,
-                categoryId: null
-            }
+            this.clear();
             if (this.isClick) {
                 //选择档案节点不显示列表页面
                 if (nodeData.type === 1) {
@@ -152,6 +147,15 @@ export default {
                     this.categoryId = null;
                 }
             }
+        },
+        clear(){
+            this.categoryId = null;
+            this.queryParams = {
+                pageNum: 1,
+                pageSize: 10,
+                categoryId: null
+            }
+            this.tableData = [];
         },
         getItem(){
             this.queryParams.pageSize = 5000;

@@ -77,7 +77,8 @@ export default {
             selection: [
                 { name: 1, label: '档案条数' },
                 { name: 2, label: '文件总数' },
-                { name: 3, label: '附件大小' }
+                { name: 3, label: '附件大小' },
+                { name: 4, label: '档案页数' }
             ],
             chartInstance2: null,
             key: 0,
@@ -151,6 +152,15 @@ export default {
                                     '年度': res.data[i].year
                                 })
                             }
+                        } else if (res.data[i].select == 4) {
+                            if (!yearCount.find(f => f.年度 == res.data[i].year)) {
+                                yearCount.push({
+                                    '年度': res.data[i].year,
+                                });
+                                charData.push({
+                                    '年度': res.data[i].year
+                                })
+                           }
                         }
 
                         if (!header.find(f => f.name == res.data[i].category)) {
@@ -172,6 +182,9 @@ export default {
                             } else if (item.select == 3) {
                                 yearCount[a][item.category] = (item.totalSize / (1024 * 1024)).toFixed(2)+'MB';
                                 charData[a][item.category] = (item.totalSize / (1024 * 1024)).toFixed(2);
+                            } else if (item.select == 4) {
+                                yearCount[a][item.category] = item.totalSize;
+                                charData[a][item.category] = item.totalSize;
                             }
                         }
                     })
