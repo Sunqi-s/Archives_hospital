@@ -91,10 +91,10 @@ public class ArchiveInfoController extends BaseController
      * 归档档案信息
      */
 //    @PreAuthorize("@ss.hasPermi('archive:info:document')")
-    @GetMapping("/document/{ids}")
-    public AjaxResult document(@PathVariable Long[] ids)
+    @PostMapping("/document/")
+    public AjaxResult document(@RequestBody SearchJson searchJson)
     {
-        return toAjax(archiveInfoService.updateArchiveStatusByIds(ids));
+        return toAjax(archiveInfoService.updateArchiveStatusByIds(searchJson));
     }
 
     /**

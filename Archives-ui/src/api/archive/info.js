@@ -53,10 +53,13 @@ export function bulkAdd(data) {
 }
 
 //归档档案信息
-export function updatAarchiveStatus(id) {
+export function updatAarchiveStatus(ids) {
   return request({
-    url:'/archive/info/document/' + id,
-    method: 'get',
+    url:'/archive/info/document/',
+    method: 'post',
+    data: {
+      ids: ids,
+    }
   })
 }
 

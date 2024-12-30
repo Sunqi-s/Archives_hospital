@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.archive.mapper.PlaceonfileLogMapper">
+    
+    <resultMap type="PlaceonfileLog" id="PlaceonfileLogResult">
+        <result property="placeonfileId"    column="placeonfile_id"    />
+        <result property="placeonfileInfo"    column="placeonfile_info"    />
+        <result property="infoId"    column="info_id"    />
+        <result property="placeonfileBy"    column="placeonfile_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="dataPermit"    column="data_permit"    />
+        <result property="type"    column="type"    />
+        <result property="oddNumbers"    column="odd_numbers"    />
+    </resultMap>
+
+    <sql id="selectPlaceonfileLogVo">
+        select placeonfile_id, placeonfile_info, info_id, placeonfile_by, create_time, update_time, data_permit, type, odd_numbers from placeonfile_log
+    </sql>
+
+    <select id="selectPlaceonfileLogList" parameterType="PlaceonfileLog" resultMap="PlaceonfileLogResult">
+        <include refid="selectPlaceonfileLogVo"/>
+        <where>  
+            <if test="placeonfileId != null "> and placeonfile_id = #{placeonfileId}</if>
+            <if test="placeonfileInfo != null "> and placeonfile_info = #{placeonfileInfo}</if>
+            <if test="infoId != null  and infoId != ''"> and info_id = #{infoId}</if>
+            <if test="placeonfileBy != null  and placeonfileBy != ''"> and placeonfile_by like concat('%', #{placeonfileBy}, '%')</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+            <if test="updateTime != null "> and update_time = #{updateTime}</if>
+            <if test="dataPermit != null  and dataPermit != ''"> and data_permit = #{dataPermit}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="oddNumbers != null "> and odd_numbers like concat('%', #{oddNumbers}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectPlaceonfileLogByPlaceonfileId" parameterType="Long" resultMap="PlaceonfileLogResult">
+        <include refid="selectPlaceonfileLogVo"/>
+        where placeonfile_id = #{placeonfileId}
+    </select>
+        
+    <insert id="insertPlaceonfileLog" parameterType="PlaceonfileLog" useGeneratedKeys="true" keyProperty="placeonfileId">
+        insert into placeonfile_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="placeonfileInfo != null">placeonfile_info,</if>
+            <if test="infoId != null and infoId != ''">info_id,</if>
+            <if test="placeonfileBy != null and placeonfileBy != ''">placeonfile_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="dataPermit != null">data_permit,</if>
+            <if test="type != null">type,</if>
+            <if test="oddNumbers != null">odd_numbers,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="placeonfileInfo != null">#{placeonfileInfo},</if>
+            <if test="infoId != null and infoId != ''">#{infoId},</if>
+            <if test="placeonfileBy != null and placeonfileBy != ''">#{placeonfileBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="dataPermit != null">#{dataPermit},</if>
+            <if test="type != null">#{type},</if>
+            <if test="oddNumbers != null">#{oddNumbers},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePlaceonfileLog" parameterType="PlaceonfileLog">
+        update placeonfile_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="placeonfileInfo != null">placeonfile_info = #{placeonfileInfo},</if>
+            <if test="infoId != null and infoId != ''">info_id = #{infoId},</if>
+            <if test="placeonfileBy != null and placeonfileBy != ''">placeonfile_by = #{placeonfileBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="dataPermit != null">data_permit = #{dataPermit},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="oddNumbers != null">odd_numbers = #{oddNumbers},</if>
+        </trim>
+        where placeonfile_id = #{placeonfileId}
+    </update>
+
+    <delete id="deletePlaceonfileLogByPlaceonfileId" parameterType="Long">
+        delete from placeonfile_log where placeonfile_id = #{placeonfileId}
+    </delete>
+
+    <delete id="deletePlaceonfileLogByPlaceonfileIds" parameterType="String">
+        delete from placeonfile_log where placeonfile_id in 
+        <foreach item="placeonfileId" collection="array" open="(" separator="," close=")">
+            #{placeonfileId}
+        </foreach>
+    </delete>
+</mapper>

@@ -10,7 +10,7 @@ import com.archives.archive.domain.SearchJson;
  * 档案信息Service接口
  *
  * @author 高小川
- * @date 2024-07-11
+ * &#064;date  2024-07-11
  */
 public interface IArchiveInfoService
 {
@@ -49,15 +49,13 @@ public interface IArchiveInfoService
     /**
      * 批量归档档案信息
      *
-     * @param ids 需要归档的档案信息主键
+     * @param searchJson 需要归档的档案信息
      *             归档状态为1
      * @return 结果
      */
-        public int updateArchiveStatusByIds(Long[] ids);
+        public int updateArchiveStatusByIds(SearchJson searchJson);
     /**
      * 归档档案信息
-     * @param id
-     * @return
      */
     public int updateArchiveStatusById(Long id);
     /**

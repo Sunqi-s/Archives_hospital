@@ -1,8 +1,10 @@
 package com.archives.archive.service.impl;
 
 import com.archives.archive.domain.ArchiveInfo;
+import com.archives.archive.domain.PlaceonfileLog;
 import com.archives.archive.domain.SearchJson;
 import com.archives.archive.mapper.ArchiveInfoMapper;
+import com.archives.archive.mapper.PlaceonfileLogMapper;
 import com.archives.archive.service.IArchiveInfoService;
 import com.archives.common.core.domain.entity.SysUser;
 import com.archives.common.exception.ServiceException;
@@ -32,6 +34,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Autowired
     private SysOssMapper sysOssMapper;
+
+    @Autowired
+    private PlaceonfileLogMapper placeonfileLogMapper;
 
     @Autowired
     private final ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
@@ -182,10 +187,10 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     }
 
     @Override
-    public int updateArchiveStatusByIds(Long[] ids) {
+    public int updateArchiveStatusByIds(SearchJson searchJson) {
         ArchiveInfo archiveInfoStatus = new ArchiveInfo();
         archiveInfoStatus.setArchiveDate(DateUtils.getNowDate());
-        return archiveInfoMapper.updateArchiveStatusByIds(ids,archiveInfoStatus);
+        return archiveInfoMapper.updateArchiveStatusByIds(searchJson.getIds(),archiveInfoStatus);
     }
 
     @Override
@@ -345,6 +350,21 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             dataPermiList = (currentUser.getDataPermi().split(","));
         }
         return archiveInfoMapper.getDeleteCountByQuerySearch(searchJson,dataPermiList);
+    }
+
+    public String getRandom(){
+        Random random=new Random();
+        String str="";
+        for (int i = 0; i <12; i++) {
+            if(i==0){
+                //首位不能为0且数字取值区间为 [1,9]
+                str+=(random.nextInt(9)+1);
+            }else{
+                //其余位的数字的取值区间为 [0,9]
+                str+=random.nextInt(10);
+            }
+        }
+        return str;
     }
 }
 

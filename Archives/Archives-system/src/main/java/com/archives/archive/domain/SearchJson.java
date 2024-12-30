@@ -1,6 +1,7 @@
 package com.archives.archive.domain;
 
 
+import java.util.Arrays;
 import java.util.List;
 
 public class SearchJson {
@@ -17,11 +18,12 @@ public class SearchJson {
         private String path;
         private String categoryName;
         private String archiveStatus;
+        private Long[] ids;
 
     public SearchJson() {
     }
 
-    public SearchJson(String keyWord, List<String> value, String categoryId, String length, int pageNum, int pageSize, int total, String archiveNumber, String field9, List<ArchiveInfo> searchResults, String path, String categoryName, String archiveStatus) {
+    public SearchJson(String keyWord, List<String> value, String categoryId, String length, int pageNum, int pageSize, int total, String archiveNumber, String field9, List<ArchiveInfo> searchResults, String path, String categoryName, String archiveStatus, Long[] ids) {
         this.keyWord = keyWord;
         this.value = value;
         this.categoryId = categoryId;
@@ -35,6 +37,7 @@ public class SearchJson {
         this.path = path;
         this.categoryName = categoryName;
         this.archiveStatus = archiveStatus;
+        this.ids = ids;
     }
 
     public String getKeyWord() {
@@ -141,6 +144,14 @@ public class SearchJson {
         this.archiveStatus = archiveStatus;
     }
 
+    public Long[] getIds() {
+        return ids;
+    }
+
+    public void setIds(Long[] ids) {
+        this.ids = ids;
+    }
+
     @Override
     public String toString() {
         return "SearchJson{" +
@@ -157,6 +168,7 @@ public class SearchJson {
                 ", path='" + path + '\'' +
                 ", categoryName='" + categoryName + '\'' +
                 ", archiveStatus='" + archiveStatus + '\'' +
+                ", ids=" + Arrays.toString(ids) +
                 '}';
     }
 }

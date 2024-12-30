@@ -1,9 +1,10 @@
 <template>
   <div class="app-container">
-    <el-row :gutter="20" >
+    <el-row :gutter="20">
       <!-- 档案分类树形结构 -->
       <el-col :span="4" :xs="24">
-        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree" :isClick="isClick"></file-tree>
+        <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree"
+          :isClick="isClick"></file-tree>
       </el-col>
 
       <!-- 未选择档案库时显示该画面 -->
@@ -32,42 +33,27 @@
       <el-col :span="20" :xs="24" v-show="categoryId && !showPasswordPrompt">
         <!-- 单一框的搜索条件 -->
         <div class="archives-style">
-          <el-input class="input" v-model="saveSearch.searchValue"
-                    size="small"
-                    placeholder="快速搜索"
-                    style="width: 20%; margin-right: 10px;"
-          ></el-input>
-          <el-button
-            icon="el-icon-refresh"
-            type="primary"
-            size="small"
-            @click="resetQuery"
-            plain
-          >重置</el-button>
-          <el-button
-            type="primary"
-            icon="el-icon-search"
-            size="small"
-            @click="handleQuery"
-          >搜索</el-button>
-          <el-button
-            @click="drawer = true"
-            plain
-            class="Senior-button"
-            icon="el-icon-arrow-down"
-            type="success"
-            size="small"
-          >高级搜索</el-button>
+          <el-input class="input" v-model="saveSearch.searchValue" size="small" placeholder="快速搜索"
+            style="width: 20%; margin-right: 10px;"></el-input>
+          <el-button icon="el-icon-refresh" type="primary" size="small" @click="resetQuery" plain>重置</el-button>
+          <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
+          <el-button @click="drawer = true" plain class="Senior-button" icon="el-icon-arrow-down" type="success"
+            size="small">高级搜索</el-button>
         </div>
 
         <!-- 高级搜索抽屉 -->
-        <el-drawer  class="search-drawer"  title="高级搜索"  :visible.sync="drawer" :with-header="true">
-          <el-form :model="saveSearch" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="100px">
+        <el-drawer class="search-drawer" title="高级搜索" :visible.sync="drawer" :with-header="true">
+          <el-form :model="saveSearch" ref="queryForm" size="small" :inline="true" v-show="showSearch"
+            label-width="100px">
             <el-form-item v-for="field in queryFields" :key="field.name" :label="field.label" :prop="field.name">
-              <component  :is="getComponentType(field.type)" v-model="saveSearch[field.name]" v-bind="getComponentProps(field)">
-                <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
-                <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
-                <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
+              <component :is="getComponentType(field.type)" v-model="saveSearch[field.name]"
+                v-bind="getComponentProps(field)">
+                <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value"
+                  :label="option.label" :value="option.value" />
+                <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value"
+                  :label="option.label" :value="option.value" />
+                <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value"
+                  :label="option.label" :value="option.value" />
               </component>
             </el-form-item>
           </el-form>
@@ -82,104 +68,70 @@
         <!-- 功能按钮区 -->
         <el-row :gutter="10" class="mb8">
           <el-col :span="1.5">
-            <el-button
-              type="primary"
-              icon="el-icon-plus"
-              size="small"
-              @click="handleAdd"
-              v-hasPermi="['archive:info:add']"
-            >录入</el-button>
+            <el-button type="primary" icon="el-icon-plus" size="small" @click="handleAdd"
+              v-hasPermi="['archive:info:add']">录入</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button
-              type="danger"
-              icon="el-icon-delete"
-              size="small"
-              :disabled="multiple"
-              @click="handleDelete"
-              v-hasPermi="['archive:info:remove']"
-            >删除</el-button>
+            <el-button type="danger" icon="el-icon-delete" size="small" :disabled="multiple" @click="handleDelete"
+              v-hasPermi="['archive:info:remove']">删除</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button
-              type="warning"
-              icon="el-icon-download"
-              size="small"
-              @click="handleExport"
-              v-hasPermi="['archive:info:export']"
-            >导出</el-button>
+            <el-button type="warning" icon="el-icon-download" size="small" @click="handleExport"
+              v-hasPermi="['archive:info:export']">导出</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button
-              type="success"
-              icon="el-icon-s-flag"
-              size="small"
-              @click="handleDocument"
-            >归档</el-button>
+            <el-button type="success" icon="el-icon-s-flag" size="small" @click="handleDocument">归档</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button
-              type="success"
-              icon="el-icon-s-flag"
-              size="small"
-              @click="handlePrint"
-            >打印</el-button>
+            <el-button type="success" icon="el-icon-s-flag" size="small" @click="handlePrint">打印</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button
-              type="deanger"
-              icon="el-icon-s-promotion"
-              size="small"
-              @click="handleBatchDelete"
-            >一键删除</el-button>
+            <el-button type="deanger" icon="el-icon-s-promotion" size="small"
+              @click="handleBatchDelete">一键删除</el-button>
           </el-col>
         </el-row>
 
         <!-- 动态生成的表格 -->
-        <div class="fixed-table-container" >
-        <el-table :data="infoList" v-loading="loading" element-loading-background="rgba(255,255,255,1)" @selection-change="handleSelectionChange" :default-sort = "{prop: 'id', order: 'descending'}" height="80%" ref="dynamicTable" border>
-          <el-table-column type="selection" width="55" align="center" />
-          <el-table-column
-            v-for="field in sortedFields"
-            :key="field.name"
-            :prop="field.name"
-            :label="field.label"
-            :sortable="true"
-            :width="field.label.length * 11 + 65+'vh'"
-          >
-            <template slot-scope="scope">
-              <el-tooltip class="item" effect="dark" :content="getTooltipContent(field.name, scope.row)" placement="top">
-                <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{ getArchiveStatus(scope.row.archiveStatus) }}</span>
-                <span class="truncate-text" v-else-if="field.name === 'department'">{{ getDepartmentName(scope.row.department) }}</span>
-                <span class="truncate-text" v-else-if="field.name === 'ossStatus'">{{ getOssStatus(scope.row.ossStatus) }}</span>
-                <span class="truncate-text"  v-html="scope.row[field.name]"></span>
-              </el-tooltip>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="150" align="center" fixed="right" height="440">
-            <template slot-scope="scope">
-              <el-button type="text" size="small" @click="handleUpdate(scope.row)">
-                <i class="el-icon-edit">修改</i>
-              </el-button>
-              <el-button type="text" size="small" @click="handleDetail(scope.row)">
-                <i class="el-icon-s-management">查看</i>
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <pagination
-          v-show="total>0"
-          :total="total"
-          :page.sync="queryParams.pageNum"
-          :limit.sync="queryParams.pageSize"
-          @pagination="handleNextPage"
-        />
+        <div class="fixed-table-container">
+          <el-table :data="infoList" v-loading="loading" element-loading-background="rgba(255,255,255,1)"
+            @selection-change="handleSelectionChange" :default-sort="{ prop: 'id', order: 'descending' }" height="80%"
+            ref="dynamicTable" border>
+            <el-table-column type="selection" width="55" align="center" />
+            <el-table-column v-for="field in sortedFields" :key="field.name" :prop="field.name" :label="field.label"
+              :sortable="true" :width="field.label.length * 11 + 65 + 'vh'">
+              <template slot-scope="scope">
+                <el-tooltip class="item" effect="dark" :content="getTooltipContent(field.name, scope.row)"
+                  placement="top">
+                  <span class="truncate-text" v-if="field.name === 'archiveStatus'">{{
+                    getArchiveStatus(scope.row.archiveStatus) }}</span>
+                  <span class="truncate-text" v-else-if="field.name === 'department'">{{
+                    getDepartmentName(scope.row.department) }}</span>
+                  <span class="truncate-text" v-else-if="field.name === 'ossStatus'">{{
+                    getOssStatus(scope.row.ossStatus) }}</span>
+                  <span class="truncate-text" v-html="scope.row[field.name]"></span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="150" align="center" fixed="right" height="440">
+              <template slot-scope="scope">
+                <el-button type="text" size="small" @click="handleUpdate(scope.row)">
+                  <i class="el-icon-edit">修改</i>
+                </el-button>
+                <el-button type="text" size="small" @click="handleDetail(scope.row)">
+                  <i class="el-icon-s-management">查看</i>
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum"
+            :limit.sync="queryParams.pageSize" @pagination="handleNextPage" />
         </div>
       </el-col>
     </el-row>
 
     <!-- 添加或修改对话框 -->
-    <el-dialog :title="title" :visible.sync="open" append-to-body class="dialog-container" :before-close="handleClose" style="text-align: left;" fullscreen>
+    <el-dialog :title="title" :visible.sync="open" append-to-body class="dialog-container" :before-close="handleClose"
+      style="text-align: left;" fullscreen>
       <div class="background">
         <el-row>
           <el-col :span="24">
@@ -197,10 +149,14 @@
                     <span v-else>{{ field.label }}</span>
                   </template>
                   <el-form-item :prop="field.name" class="form-item">
-                    <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
-                      <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
-                      <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
-                      <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
+                    <component :is="getComponentType(field.type)" v-model="form[field.name]"
+                      v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
+                      <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value"
+                        :label="option.label" :value="option.value" />
+                      <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value"
+                        :label="option.label" :value="option.value" />
+                      <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value"
+                        :label="option.label" :value="option.value" />
                     </component>
                   </el-form-item>
                 </el-descriptions-item>
@@ -214,10 +170,14 @@
                     <span v-else>{{ field.label }}</span>
                   </template>
                   <el-form-item :prop="field.name" class="form-item">
-                    <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
-                      <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
-                      <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
-                      <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
+                    <component :is="getComponentType(field.type)" v-model="form[field.name]"
+                      v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
+                      <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value"
+                        :label="option.label" :value="option.value" />
+                      <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value"
+                        :label="option.label" :value="option.value" />
+                      <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value"
+                        :label="option.label" :value="option.value" />
                     </component>
                   </el-form-item>
                 </el-descriptions-item>
@@ -231,61 +191,61 @@
                     <span v-else>{{ field.label }}</span>
                   </template>
                   <el-form-item :prop="field.name" class="form-item">
-                    <component  :is="getComponentType(field.type)" v-model="form[field.name]" v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
-                      <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
-                      <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
-                      <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value" :label="option.label" :value="option.value" />
+                    <component :is="getComponentType(field.type)" v-model="form[field.name]"
+                      v-bind="getComponentProps(field)" :readonly="isReadonly(field)">
+                      <el-option v-if="field.type === 'select'" v-for="option in field.options" :key="option.value"
+                        :label="option.label" :value="option.value" />
+                      <el-radio v-if="field.type === 'radio'" v-for="option in field.options" :key="option.value"
+                        :label="option.label" :value="option.value" />
+                      <el-checkbox v-if="field.type === 'checkbox'" v-for="option in field.options" :key="option.value"
+                        :label="option.label" :value="option.value" />
                     </component>
                   </el-form-item>
                 </el-descriptions-item>
               </el-descriptions>
               <el-divider dashed v-if="insertFieldsGroup3.length"></el-divider>
-              <el-row
-                v-loading="!isElCardBodyLoading"
-                element-loading-text="录入中，请稍候..."
+              <el-row v-loading="!isElCardBodyLoading" element-loading-text="录入中，请稍候..."
                 element-loading-svg="<svg class='circular' viewBox='25 25 50 50'><circle class='path' cx='50' cy='50' r='20' fill='none' stroke-width='4' stroke-miterlimit='10'/></svg>"
-                element-loading-svg-view-box="0 0 100 100"
-              >
-              <el-row>
-                <el-col :span="24">
-                  <div>
-                    <el-button type="primary" plain icon="el-icon-upload" size="small" @click="handleUpload" v-if="notCheck()">点击按钮上传</el-button>
-                    <el-button type="success" plain icon="el-icon-download" size="small" @click="handleBatchDownload" v-if="notInsert()">批量下载</el-button>
-                  </div>
-                  <el-table :data="form.sysOssList" style="width: 100%; margin-top: 10px;" >
-                    <el-table-column type="index" label="序号" width="50">
-                      <template slot-scope="scope">{{getIndex(scope.$index)}}</template>
-                    </el-table-column>
-                    <el-table-column prop="name" label="文件名称"></el-table-column>
-                    <el-table-column prop="suffix" label="文件类型" width="120"></el-table-column>
-                    <el-table-column prop="fileSize" label="文件大小" width="120">
-                      <template slot-scope="scope">{{formatSize(scope.row.size)}}</template>
-                    </el-table-column>
-                    <el-table-column label="操作" width="120" >
-                      <template slot-scope="scope">
-                        <div class="butten-column">
-                          <el-button @click="handleFileDownload(scope.row.url)" size="small" v-if="notInsert()">下载</el-button>
-                          <el-button type="danger" @click="handleFileDelete(scope.$index)" size="small" v-if="notCheck()">删除</el-button>
-                          <el-button type="success" @click="handleFilePreview(scope.row.url)" size="small" v-if="isCheck()">预览</el-button>
-                        </div>
-                      </template>
-                    </el-table-column>
-                  </el-table>
-                </el-col>
-              </el-row>
+                element-loading-svg-view-box="0 0 100 100">
+                <el-row>
+                  <el-col :span="24">
+                    <div>
+                      <el-button type="primary" plain icon="el-icon-upload" size="small" @click="handleUpload"
+                        v-if="notCheck()">点击按钮上传</el-button>
+                      <el-button type="success" plain icon="el-icon-download" size="small" @click="handleBatchDownload"
+                        v-if="notInsert()">批量下载</el-button>
+                    </div>
+                    <el-table :data="form.sysOssList" style="width: 100%; margin-top: 10px;">
+                      <el-table-column type="index" label="序号" width="50">
+                        <template slot-scope="scope">{{ getIndex(scope.$index) }}</template>
+                      </el-table-column>
+                      <el-table-column prop="name" label="文件名称"></el-table-column>
+                      <el-table-column prop="suffix" label="文件类型" width="120"></el-table-column>
+                      <el-table-column prop="fileSize" label="文件大小" width="120">
+                        <template slot-scope="scope">{{ formatSize(scope.row.size) }}</template>
+                      </el-table-column>
+                      <el-table-column label="操作" width="120">
+                        <template slot-scope="scope">
+                          <div class="butten-column">
+                            <el-button @click="handleFileDownload(scope.row.url)" size="small"
+                              v-if="notInsert()">下载</el-button>
+                            <el-button type="danger" @click="handleFileDelete(scope.$index)" size="small"
+                              v-if="notCheck()">删除</el-button>
+                            <el-button type="success" @click="handleFilePreview(scope.row.url)" size="small"
+                              v-if="isCheck()">预览</el-button>
+                          </div>
+                        </template>
+                      </el-table-column>
+                    </el-table>
+                  </el-col>
+                </el-row>
               </el-row>
               <!--文件上传对话框-->
               <el-dialog title="文件上传" :visible.sync="showDialog" width="800px" append-to-body class="dialog-container">
                 <el-form-item label="" prop="url">
-                  <file-upload
-                    :limit="5"
-                    :fileSize="1000"
+                  <file-upload :limit="5" :fileSize="1000"
                     :fileType="['doc', 'xls', 'ppt', 'txt', 'pdf', 'xlsx', 'jpg', 'png', 'mp4']"
-                    :auto-upload="isAutoUpload"
-                    @input="returnFiles"
-                    @info="handleFileUpload"
-                    ref="fileUpload"
-                  />
+                    :auto-upload="isAutoUpload" @input="returnFiles" @info="handleFileUpload" ref="fileUpload" />
                 </el-form-item>
                 <div slot="footer" class="dialog-footer">
                   <el-button type="primary" @click="clickShow()">确 定</el-button>
@@ -314,19 +274,21 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import {addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo,getBeachList,getDelCount,getDeleteCountBySearch} from "@/api/archive/info";
+import { addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo, getBeachList, getDelCount, getDeleteCountBySearch } from "@/api/archive/info";
 import { getCategory, listCategory } from '@/api/archive/category'
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
-import {  deptTreeSelect } from "@/api/system/user";
+import { deptTreeSelect } from "@/api/system/user";
 import * as XLSX from 'xlsx'
-import {listDept} from "@/api/system/dept";
-import {pointRelation} from "@/api/archive/relation";
-import {Base64} from "js-base64";
-import {addImportLog,updateImportLog} from "@/api/archive/importLog";
-import {listFit} from "@/api/archive/fit";
+import { listDept } from "@/api/system/dept";
+import { pointRelation } from "@/api/archive/relation";
+import { Base64 } from "js-base64";
+import { addImportLog, updateImportLog } from "@/api/archive/importLog";
+import { listFit } from "@/api/archive/fit";
+import { addPlaceonlog, delPlaceonlog, getPlaceonlog, listPlaceonlog, updatePlaceonlog } from "@/api/archive/placeonlog";
+import { customAlphabet, nanoid } from 'nanoid';
 export default {
   name: "Info",
   components: {
@@ -334,7 +296,7 @@ export default {
   },
   data() {
     return {
-      keyword:'',
+      keyword: '',
       drawer: false,
       loading: true,
       showSearch: true,
@@ -351,8 +313,8 @@ export default {
         archiveStatus: 0, //默认显示待归档数据
         searchValue: ''
       },
-      ids:[],
-      archiveNumbers:[],
+      ids: [],
+      archiveNumbers: [],
       fields: [],
       queryFields: [],
       listFields: [],
@@ -365,7 +327,7 @@ export default {
       title: null,
       single: true,// 非单个禁用
       multiple: true, // 非多个禁用
-      form: {categoryId: null, sysOssList: []},
+      form: { categoryId: null, sysOssList: [] },
       rules: {},
       showDialog: false,
       ossParams: {},
@@ -373,22 +335,22 @@ export default {
       choice: 2,
       //预览相关
       showPreview: false,
-      previewUrl:"",
+      previewUrl: "",
       //文件上传相关
-      isAutoUpload:false,
+      isAutoUpload: false,
       //文件修改相关
-      originalFile:-1,
+      originalFile: -1,
       //部门列表
-      departmentMap:{},
+      departmentMap: {},
       //选中的数组
-      savedids:[],
-      deleteQuery:{},
-      uploadCount:0,
-      successList:[],
-      isElCardBodyLoading:true,
-      isClick:true,
-      isCheckBySearch:false,//检查是否为高级搜索
-      saveSearch:{
+      savedids: [],
+      deleteQuery: {},
+      uploadCount: 0,
+      successList: [],
+      isElCardBodyLoading: true,
+      isClick: true,
+      isCheckBySearch: false,//检查是否为高级搜索
+      saveSearch: {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
@@ -406,9 +368,10 @@ export default {
       },
       showPasswordPrompt: false,//是否显示密码输入框
       passwordInput: '',//密码
-      optionsPass:[],
-      fitList:[],
-      isSubmit:false,
+      optionsPass: [],
+      fitList: [],
+      isSubmit: false,
+      placeon: {},//归档信息
     };
   },
   created() {
@@ -421,20 +384,20 @@ export default {
     this.clearSearch()
     this.getCategoryTreeList();
   },
-  computed:{
-    sortedFields(){
-      return this.listFields.sort((a,b)=>{
-        if(a.name === 'archiveStatus') return -1;
-        if(b.name === 'archiveStatus') return 1;
+  computed: {
+    sortedFields() {
+      return this.listFields.sort((a, b) => {
+        if (a.name === 'archiveStatus') return -1;
+        if (b.name === 'archiveStatus') return 1;
         return 0;
       });
     },
-    isselect(){
-      return this.categoryId===null;
+    isselect() {
+      return this.categoryId === null;
     },
   },
-  watch:{
-    infoList:{
+  watch: {
+    infoList: {
       handler(newValue, oldValue) {
         this.$refs.dynamicTable.doLayout();//对table进行重新布局
       },
@@ -495,7 +458,7 @@ export default {
             'value-format': 'yyyy-MM-dd HH:mm:ss'
           };
         case 'el-input':
-          return field.type === 'textarea' ? { type: 'textarea' , placeholder: `请输入${field.label}`} : {placeholder: `请输入${field.label}`};
+          return field.type === 'textarea' ? { type: 'textarea', placeholder: `请输入${field.label}` } : { placeholder: `请输入${field.label}` };
         default:
           return {};
       }
@@ -571,7 +534,7 @@ export default {
           this.fileOptions = this.handleFileOptions(response.data, "id", "parentId");
         });
       }).then(() => {
-        if(this.$refs.fileTree){
+        if (this.$refs.fileTree) {
           this.$refs.fileTree.clear();
         }
         // this.getRouterPath();
@@ -617,20 +580,20 @@ export default {
             this.showPasswordPrompt = false;
             this.doList(nodeData)
           }
-        }else if(nodeData.type === 0) {
+        } else if (nodeData.type === 0) {
           this.categoryId = null;
           this.showPasswordPrompt = false;
-        }else {
+        } else {
           this.categoryId = nodeData.parentId;
-          if(this.optionsPass.find(t => t.id === nodeData.parentId)){
+          if (this.optionsPass.find(t => t.id === nodeData.parentId)) {
             this.showPasswordPrompt = true;
-            if(this.optionsPass.find(p => p.status === 'pass')){
+            if (this.optionsPass.find(p => p.status === 'pass')) {
               this.queryParams.categoryId = nodeData.parentId;
-            this.categoryName = nodeData.parentName;
-            this.$set(this.queryParams, nodeData.query, nodeData.label);
-            this.getList();
+              this.categoryName = nodeData.parentName;
+              this.$set(this.queryParams, nodeData.query, nodeData.label);
+              this.getList();
             }
-          }else {
+          } else {
             this.queryParams.categoryId = nodeData.parentId;
             this.categoryName = nodeData.parentName;
             this.$set(this.queryParams, nodeData.query, nodeData.label);
@@ -645,7 +608,7 @@ export default {
           this.loading = false;
           this.isClick = true;
           this.showPasswordPrompt = false;
-          const nodeData = {id:response.data.id,name:response.data.name}
+          const nodeData = { id: response.data.id, name: response.data.name }
           this.doList(nodeData)
         } else {
           this.$message.error("密码错误");
@@ -661,24 +624,24 @@ export default {
       this.isClick = true;
     },
     handleQuery() {
-      if(this.isClick){
+      if (this.isClick) {
         this.isClick = false;
         this.queryParams = {
-        categoryId : this.categoryId,
-        archiveStatus : 0,
-        searchValue : this.saveSearch.searchValue,
-        pageNum : 1,
-        pageSize: this.queryParams.pageSize
-      }
-      this.saveSearch = {
-        searchValue : this.saveSearch.searchValue,
-        pageNum : 1,
-        pageSize: 10,
-        archiveStatus : 0,
-        categoryId : this.categoryId
-      }
-      this.deleteQuery.searchValue = this.queryParams.searchValue;
-      this.getList();
+          categoryId: this.categoryId,
+          archiveStatus: 0,
+          searchValue: this.saveSearch.searchValue,
+          pageNum: 1,
+          pageSize: this.queryParams.pageSize
+        }
+        this.saveSearch = {
+          searchValue: this.saveSearch.searchValue,
+          pageNum: 1,
+          pageSize: 10,
+          archiveStatus: 0,
+          categoryId: this.categoryId
+        }
+        this.deleteQuery.searchValue = this.queryParams.searchValue;
+        this.getList();
       }
     },
     handleQueryBeach(pn) {
@@ -773,19 +736,19 @@ export default {
       }
       this.open = true;
       this.choice = 0;
-      this.title =  this.categoryName + '录入';
+      this.title = this.categoryName + '录入';
     },
     // 取消按钮
     cancel() {
       this.close()
-      if(this.$refs.fileUpload){
+      if (this.$refs.fileUpload) {
         this.$refs.fileUpload.resetFileList()
       }
     },
     //上传取消按钮
     cancelUpload() {
       this.showDialog = false
-      if(this.$refs.fileUpload){
+      if (this.$refs.fileUpload) {
         this.$refs.fileUpload.resetFileList()
       }
     },
@@ -944,7 +907,7 @@ export default {
       this.form.sysOssList = this.form.sysOssList.concat(fileList)
     },
     clickShow() {
-      if(this.$refs.fileUpload){
+      if (this.$refs.fileUpload) {
         this.$refs.fileUpload.confirm();
       }
       this.showDialog = false
@@ -952,7 +915,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete() {
       const ids = this.ids;
-      this.$modal.confirm('确认删除选中数据？').then(()=> {
+      this.$modal.confirm('确认删除选中数据？').then(() => {
         return delInfo(ids);
       }).then(() => {
         this.getList();
@@ -1030,7 +993,7 @@ export default {
     handleFileDelete(index) {
       // 直接从 sysOssList 中删除文件
       this.form.sysOssList.splice(index, 1);
-      if (this.choice === 1 &&index <= this.originalFile) {
+      if (this.choice === 1 && index <= this.originalFile) {
         this.originalFile -= 1;
       }
     },
@@ -1147,12 +1110,23 @@ export default {
       }
     },
     handleDocument() {
-      if(this.ids.length >= 1){
+      if (this.ids.length >= 1) {
         const ids = this.ids;
-        this.$modal.confirm('确认归档选中数据？').then(()=> {
+        this.$modal.confirm('确认归档选中数据？').then(() => {
           this.$modal.loading("正在处理中");
-          return updatAarchiveStatus(ids)
+          const type = 'guidang'
+          return updatAarchiveStatus(ids, type)
         }).then(() => {
+          const nanoid = customAlphabet('1234567890', 14);
+          const id = nanoid();
+          const logInfo = {
+            placeonfileInfo: ids.length,
+            infoId: ids.join(','),
+            type: 'guidang',
+            oddNumbers: id,
+            createTime: this.getDataTime(new Date())
+          }
+          addPlaceonlog(logInfo)
           this.$modal.closeLoading();
           this.getList();
           this.$modal.msgSuccess("归档成功");
@@ -1169,6 +1143,9 @@ export default {
           };
           ExportQueryParams.pageNum = 1;
           ExportQueryParams.pageSize = 3000;
+          const createTime = this.getDataTime(new Date());
+          const nanoid = customAlphabet('1234567890', 14);
+          const id = nanoid();
           // 定义递归函数
           const fetchAndProcessPageData = async (pageNum, pageTotal, concurrency = 5) => {
             try {
@@ -1209,6 +1186,14 @@ export default {
                 }
                 await Promise.all(tasks);
               }
+              const logInfo = {
+                placeonfileInfo: ids.length,
+                infoId: ids.join(','),
+                type: 'guidang',
+                oddNumbers: id,
+                createTime: createTime
+              }
+              addPlaceonlog(logInfo)
               // 递归调用，处理下一页
               await fetchAndProcessPageData(pageNum + 1, pageTotal, concurrency);
             } catch (error) {
@@ -1223,6 +1208,15 @@ export default {
         })
       }
     },
+    getDataTime(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    },
     getTexted(name) {
       name = name.replace(/<\/?span[^>]*>/g, '');
       return name;
@@ -1230,7 +1224,7 @@ export default {
     getDepartmentName(department) {
       return this.departmentMap[department] || '无';
     },
-    getOssStatus(status){
+    getOssStatus(status) {
       switch (status) {
         case 1:
           return '有附件';
@@ -1250,47 +1244,47 @@ export default {
     },
     //文件打印
     handlePrint() {
-        pointRelation(this.categoryId).then(response => {
-          if(response.name){
-            let ids = ''
-            if (this.selectedItems.length > 0) {
-              this.savedids = this.ids;
-              ids = this.savedids.join(',');
-              print(response.name,ids)
-            }
-            else {
-              let listids = []
-              let ExportQueryParams = {
-                categoryId: this.categoryId,
-                archiveStatus: 0,
-                ...this.queryParams
-              }
-              ExportQueryParams.pageNum = 1;
-              ExportQueryParams.pageSize = 10000000;
-              listInfo(ExportQueryParams).then(res => {
-                listids = res.rows.map(item => item.id)
-                ids = listids.join(',');
-                print(response.name,ids)
-                }
-              )
-            }
-          }else {
-            this.$message.error("未找到打印模板");
+      pointRelation(this.categoryId).then(response => {
+        if (response.name) {
+          let ids = ''
+          if (this.selectedItems.length > 0) {
+            this.savedids = this.ids;
+            ids = this.savedids.join(',');
+            print(response.name, ids)
           }
-        })
-        const print = (name,ids)=>{
-          const tpl_name = name;
-          const pageIndex = 1;     // 页码
-          const renderOption = 1;  // 渲染选项
-          const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
-          window.open(url, '_blank');
+          else {
+            let listids = []
+            let ExportQueryParams = {
+              categoryId: this.categoryId,
+              archiveStatus: 0,
+              ...this.queryParams
+            }
+            ExportQueryParams.pageNum = 1;
+            ExportQueryParams.pageSize = 10000000;
+            listInfo(ExportQueryParams).then(res => {
+              listids = res.rows.map(item => item.id)
+              ids = listids.join(',');
+              print(response.name, ids)
+            }
+            )
+          }
+        } else {
+          this.$message.error("未找到打印模板");
         }
+      })
+      const print = (name, ids) => {
+        const tpl_name = name;
+        const pageIndex = 1;     // 页码
+        const renderOption = 1;  // 渲染选项
+        const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
+        window.open(url, '_blank');
+      }
     },
     handleNextPage() {
       // this.savedids = this.savedids.concat(this.ids);
-      if(this.isCheckBySearch){
+      if (this.isCheckBySearch) {
         this.handleQueryBeach();
-      }else {
+      } else {
         this.getList();
       }
     },
@@ -1369,7 +1363,7 @@ export default {
     },
     clearSearch() {
       this.categoryId = null;
-      this.queryParams= {
+      this.queryParams = {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
@@ -1377,7 +1371,7 @@ export default {
         searchValue: ''
       }
       this.deleteQuery = this.queryParams;
-      this.saveSearch={
+      this.saveSearch = {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
@@ -1392,9 +1386,9 @@ export default {
     },
     getRouterPath() {
       const cId = this.$route.query.categoryId;
-      if(cId !== undefined && cId !== null){
+      if (cId !== undefined && cId !== null) {
         this.categoryId = cId;
-        if(this.$refs.fileTree){
+        if (this.$refs.fileTree) {
           this.$refs.fileTree.setNode(this.categoryId);
         }
         this.getFieldDefinitions(this.categoryId);
@@ -1404,7 +1398,7 @@ export default {
           this.categoryName = res.data.name;
           this.parentCategoryName = res.data.parentName;
         });
-      }else {}
+      } else { }
     },
   }
 };
@@ -1413,27 +1407,40 @@ export default {
 <style scoped>
 /* 未选择分类，水平垂直居中对齐内容 */
 .no-selection {
-  display: flex; /* 使用Flexbox布局 */
-  flex-direction: column; /* 垂直排列子元素 */
-  align-items: center; /* 水平居中子元素 */
-  justify-content: center; /* 垂直居中子元素 */
-  height: 100%; /* 确保容器高度占满父元素 */
-  text-align: center; /* 文字居中对齐 */
-  min-height: 500px; /* 设置最小高度，以确保居中效果 */
+  display: flex;
+  /* 使用Flexbox布局 */
+  flex-direction: column;
+  /* 垂直排列子元素 */
+  align-items: center;
+  /* 水平居中子元素 */
+  justify-content: center;
+  /* 垂直居中子元素 */
+  height: 100%;
+  /* 确保容器高度占满父元素 */
+  text-align: center;
+  /* 文字居中对齐 */
+  min-height: 500px;
+  /* 设置最小高度，以确保居中效果 */
 }
 
 /* 未选择分类图片居中并具有适当的大小 */
 .file-center {
-  width: 200px; /* 调整图片宽度至适当大小 */
-  height: auto; /* 保持图片宽高比 */
-  margin-bottom: 20px; /* 在图片和文本之间添加间距 */
+  width: 200px;
+  /* 调整图片宽度至适当大小 */
+  height: auto;
+  /* 保持图片宽高比 */
+  margin-bottom: 20px;
+  /* 在图片和文本之间添加间距 */
 }
 
 /* 未选择分类 */
 .file-fontcenter {
-  color: #414141; /* 设置文本颜色为深灰色 */
-  font-size: 16px; /* 调整字体大小以提高可读性 */
-  margin-top: 10px; /* 在文本和前面的元素（如图片）之间添加间距 */
+  color: #414141;
+  /* 设置文本颜色为深灰色 */
+  font-size: 16px;
+  /* 调整字体大小以提高可读性 */
+  margin-top: 10px;
+  /* 在文本和前面的元素（如图片）之间添加间距 */
 }
 
 /* 高级搜索 按钮 */
@@ -1453,26 +1460,32 @@ export default {
   color: #F56C6C;
   margin-right: 4px;
 }
+
 .truncate-text {
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%; /* Adjust as needed */
+  max-width: 100%;
+  /* Adjust as needed */
 }
+
 .item {
   display: inline-block;
 }
+
 .butten-column {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  align-items:center;
+  align-items: center;
 }
+
 .butten-column button {
   margin: 0;
   padding: 10px;
 }
+
 .fixed-table-container {
   top: 200px;
   width: auto;
@@ -1481,13 +1494,21 @@ export default {
   overflow-x: auto;
   position: fixed;
 }
+
 .password-prompt {
-  display: flex; /* 使用Flexbox布局 */
-  flex-direction: column; /* 垂直排列子元素 */
-  align-items: center; /* 水平居中子元素 */
-  justify-content: center; /* 垂直居中子元素 */
-  height: 100%; /* 确保容器高度占满父元素 */
-  text-align: center; /* 文字居中对齐 */
-  min-height: 500px; /* 设置最小高度，以确保居中效果 */
+  display: flex;
+  /* 使用Flexbox布局 */
+  flex-direction: column;
+  /* 垂直排列子元素 */
+  align-items: center;
+  /* 水平居中子元素 */
+  justify-content: center;
+  /* 垂直居中子元素 */
+  height: 100%;
+  /* 确保容器高度占满父元素 */
+  text-align: center;
+  /* 文字居中对齐 */
+  min-height: 500px;
+  /* 设置最小高度，以确保居中效果 */
 }
 </style>

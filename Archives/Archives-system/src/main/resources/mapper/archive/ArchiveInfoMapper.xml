@@ -57,7 +57,7 @@
     </resultMap>
 
     <sql id="selectArchiveInfoVo">
-        select id, category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, remarks, archive_status, create_by, create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status from archive_info
+        select id, category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, remarks, archive_status, create_by, create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status,data_permit from archive_info
     </sql>
 
     <sql id="selectArchiveInfoDataPermit">
