@@ -26,6 +26,7 @@
         </foreach>
         <include refid="selectSearchListBydataPermiList"/>
         GROUP BY ai.field1, ac.name
+        order By ai.field1
     </select>
     <select id="getYearfileCount" resultType="com.archives.archive.domain.Statistics">
         SELECT ai.field1 AS year,
@@ -41,6 +42,7 @@
         </foreach>
         <include refid="selectSearchListBydataPermiList"/>
         GROUP BY ai.field1, ac.name
+        order By ai.field1
     </select>
     <select id="getYearfileSize" resultType="com.archives.archive.domain.Statistics">
         SELECT ai.field1 AS year,
@@ -56,6 +58,7 @@
         </foreach>
         <include refid="selectSearchListBydataPermiList"/>
         GROUP BY ai.field1, ac.name
+        order By ai.field1
     </select>
     <select id="getStatisticsByCondition" resultType="com.archives.archive.domain.Statistics">
         SELECT
@@ -107,7 +110,8 @@
             #{item}
         </foreach>
         <include refid="selectSearchListBydataPermiList"/>
-        GROUP BY ai.field1, ai.category_id;
+        GROUP BY ai.field1, ai.category_id
+        order By ai.field1
     </select>
     <select id="getPageColumn" resultType="com.archives.archive.domain.Statistics">
         SELECT category_id AS startData,column_name AS endData
