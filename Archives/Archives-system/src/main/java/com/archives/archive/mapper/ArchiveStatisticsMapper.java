@@ -19,7 +19,7 @@ public interface ArchiveStatisticsMapper {
 
     public List<Statistics> importData(@Param("year") int data,@Param("dataPermiList")String[] dataPermiList);
 
-    public List<Statistics> getCategoryStatistics(@Param("categoryIds") List<Integer> category, @Param("startData") String startData, @Param("endData") String endData,@Param("dataPermiList")String[] dataPermiList);
+    public List<Statistics> getCategoryCountStatistics(@Param("categoryIds") List<Integer> category, @Param("startData") String startData, @Param("endData") String endData,@Param("dataPermiList")String[] dataPermiList);
 
     List<Statistics> getPageColumn(@Param("itemName") String itemName,@Param("dataPermiList")String[] dataPermiList);
 

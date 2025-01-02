@@ -28,6 +28,7 @@
         GROUP BY ai.field1, ac.name
         order By ai.field1
     </select>
+
     <select id="getYearfileCount" resultType="com.archives.archive.domain.Statistics">
         SELECT ai.field1 AS year,
         COUNT(CASE WHEN  ai.oss_status = 1 THEN ss.id END) AS fileCount,
@@ -44,6 +45,7 @@
         GROUP BY ai.field1, ac.name
         order By ai.field1
     </select>
+
     <select id="getYearfileSize" resultType="com.archives.archive.domain.Statistics">
         SELECT ai.field1 AS year,
         SUM(CASE WHEN ai.oss_status = 1 THEN CAST(ss.size AS UNSIGNED) ELSE 0 END) AS totalSize,
@@ -60,6 +62,23 @@
         GROUP BY ai.field1, ac.name
         order By ai.field1
     </select>
+
+    <select id="getYearPageCount" resultType="com.archives.archive.domain.Statistics">
+        SELECT ai.field1 AS year,
+        SUM(ai.${item.endData}) AS totalSize,
+        ac.name AS category
+        FROM archive_info ai JOIN archive_category ac ON ai.category_id = ac.id
+        WHERE ai.field1 BETWEEN #{sta.startData} AND #{sta.endData}
+        AND ai.category_id = #{item.startData}
+        AND ai.category_id in
+        <foreach collection="sta.typeList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <include refid="selectSearchListBydataPermiList"/>
+        GROUP BY ai.field1, ai.category_id
+        order By ai.field1
+    </select>
+
     <select id="getStatisticsByCondition" resultType="com.archives.archive.domain.Statistics">
         SELECT
         COUNT(ss.id) AS fileCount,
@@ -82,14 +101,12 @@
         ORDER BY MONTH(create_time)
     </select>
 
-    <select id="getCategoryStatistics" resultType="com.archives.archive.domain.Statistics">
+    <select id="getCategoryCountStatistics" resultType="com.archives.archive.domain.Statistics">
         SELECT
+        GROUP_CONCAT(CASE WHEN ai.oss_status = 1 THEN ai.id END) AS `condition`,
         COUNT(*) AS archiveCount,
-        COUNT(CASE WHEN  ai.oss_status = 1 THEN ss.id END) AS fileCount,
-        SUM(CASE WHEN ai.oss_status = 1 THEN CAST(ss.size AS UNSIGNED) ELSE 0 END) AS totalSize,
         ac.name AS category
         FROM archive_info ai
-        LEFT JOIN sys_oss ss on ai.id = ss.fid
         JOIN archive_category ac ON ai.category_id = ac.id
         WHERE YEAR(ai.create_time) BETWEEN #{startData} AND #{endData}
         AND ai.category_id in
@@ -98,26 +115,13 @@
         </foreach>
         GROUP BY ac.name
     </select>
-    <select id="getYearPageCount" resultType="com.archives.archive.domain.Statistics">
-        SELECT ai.field1 AS year,
-        SUM(ai.${item.endData}) AS totalSize,
-        ac.name AS category
-        FROM archive_info ai JOIN archive_category ac ON ai.category_id = ac.id
-        WHERE ai.field1 BETWEEN #{sta.startData} AND #{sta.endData}
-        AND ai.category_id = #{item.startData}
-        AND ai.category_id in
-        <foreach collection="sta.typeList" item="item" open="(" separator="," close=")">
-            #{item}
-        </foreach>
-        <include refid="selectSearchListBydataPermiList"/>
-        GROUP BY ai.field1, ai.category_id
-        order By ai.field1
-    </select>
+
     <select id="getPageColumn" resultType="com.archives.archive.domain.Statistics">
         SELECT category_id AS startData,column_name AS endData
         FROM archive_item
         WHERE item_name = #{itemName}
     </select>
+
     <select id="getFileCountByCondition" resultType="com.archives.archive.domain.Statistics">
         SELECT
         GROUP_CONCAT(CASE WHEN ai.oss_status = 1 THEN ai.id END) AS `condition`,

@@ -114,7 +114,19 @@ public class ArchiveStatisticsServiceImpl implements ArchiveStatisticsService {
         String startData = statistics.getTypeList().get(0);
         String endData = statistics.getTypeList().get(1);
         List<Integer> categoryIds = statistics.getDataCountList();
-        List<Statistics> categoryStatistics = archiveStatisticsMapper.getCategoryStatistics(categoryIds, startData, endData,dataPermiList);
+        List<Statistics> categoryStatistics = archiveStatisticsMapper.getCategoryCountStatistics(categoryIds, startData, endData,dataPermiList);
+        for (Statistics s : categoryStatistics) {
+            if (s.getCondition() == null) {
+                s.setTotalSize(0L);
+                s.setFileCount(0);
+            }else {
+                String ids = s.getCondition();
+                String[] idArr = ids.split(",");
+                Statistics returnStatistics = archiveStatisticsMapper.getStatisticsByCondition(idArr);
+                s.setTotalSize(returnStatistics.getTotalSize());
+                s.setFileCount(returnStatistics.getFileCount());
+            }
+        }
         return categoryStatistics;
     }
 
