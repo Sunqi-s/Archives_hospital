@@ -156,6 +156,8 @@ export default {
                 categoryId: null
             }
             this.tableData = [];
+            this.archiveItem = null;
+            this.value = '';
         },
         getItem(){
             this.queryParams.pageSize = 5000;

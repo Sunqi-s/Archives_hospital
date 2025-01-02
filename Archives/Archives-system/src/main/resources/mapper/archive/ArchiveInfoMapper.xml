@@ -347,6 +347,12 @@
         <include refid="selectArchiveInfoDataPermit"/>
         </where>
     </select>
+    <select id="selectArchiveInfoByIds" resultMap="ArchiveInfoResult">
+        select archive_number, field3 from archive_info where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 
     <insert id="insertArchiveInfo" parameterType="ArchiveInfo" useGeneratedKeys="true" keyProperty="id">
         insert into archive_info

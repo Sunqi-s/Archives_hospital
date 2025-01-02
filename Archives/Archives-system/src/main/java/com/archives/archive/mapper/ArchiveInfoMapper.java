@@ -129,4 +129,6 @@ public interface ArchiveInfoMapper
      * 获取快速搜索删除档案信息数量
      */
     public List<Integer> getDeleteCountByQuerySearch(@Param("searchJson") SearchJson searchJson, @Param("dataPermit") String[] dataPermiList);
+
+    public List<ArchiveInfo> selectArchiveInfoByIds(@Param("ids") List<Long> ids);
 }

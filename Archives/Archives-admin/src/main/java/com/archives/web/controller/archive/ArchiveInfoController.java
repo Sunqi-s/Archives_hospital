@@ -160,4 +160,9 @@ public class ArchiveInfoController extends BaseController
     public List<Integer> getDeleteCountByQuerySearch(SearchJson searchJson) {
         return archiveInfoService.getDeleteCountByQuerySearch(searchJson);
     }
+
+    @PostMapping("/getInfoByIds")
+    public AjaxResult getInfoByIds(@RequestBody List<Long> ids) {
+        return AjaxResult.success(archiveInfoService.selectArchiveInfoByIds(ids));
+    }
 }

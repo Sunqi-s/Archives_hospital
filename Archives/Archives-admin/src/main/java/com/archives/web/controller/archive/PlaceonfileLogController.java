@@ -101,4 +101,9 @@ public class PlaceonfileLogController extends BaseController
     {
         return toAjax(placeonfileLogService.deletePlaceonfileLogByPlaceonfileIds(placeonfileIds));
     }
+
+    @PostMapping("/getIdByOddNumbers")
+    public AjaxResult getIdByOddNumbers(@RequestBody Long oddNumbers) {
+        return success(placeonfileLogService.selectPlaceonfileLogByOddNumbers(oddNumbers));
+    }
 }

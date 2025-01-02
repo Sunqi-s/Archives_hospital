@@ -352,6 +352,11 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         return archiveInfoMapper.getDeleteCountByQuerySearch(searchJson,dataPermiList);
     }
 
+    @Override
+    public List<ArchiveInfo> selectArchiveInfoByIds(List<Long> ids) {
+        return archiveInfoMapper.selectArchiveInfoByIds(ids);
+    }
+
     public String getRandom(){
         Random random=new Random();
         String str="";

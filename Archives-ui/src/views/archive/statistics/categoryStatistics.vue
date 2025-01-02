@@ -35,7 +35,7 @@
                         <el-table :data="tableData" style="width: 100%; margin-top: 10px;">
                             <el-table-column v-for="item in tableHeaders" :key="item.name" :prop="item.name"
                                 :label="item.label" :render-header="renderHeader">
-                                <template slot-scope="scope" >
+                                <template slot-scope="scope">
                                     <span v-if="item.name == 'totalSize'">{{ scope.row[item.name] }} MB</span>
                                     <span v-else>{{ scope.row[item.name] }}</span>
                                 </template>
@@ -77,10 +77,7 @@ export default {
             categoryData: [],
             myEcharts: null,
             loading: false,
-            archiveCount:0,
-            fileCount:0,
-            totalSize:0,
-            chartLegend:['档案条数','文件数量','文件大小'],
+            chartLegend: ['档案条数', '文件数量', '文件大小'],
         }
     },
     created() {
@@ -93,36 +90,30 @@ export default {
     methods: {
         handleQuery() {
             let queryParams = {};
-            const a = this.checkCategory.filter(item => item.ancestors === 1);
-            if(a.length == 0){
-                this.$message.error('请选择档案分类');
+            queryParams.dataCountList = this.checkCategory.filter(item => item.ancestors === 1).map(item => item.id);
+            queryParams.typeList = this.yearList
+            if (queryParams.dataCountList.length == 0) {
+                this.$message.error('请勾选档案分类');
                 return;
-            };
-            if(this.yearList.length != 2 ){
+            }
+            if (queryParams.typeList.length != 2) {
                 this.$message.error('请选择年份');
                 return;
-            };
-            this.loading = true;
-            queryParams.dataCountList = a.map(item => item.id);
-            queryParams.typeList = this.yearList;
+            }
             getCategoryStatistics(queryParams).then(response => {
                 const data = response.data;
                 data.forEach(item => {
-                        this.archiveCount += item.archiveCount;
-                        this.fileCount += item.fileCount;
-                        this.totalSize += item.totalSize;
                     item.totalSize = this.formatSize(item.totalSize);
                 })
                 this.tableData = data;
             }).then(() => {
                 this.totalSize = this.formatSize(this.totalSize);
                 this.tableHeaders = [
-                    {label:'档案名称',name:'category'},
-                {label:'档案条数[合计' + this.archiveCount + ']',name:'archiveCount'},
-                {label:'文件数量[合计' + this.fileCount + ']',name:'fileCount'},
-                {label:'文件大小[合计' + this.totalSize + 'MB]',name:'totalSize'}]
+                    { label: '档案名称', name: 'category' },
+                    { label: '档案条数', name: 'archiveCount' },
+                    { label: '文件数量', name: 'fileCount' },
+                    { label: '文件大小', name: 'totalSize' }]
                 this.updateChart()
-                this.loading = false;
             });
         },
         handleCheckChange(data, checked, indeterminate) {
@@ -134,19 +125,19 @@ export default {
                     this.checkCategory[idx].ancestors = checknode;
                 }
             }
-            if (data.type === 0 && checked && !indeterminate) {
+            if (data.type === 0 && !indeterminate) {
                 let list = this.checkCategory.filter(item => item.parentId === data.id);
                 list.forEach(check => {
                     let idx = this.checkCategory.findIndex(i => i.id === check.id);
                     if (idx != -1) {
-                        this.checkCategory[idx].ancestors = 1;
+                        this.checkCategory[idx].ancestors = checked ? 1 : 0;
                     }
                 })
             }
             // console.log(this.checkCategory);
 
         },
-        handleExport(){
+        handleExport() {
             const worksheetData = [];
             const headers = this.tableHeaders.map(header => header.label);
             worksheetData.push(headers);
@@ -161,7 +152,7 @@ export default {
             XLSX.writeFile(workbook, `档案分类统计.xlsx`);
         },
         clearSearch() {
-            this.yearList=[];
+            this.yearList = [];
             this.$refs.fileTree.reset();
             this.tableData = [];
             this.tableHeaders = [];
@@ -204,25 +195,25 @@ export default {
                         type: 'value'
                     }
                 ],
-                    series:[
-                        {
-                            name: '档案条数',
-                            type: 'bar',
-                            data: this.tableData.map(item => item.archiveCount)
-                        },
-                        {
-                            name: '文件数量',
-                            type: 'bar',
-                            data: this.tableData.map(item => item.fileCount)
-                        },
-                        {
-                            name: '文件大小',
-                            type: 'bar',
-                            data: this.tableData.map(item => item.totalSize)
-                        }
-                    ]
-                }
-            
+                series: [
+                    {
+                        name: '档案条数',
+                        type: 'bar',
+                        data: this.tableData.map(item => item.archiveCount)
+                    },
+                    {
+                        name: '文件数量',
+                        type: 'bar',
+                        data: this.tableData.map(item => item.fileCount)
+                    },
+                    {
+                        name: '文件大小',
+                        type: 'bar',
+                        data: this.tableData.map(item => item.totalSize)
+                    }
+                ]
+            }
+
             if (this.myEcharts) {
                 this.myEcharts.setOption(option, true);
                 this.loading = false;
@@ -264,7 +255,7 @@ export default {
             return tree;
         },
         formatSize(size) {
-            const sizeInKB = size / (1024*1024);
+            const sizeInKB = size / (1024 * 1024);
             return sizeInKB.toFixed(2)
         },
 
@@ -285,7 +276,8 @@ export default {
     display: flex;
     align-items: center;
 }
-.loading{
+
+.loading {
     position: absolute;
     top: 0;
     left: 0;

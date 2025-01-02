@@ -2,6 +2,7 @@ package com.archives.archive.mapper;
 
 import java.util.List;
 import com.archives.archive.domain.PlaceonfileLog;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * placeonlogMapper接口
@@ -25,7 +26,8 @@ public interface PlaceonfileLogMapper
      * @param placeonfileLog placeonlog
      * @return placeonlog集合
      */
-    public List<PlaceonfileLog> selectPlaceonfileLogList(PlaceonfileLog placeonfileLog);
+    public List<PlaceonfileLog> selectPlaceonfileLogList(@Param("placeonfileLog") PlaceonfileLog placeonfileLog, @Param("dataPermiList") String[] dataPermiList);
+
 
     /**
      * 新增placeonlog
@@ -58,4 +60,9 @@ public interface PlaceonfileLogMapper
      * @return 结果
      */
     public int deletePlaceonfileLogByPlaceonfileIds(Long[] placeonfileIds);
+
+    public List<String> getIdByOddNumbers(@Param("oddNumbers") Long oddNumbers,@Param("dataPermiList") String[] dataPermiList);
+
+
+
 }

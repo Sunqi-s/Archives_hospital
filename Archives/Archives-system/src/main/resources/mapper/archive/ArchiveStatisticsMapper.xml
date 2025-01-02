@@ -4,58 +4,68 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.archives.archive.mapper.ArchiveStatisticsMapper">
 
+    <sql id="selectSearchListBydataPermiList">
+        <if test="dataPermiList.length > 0" >
+            and data_permit in
+            <foreach collection="dataPermiList" item="itemDataPermi" open="(" separator="," close=")">
+                #{itemDataPermi}
+            </foreach>
+        </if>
+    </sql>
+
     <select id="getYeararchiveCount" resultType="com.archives.archive.domain.Statistics">
-        SELECT YEAR(ai.create_time) AS year,
-            COUNT(*) AS archiveCount,
-            ac.name AS category
+        SELECT ai.field1 AS year,
+        COUNT(*) AS archiveCount,
+        ac.name AS category
         FROM archive_info ai
         JOIN archive_category ac ON ai.category_id = ac.id
-        WHERE YEAR(ai.create_time) BETWEEN #{startData} AND #{endData}
-        GROUP BY YEAR(ai.create_time), ac.name
+        WHERE ai.field1 BETWEEN #{sta.startData} AND #{sta.endData}
+        AND ai.category_id in
+        <foreach collection="sta.typeList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <include refid="selectSearchListBydataPermiList"/>
+        GROUP BY ai.field1, ac.name
     </select>
     <select id="getYearfileCount" resultType="com.archives.archive.domain.Statistics">
-        SELECT YEAR(ai.create_time) AS year,
-            COUNT(CASE WHEN  ai.oss_status = 1 THEN ss.id END) AS fileCount,
-            ac.name AS category
+        SELECT ai.field1 AS year,
+        COUNT(CASE WHEN  ai.oss_status = 1 THEN ss.id END) AS fileCount,
+        ac.name AS category
         FROM archive_info ai
         LEFT JOIN sys_oss ss on ai.id = ss.fid
         JOIN archive_category ac ON ai.category_id = ac.id
-        WHERE YEAR(ai.create_time) BETWEEN #{startData} AND #{endData}
-        GROUP BY YEAR(ai.create_time), ac.name
+        WHERE ai.field1 BETWEEN #{sta.startData} AND #{sta.endData}
+        AND ai.category_id in
+        <foreach collection="sta.typeList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <include refid="selectSearchListBydataPermiList"/>
+        GROUP BY ai.field1, ac.name
     </select>
     <select id="getYearfileSize" resultType="com.archives.archive.domain.Statistics">
-        SELECT YEAR(ai.create_time) AS year,
-            SUM(CASE WHEN ai.oss_status = 1 THEN CAST(ss.size AS UNSIGNED) ELSE 0 END) AS totalSize,
-            ac.name AS category
+        SELECT ai.field1 AS year,
+        SUM(CASE WHEN ai.oss_status = 1 THEN CAST(ss.size AS UNSIGNED) ELSE 0 END) AS totalSize,
+        ac.name AS category
         FROM archive_info ai
         LEFT JOIN sys_oss ss on ai.id = ss.fid
         JOIN archive_category ac ON ai.category_id = ac.id
-        WHERE YEAR(ai.create_time) BETWEEN #{startData} AND #{endData}
-        GROUP BY YEAR(ai.create_time), ac.name
+        WHERE ai.field1 BETWEEN #{sta.startData} AND #{sta.endData}
+        AND ai.category_id in
+        <foreach collection="sta.typeList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <include refid="selectSearchListBydataPermiList"/>
+        GROUP BY ai.field1, ac.name
     </select>
     <select id="getStatisticsByCondition" resultType="com.archives.archive.domain.Statistics">
         SELECT
-        ai.category_id AS categoryId,
-        <choose>
-            <when test="condition != null">
-                ai.${condition} AS category
-            </when>
-            <otherwise>
-                NULL AS category
-            </otherwise>
-        </choose>,
-        COUNT(*) AS archiveCount,
-        COUNT(CASE WHEN ai.oss_status = 1 THEN ss.id END) AS fileCount,
-        SUM(CASE WHEN ai.oss_status = 1 THEN CAST(ss.size AS UNSIGNED) ELSE 0 END) AS totalSize
-        FROM archive_info ai
-        LEFT JOIN sys_oss ss ON ai.id = ss.fid
-        WHERE YEAR(ai.create_time) BETWEEN #{startData} AND #{endData}
-        <if test="dataCountList != null">
-            <foreach collection="dataCountList" item="dataCount" separator="OR">
-                AND ai.category_id = #{dataCount}
-            </foreach>
-        </if>
-        GROUP BY ai.category_id, ai.${condition}
+        COUNT(ss.id) AS fileCount,
+        SUM(CAST(ss.size AS UNSIGNED)) AS totalSize
+        FROM sys_oss ss
+        WHERE ss.fid IN
+        <foreach collection="idArr" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
     </select>
 
     <select id="importData" resultType="com.archives.archive.domain.Statistics">
@@ -86,18 +96,47 @@
         GROUP BY ac.name
     </select>
     <select id="getYearPageCount" resultType="com.archives.archive.domain.Statistics">
-        SELECT YEAR(ai.create_time) AS year,
-            SUM(ai.${item.endData}) AS totalSize,
-            ac.name AS category
+        SELECT ai.field1 AS year,
+        SUM(ai.${item.endData}) AS totalSize,
+        ac.name AS category
         FROM archive_info ai JOIN archive_category ac ON ai.category_id = ac.id
-        WHERE YEAR(ai.create_time) BETWEEN #{sta.startData} AND #{sta.endData}
-          AND ai.category_id = #{item.startData}
-        GROUP BY YEAR(ai.create_time), ai.category_id;
+        WHERE ai.field1 BETWEEN #{sta.startData} AND #{sta.endData}
+        AND ai.category_id = #{item.startData}
+        AND ai.category_id in
+        <foreach collection="sta.typeList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        <include refid="selectSearchListBydataPermiList"/>
+        GROUP BY ai.field1, ai.category_id;
     </select>
     <select id="getPageColumn" resultType="com.archives.archive.domain.Statistics">
         SELECT category_id AS startData,column_name AS endData
         FROM archive_item
         WHERE item_name = #{itemName}
+    </select>
+    <select id="getFileCountByCondition" resultType="com.archives.archive.domain.Statistics">
+        SELECT
+        GROUP_CONCAT(CASE WHEN ai.oss_status = 1 THEN ai.id END) AS `condition`,
+        ai.category_id AS categoryId,
+        <choose>
+            <when test="condition != null">
+                ai.${condition} AS category
+            </when>
+            <otherwise>
+                NULL AS category
+            </otherwise>
+        </choose>,
+        COUNT(ai.id) AS archiveCount  <!-- 直接统计 archive_info 表的记录数 -->
+        FROM archive_info ai
+        WHERE YEAR(ai.create_time) BETWEEN #{startData} AND #{endData}
+        <if test="dataCountList != null">
+            AND ai.category_id IN
+            <foreach collection="dataCountList" item="dataCount" open="(" separator="," close=")">
+                #{dataCount}
+            </foreach>
+        </if>
+        <include refid="selectSearchListBydataPermiList"/>
+        GROUP BY ai.category_id, ai.${condition}
     </select>
 
 </mapper>

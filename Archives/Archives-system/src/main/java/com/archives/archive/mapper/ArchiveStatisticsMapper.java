@@ -9,21 +9,24 @@ import java.util.List;
 @Mapper
 public interface ArchiveStatisticsMapper {
 
-    public List<Statistics> getYeararchiveCount(Statistics statistics);
+    public List<Statistics> getYeararchiveCount(@Param("sta") Statistics statistics,@Param("dataPermiList")String[] dataPermiList);
 
-    public List<Statistics> getYearfileCount(Statistics statistics);
+    public List<Statistics> getYearfileCount(@Param("sta") Statistics statistics,@Param("dataPermiList")String[] dataPermiList);
 
-    public List<Statistics> getYearfileSize(Statistics statistics);
+    public List<Statistics> getYearfileSize(@Param("sta") Statistics statistics,@Param("dataPermiList")String[] dataPermiList);
 
-    List<Statistics> getStatisticsByCondition(@Param("startData") String startData, @Param("endData") String endData, @Param("condition") String condition, @Param("dataCountList") List<Integer> dataCountList);
+    Statistics getStatisticsByCondition(@Param("idArr") String[] idArr);
 
-    public List<Statistics> importData(@Param("year") int data);
+    public List<Statistics> importData(@Param("year") int data,@Param("dataPermiList")String[] dataPermiList);
 
-    public List<Statistics> getCategoryStatistics(@Param("categoryIds") List<Integer> category, @Param("startData") String startData, @Param("endData") String endData);
+    public List<Statistics> getCategoryStatistics(@Param("categoryIds") List<Integer> category, @Param("startData") String startData, @Param("endData") String endData,@Param("dataPermiList")String[] dataPermiList);
 
-    List<Statistics> getPageColumn(@Param("itemName") String itemName);
+    List<Statistics> getPageColumn(@Param("itemName") String itemName,@Param("dataPermiList")String[] dataPermiList);
 
 
-    List<Statistics> getYearPageCount(@Param("item") Statistics s, @Param("sta") Statistics statistics);
+    List<Statistics> getYearPageCount(@Param("item") Statistics s, @Param("sta") Statistics statistics,@Param("dataPermiList")String[] dataPermiList);
+
+    List<Statistics> getFileCountByCondition(@Param("startData") String startData, @Param("endData") String endData, @Param("condition") String condition, @Param("dataCountList") List<Integer> dataCountList,@Param("dataPermiList") String[] dataPermiList);
+
 
 }

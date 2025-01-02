@@ -42,3 +42,11 @@ export function delPlaceonlog(placeonfileId) {
     method: 'delete'
   })
 }
+
+export function getIdByOddNumbers(oddNumbers) {
+  return request({
+    url: '/placeonlog/placeonlog/getIdByOddNumbers/',
+    method: 'post',
+    data: oddNumbers
+  })
+}

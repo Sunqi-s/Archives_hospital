@@ -1,7 +1,9 @@
 package com.archives.archive.service.impl;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 import com.archives.common.core.domain.entity.SysUser;
@@ -44,9 +46,17 @@ public class PlaceonfileLogServiceImpl implements IPlaceonfileLogService
      * @return placeonlog
      */
     @Override
-    public List<PlaceonfileLog> selectPlaceonfileLogList(PlaceonfileLog placeonfileLog)
-    {
-        return placeonfileLogMapper.selectPlaceonfileLogList(placeonfileLog);
+    public List<PlaceonfileLog> selectPlaceonfileLogList(PlaceonfileLog placeonfileLog) {
+        String[] dataPermiList = selectSearchByDataPermit();
+        Date createTime = placeonfileLog.getCreateTime();
+        if (placeonfileLog.getCreateTime() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss");
+            String formattedDate = formatter.format(LocalDateTime.ofInstant(createTime.toInstant(), ZoneId.systemDefault()));
+
+            // 设置格式化后的日期字符串回到 placeonfileLog 中
+            placeonfileLog.setFormatCreateTime(formattedDate);
+        }
+        return placeonfileLogMapper.selectPlaceonfileLogList(placeonfileLog, dataPermiList);
     }
 
     /**
@@ -98,5 +108,22 @@ public class PlaceonfileLogServiceImpl implements IPlaceonfileLogService
     public int deletePlaceonfileLogByPlaceonfileId(Long placeonfileId)
     {
         return placeonfileLogMapper.deletePlaceonfileLogByPlaceonfileId(placeonfileId);
+    }
+
+    @Override
+    public List<String> selectPlaceonfileLogByOddNumbers(Long oddNumbers) {
+        String[] dataPermiList = selectSearchByDataPermit();
+        return placeonfileLogMapper.getIdByOddNumbers(oddNumbers, dataPermiList);
+    }
+
+    public String[] selectSearchByDataPermit() {
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        String[] dataPermiList;
+        if ("all".equals(currentUser.getDataPermi())) {
+            dataPermiList = new String[0];
+        } else {
+            dataPermiList = (currentUser.getDataPermi().split(","));
+        }
+        return dataPermiList;
     }
 }

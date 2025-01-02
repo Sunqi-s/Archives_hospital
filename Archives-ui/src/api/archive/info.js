@@ -96,3 +96,11 @@ export function getDeleteCountBySearch(query) {
     params: query
   })
 }
+
+export function getInfoByIds(query) {
+  return request({
+    url: '/archive/info/getInfoByIds',
+    method: 'post',
+    data: query
+  })
+}

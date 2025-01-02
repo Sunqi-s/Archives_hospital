@@ -102,4 +102,6 @@ public interface IArchiveInfoService
      * 获取快速搜索删除档案信息的数量
      */
     public List<Integer> getDeleteCountByQuerySearch(SearchJson searchJson);
+
+    public List<ArchiveInfo> selectArchiveInfoByIds(List<Long> ids);
 }

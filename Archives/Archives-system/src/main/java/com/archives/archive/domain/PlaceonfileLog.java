@@ -7,114 +7,130 @@ import com.archives.common.core.domain.BaseEntity;
 
 /**
  * placeonlog对象 placeonfile_log
- * 
+ *
  * @author é«å°å·
  * @date 2024-12-26
  */
-public class PlaceonfileLog extends BaseEntity
-{
+public class PlaceonfileLog extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
-    /** 归档id */
+    /**
+     * 归档id
+     */
     private Long placeonfileId;
 
-    /** 归档文件数量 */
+    /**
+     * 归档文件数量
+     */
     @Excel(name = "归档文件数量")
     private Long placeonfileInfo;
 
-    /** 文件id */
+    /**
+     * 文件id
+     */
     private String infoId;
 
-    /** 归档人 */
+    /**
+     * 归档人
+     */
     @Excel(name = "归档人")
     private String placeonfileBy;
 
-    /** 数据权限 */
+    /**
+     * 数据权限
+     */
     private String dataPermit;
 
-    /** 类型 */
+    /**
+     * 类型
+     */
     private String type;
 
-    /** 单号 */
+    /**
+     * 单号
+     */
     @Excel(name = "单号")
     private Long oddNumbers;
 
-    public void setPlaceonfileId(Long placeonfileId) 
-    {
+    private String formatCreateTime;
+
+    public void setPlaceonfileId(Long placeonfileId) {
         this.placeonfileId = placeonfileId;
     }
 
-    public Long getPlaceonfileId() 
-    {
+    public Long getPlaceonfileId() {
         return placeonfileId;
     }
-    public void setPlaceonfileInfo(Long placeonfileInfo) 
-    {
+
+    public void setPlaceonfileInfo(Long placeonfileInfo) {
         this.placeonfileInfo = placeonfileInfo;
     }
 
-    public Long getPlaceonfileInfo() 
-    {
+    public Long getPlaceonfileInfo() {
         return placeonfileInfo;
     }
-    public void setInfoId(String infoId) 
-    {
+
+    public void setInfoId(String infoId) {
         this.infoId = infoId;
     }
 
-    public String getInfoId() 
-    {
+    public String getInfoId() {
         return infoId;
     }
-    public void setPlaceonfileBy(String placeonfileBy) 
-    {
+
+    public void setPlaceonfileBy(String placeonfileBy) {
         this.placeonfileBy = placeonfileBy;
     }
 
-    public String getPlaceonfileBy() 
-    {
+    public String getPlaceonfileBy() {
         return placeonfileBy;
     }
-    public void setDataPermit(String dataPermit) 
-    {
+
+    public void setDataPermit(String dataPermit) {
         this.dataPermit = dataPermit;
     }
 
-    public String getDataPermit() 
-    {
+    public String getDataPermit() {
         return dataPermit;
     }
-    public void setType(String type) 
-    {
+
+    public void setType(String type) {
         this.type = type;
     }
 
-    public String getType() 
-    {
+    public String getType() {
         return type;
     }
-    public void setOddNumbers(Long oddNumbers) 
-    {
+
+    public void setOddNumbers(Long oddNumbers) {
         this.oddNumbers = oddNumbers;
     }
 
-    public Long getOddNumbers() 
-    {
+    public Long getOddNumbers() {
         return oddNumbers;
+    }
+
+    public String getFormatCreateTime() {
+        return formatCreateTime;
+    }
+
+    public void setFormatCreateTime(String formmatCreateTime) {
+        this.formatCreateTime = formmatCreateTime;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("placeonfileId", getPlaceonfileId())
-            .append("placeonfileInfo", getPlaceonfileInfo())
-            .append("infoId", getInfoId())
-            .append("placeonfileBy", getPlaceonfileBy())
-            .append("createTime", getCreateTime())
-            .append("updateTime", getUpdateTime())
-            .append("dataPermit", getDataPermit())
-            .append("type", getType())
-            .append("oddNumbers", getOddNumbers())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("placeonfileId", getPlaceonfileId())
+                .append("placeonfileInfo", getPlaceonfileInfo())
+                .append("infoId", getInfoId())
+                .append("placeonfileBy", getPlaceonfileBy())
+                .append("createTime", getCreateTime())
+                .append("updateTime", getUpdateTime())
+                .append("dataPermit", getDataPermit())
+                .append("type", getType())
+                .append("oddNumbers", getOddNumbers())
+                .append("formatCreateTime", getFormatCreateTime())
+                .toString();
     }
 }

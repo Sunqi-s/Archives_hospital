@@ -20,26 +20,45 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select placeonfile_id, placeonfile_info, info_id, placeonfile_by, create_time, update_time, data_permit, type, odd_numbers from placeonfile_log
     </sql>
 
-    <select id="selectPlaceonfileLogList" parameterType="PlaceonfileLog" resultMap="PlaceonfileLogResult">
-        <include refid="selectPlaceonfileLogVo"/>
-        <where>  
-            <if test="placeonfileId != null "> and placeonfile_id = #{placeonfileId}</if>
-            <if test="placeonfileInfo != null "> and placeonfile_info = #{placeonfileInfo}</if>
-            <if test="infoId != null  and infoId != ''"> and info_id = #{infoId}</if>
-            <if test="placeonfileBy != null  and placeonfileBy != ''"> and placeonfile_by like concat('%', #{placeonfileBy}, '%')</if>
-            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
-            <if test="updateTime != null "> and update_time = #{updateTime}</if>
-            <if test="dataPermit != null  and dataPermit != ''"> and data_permit = #{dataPermit}</if>
-            <if test="type != null  and type != ''"> and type = #{type}</if>
-            <if test="oddNumbers != null "> and odd_numbers like concat('%', #{oddNumbers}, '%')</if>
+    <sql id="selectSearchListBydataPermiList">
+        <if test="dataPermiList.length > 0" >
+            and data_permit in
+            <foreach collection="dataPermiList" item="itemDataPermi" open="(" separator="," close=")">
+                #{itemDataPermi}
+            </foreach>
+        </if>
+    </sql>
+
+    <select id="selectPlaceonfileLogList"  resultMap="PlaceonfileLogResult">
+        select odd_numbers, sum(placeonfile_info) as placeonfile_info, placeonfile_by, create_time
+        from placeonfile_log
+        <where>
+            <if test="placeonfileLog.placeonfileId != null "> and placeonfile_id = #{placeonfileLog.placeonfileId}</if>
+            <if test="placeonfileLog.oddNumbers != null "> and odd_numbers = #{placeonfileLog.oddNumbers}</if>
+            <if test="placeonfileLog.type != null  and placeonfileLog.type != ''"> and type = #{placeonfileLog.type}</if>
+            <if test="placeonfileLog.placeonfileInfo != null "> and placeonfile_info = #{placeonfileLog.placeonfileInfo}</if>
+            <if test="placeonfileLog.infoId != null  and placeonfileLog.infoId != ''"> and info_id = #{placeonfileLog.infoId}</if>
+            <if test="placeonfileLog.placeonfileBy != null  and placeonfileLog.placeonfileBy != ''"> and placeonfile_by like concat('%',#{placeonfileLog.placeonfileBy},'%')</if>
+            <if test="placeonfileLog.formatCreateTime != null and placeonfileLog.formatCreateTime != '' "> and DATE(create_time) = DATE(#{placeonfileLog.formatCreateTime})</if>
+            <if test="placeonfileLog.updateTime != null "> and update_time = #{placeonfileLog.updateTime}</if>
+            <include refid="selectSearchListBydataPermiList"/>
         </where>
+        group by odd_numbers,placeonfile_by, create_time
+        order by create_time desc
     </select>
     
     <select id="selectPlaceonfileLogByPlaceonfileId" parameterType="Long" resultMap="PlaceonfileLogResult">
         <include refid="selectPlaceonfileLogVo"/>
         where placeonfile_id = #{placeonfileId}
     </select>
-        
+
+    <select id="getIdByOddNumbers" resultType="java.lang.String">
+        select info_id
+        from placeonfile_log
+        where odd_numbers = #{oddNumbers}
+        <include refid="selectSearchListBydataPermiList"/>
+    </select>
+
     <insert id="insertPlaceonfileLog" parameterType="PlaceonfileLog" useGeneratedKeys="true" keyProperty="placeonfileId">
         insert into placeonfile_log
         <trim prefix="(" suffix=")" suffixOverrides=",">

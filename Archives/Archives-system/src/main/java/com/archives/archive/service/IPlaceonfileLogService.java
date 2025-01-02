@@ -58,4 +58,6 @@ public interface IPlaceonfileLogService
      * @return 结果
      */
     public int deletePlaceonfileLogByPlaceonfileId(Long placeonfileId);
+
+    public List<String> selectPlaceonfileLogByOddNumbers(Long oddNumbers);
 }
