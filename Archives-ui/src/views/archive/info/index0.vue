@@ -955,11 +955,24 @@ export default {
 
         // 最大长度校验
         if (field.type !== 'select' && field.type !== 'treeselect' && field.maxLength) {
-          fieldRules.push({
-            max: field.maxLength,
-            message: `${field.label}不能超过${field.maxLength}字符`,
-            trigger: 'blur'
-          });
+          if (field.name === 'field3') {
+            fieldRules.push({
+              validator: (rule, value, callback) => {
+                if (value.length > 1000) {
+                  callback(new Error(`${field.label}不能超过1000字符`));
+                } else {
+                  callback();
+                }
+              },
+              trigger: 'blur'
+            });
+          } else if (field.maxLength) {
+            fieldRules.push({
+              max: field.maxLength,
+              message: `${field.label}不能超过${field.maxLength}字符`,
+              trigger: 'blur'
+            });
+          }
         }
 
         // 类型检查
