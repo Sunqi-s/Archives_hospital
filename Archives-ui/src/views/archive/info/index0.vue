@@ -1349,9 +1349,6 @@ export default {
             }
             await Promise.all(tasks);
           }
-          // 关闭加载中状态，并显示删除成功消息
-          this.$modal.closeLoading();
-          this.$modal.msgSuccess("删除成功");
         };
         // 根据是否有搜索值来选择删除操作
         if (this.deleteQuery.searchValue !== '') {
@@ -1362,7 +1359,12 @@ export default {
               console.error("删除过程中发生错误:", error);
               this.$modal.msgError("删除过程中发生错误");
             })
-            .finally(() => this.getList());
+            // 关闭加载中状态，并显示删除成功消息
+            .finally(() => setTimeout(() => {
+              this.getList()
+              this.$modal.closeLoading();
+              this.$modal.msgSuccess("删除成功");
+            }, 2000));
         } else {
           getDelCount(this.deleteQuery)
             .then(res => handleDeletion(res))
@@ -1370,9 +1372,14 @@ export default {
               console.error("删除过程中发生错误:", error);
               this.$modal.msgError("删除过程中发生错误");
             })
-            .finally(() => this.getList());
+            // 关闭加载中状态，并显示删除成功消息
+            .finally(() => setTimeout(() => {
+              this.getList()
+              this.$modal.closeLoading();
+              this.$modal.msgSuccess("删除成功");
+            }, 2000));
         }
-      });
+      })  
     },
     clearSearch() {
       this.categoryId = null;
