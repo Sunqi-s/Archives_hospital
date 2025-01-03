@@ -2,7 +2,7 @@
   <div>
     <el-table :data="localPaginatedTableData" class="table" @selection-change="handleSelectionChange" border resizable>
       <!-- 新增的附件列 -->
- <el-table-column label="附件" show-overflow-tooltip>
+      <!-- <el-table-column label="附件" show-overflow-tooltip>
   <template slot-scope="scope">
     <el-button type="text" v-if="scope.row.sysOssList && scope.row.sysOssList.length > 0" @click="showAttachments(scope.row)">
       <el-popover placement="left" width="200" trigger="hover">
@@ -23,20 +23,16 @@
       <el-button type="text" icon="el-icon-folder-delete" style="color: saddlebrown"></el-button>
     </el-tooltip>
   </template>
-</el-table-column>
+</el-table-column> -->
 
       <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column
-        v-for="column in columnList"
-        v-if="column.isInsert"
-        :key="column.prop"
-        :prop="column.prop"
-        :label="column.label"
-        show-overflow-tooltip
-      >
+      <el-table-column v-for="column in columnList" v-if="column.isInsert" :key="column.prop" :prop="column.prop"
+        :label="column.label" show-overflow-tooltip>
         <template slot-scope="scope">
           <span>
-            <el-tooltip v-if="!['主键ID', '创建者', '创建时间', '更新者', '更新时间'].includes(column.label) && (scope.row.validationErrors.some(v => v.field === column.prop))" :content="getViolationMessage(scope.row.validationErrors, column.prop)" placement="top">
+            <el-tooltip
+              v-if="!['主键ID', '创建者', '创建时间', '更新者', '更新时间'].includes(column.label) && (scope.row.validationErrors.some(v => v.field === column.prop))"
+              :content="getViolationMessage(scope.row.validationErrors, column.prop)" placement="top">
               <i class="el-icon-error"></i>
             </el-tooltip>
             <i class="el-icon-success" v-else></i>
@@ -46,13 +42,8 @@
       </el-table-column>
     </el-table>
     <div class="pagination-container">
-      <el-pagination
-        @current-change="handlePageChange"
-        :current-page="currentPage"
-        :page-size="pageSize"
-        layout="total, prev, pager, next"
-        :total="filteredTableData.length"
-      ></el-pagination>
+      <pagination :total="filteredTableData.length" :page.sync="pageNum" :limit.sync="pageSize"
+        @pagination="handlePageChange(pageNum, pageSize)" />
     </div>
     <!-- 预览文件对话框 -->
     <el-dialog :title="previewTitle" :visible.sync="previewVisible" fullscreen>
@@ -66,8 +57,6 @@ export default {
   props: {
     paginatedTableData: Array,
     columnList: Array,
-    currentPage: Number,
-    pageSize: Number,
     filteredTableData: Array,
     rulesList: Array,
     upFileList: Array,
@@ -83,6 +72,8 @@ export default {
       localIsHovered: this.isHovered,
       previewUrl: "",
       previewVisible: false,
+      pageNum: 1,
+      pageSize: 10,
     };
   },
   created() {
@@ -101,8 +92,12 @@ export default {
     handleSelectionChange(val) {
       this.$emit('selection-change', val);
     },
-    handlePageChange(page) {
-      this.$emit('page-change', page);
+    handlePageChange(pageNum, pageSize) {
+      this.$emit('page-change', { pageNum: pageNum, pageSize: pageSize });
+    },
+    updatePage(num, size) {
+      this.pageNum = num;
+      this.pageSize = size;
     },
     getViolationMessage(validationErrors, field) {
       const violation = validationErrors.find(v => v.field === field);

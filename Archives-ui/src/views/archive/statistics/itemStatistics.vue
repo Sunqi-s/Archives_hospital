@@ -44,6 +44,8 @@
                                 </template>
                             </el-table-column>
                         </el-table>
+                        <pagination v-show="total > 0" :total="total" :page.sync="pageNum" :limit.sync="pageSize"
+                            @pagination="handleNextPage" />
                     </div>
                 </el-card>
             </el-col>
@@ -99,7 +101,11 @@ export default {
                 categoryId: null,
                 pageNum: 1,
                 pageSize: 10
-            }
+            },
+            total: 0,
+            pageNum: 1,
+            pageSize: 10,
+            sliceData: []
         }
     },
     created() {
@@ -170,8 +176,6 @@ export default {
                     label: item.itemName
                 }))
                 .filter(item => ['全宗号','全宗名称','保管期限','年度','机构或问题'].includes(item.label))
-                console.log(this.selection);
-                
                 this.isClick = true;
             })
         },
@@ -208,10 +212,16 @@ export default {
                     ...item,
                     totalSize: (item.totalSize /(1024 * 1024)).toFixed(2) + 'MB'
                 }))
+                this.total = this.tableData.length;
+                this.pageNum = 1;
+                this.handleNextPage();
                 this.loading = false;
             })
-            
-            
+        },
+        handleNextPage() {
+            const start = (this.pageNum - 1) * this.pageSize;
+            const end = start + this.pageSize;
+            this.sliceData = this.tableData.slice(start, end);
         },
         handleReset(){
             this.value = '',

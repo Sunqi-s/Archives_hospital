@@ -68,7 +68,7 @@
               </el-button>
               <!-- 导出模板 -->
               <el-button type="primary"
-                         :disabled="isButtonDisabled || !isDisplayOutput"
+                         :disabled="isButtonDisabled || !isDisplayOutput || exportBut"
                          plain
                          @click="exportTemplate()">导出模板
               </el-button>
@@ -88,8 +88,6 @@
           <DataDisplay ref="dataDisplay"
                        :paginatedTableData="paginatedTableData"
                        :columnList="columnList"
-                       :currentPage="currentPage"
-                       :pageSize="pageSize"
                        :filteredTableData="filteredTableData"
                        @selection-change="handleSelectionChange"
                        @page-change="handlePageChange"
@@ -323,7 +321,7 @@ export default {
       selectedRows: [], // 选中的行
       showAllData: true, // 是否显示所有数据
       currentPage: 1, // 当前页码
-      pageSize: 15, // 每页显示的条数
+      pageSize: 10, // 每页显示的条数
       rulesList: [{columnName: "archiveNumber",isEditing: false,itemName:"档号",prefix: "", suffix: ""}],
       upFileList: [],
       attachmentProgress: 0,
@@ -399,6 +397,7 @@ export default {
       value: '', // 在线挂接文件夹选择值
       unUploadList: [],//上传失败文件信息
       folderscountList:new Map(),
+      exportBut: false,
     };
   },
   computed: {
@@ -864,6 +863,8 @@ export default {
 
     // EXCEL切换正确与错误数据显示
     toggleDataDisplay() {
+      this.currentPage = 1;
+      this.$refs.dataDisplay.updatePage(this.currentPage,this.pageSize);
       this.showAllData = !this.showAllData; // 切换显示所有数据
       const hasErrors = this.tableData.some(row => row.validationErrors.length > 0);
       if (!hasErrors && this.tableData.length > 0) {
@@ -873,13 +874,24 @@ export default {
 
     // 处理EXCEL分页变化事件
     handlePageChange(page) {
-      this.currentPage = page; // 设置当前页码
+      this.currentPage = page.pageNum; // 设置当前页码
+      this.pageSize = page.pageSize;
     },
 
     // 导出模板
     exportTemplate() {
-      this.download('/export/exportTemplate', {categoryId: this.selectedNodeKey,categoryName:this.categoryName
-      }, `${this.categoryName}模版.xlsx`)
+      this.exportBut = true;
+      if (this.exportCategory.findIndex(item => item == this.selectedNodeKey) != -1) {
+        this.download('/export/exportTemplate', {
+          categoryId: this.selectedNodeKey, categoryName: this.categoryName
+        }, `${this.categoryName}模版.xlsx`)
+        setTimeout(() => {
+          this.exportBut = false;
+        }, 1500);
+      } else {
+        this.$message.error('暂无模版');
+        this.exportBut = false;
+      }
     },
 
     // 重置表单

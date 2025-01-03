@@ -48,6 +48,8 @@
                                     </template>
                                 </el-table-column>
                             </el-table>
+                            <pagination v-show="total > 0" :total="total" :page.sync="pageNum" :limit.sync="pageSize"
+                                @pagination="handleNextPage" />
                         </div>
 
                         <div v-show="radio == 2">
@@ -86,6 +88,10 @@ export default {
             charData: [],
             myEcharts: null,
             loading: false,
+            total: 0,
+            pageNum: 1,
+            pageSize: 10,
+            sliceData: []
         };
     },
     mounted() {
@@ -190,19 +196,27 @@ export default {
                     })
                     this.tableHeaders = header;
                     this.tableData = yearCount;
+                    this.total = this.tableData.length;
+                    this.pageNum = 1;
                     this.charData = charData;
                     this.categoryData = header.map(item => {
                         if (item.name != '年度') {
                             return item.name
                         }
                     });
-                    this.updateChart()
+                    this.updateChart();
+                    this.handleNextPage();
                     
                 } else {
                     this.$message.error('查询失败');
                     this.loading = false;
                 }
             })
+        },
+        handleNextPage() {
+            const start = (this.pageNum - 1) * this.pageSize;
+            const end = start + this.pageSize;
+            this.sliceData = this.tableData.slice(start, end);
         },
         handleReset() {
             this.value = [];
