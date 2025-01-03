@@ -18,12 +18,13 @@ public class Statistics {
     private int select;
     private String condition ;
     private int categoryId;
+    private List<Integer> archivelogList;
 
 
     public Statistics() {
     }
 
-    public Statistics(int logCount, int dataCount, List<String> typeList, List<Integer> logCountList, List<Integer> dataCountList, String startData, String endData, String category, int archiveCount, int fileCount, Long totalSize, String year, int select, String condition, int categoryId) {
+    public Statistics(int logCount, int dataCount, List<String> typeList, List<Integer> logCountList, List<Integer> dataCountList, String startData, String endData, String category, int archiveCount, int fileCount, Long totalSize, String year, int select, String condition, int categoryId, List<Integer> archivelogList) {
         this.logCount = logCount;
         this.dataCount = dataCount;
         this.typeList = typeList;
@@ -39,6 +40,7 @@ public class Statistics {
         this.select = select;
         this.condition = condition;
         this.categoryId = categoryId;
+        this.archivelogList = archivelogList;
     }
 
     public String getStartData() {
@@ -161,6 +163,14 @@ public class Statistics {
         this.categoryId = categoryId;
     }
 
+    public List<Integer> getArchivelogList() {
+        return archivelogList;
+    }
+
+    public void setArchivelogList(List<Integer> archivelogList) {
+        this.archivelogList = archivelogList;
+    }
+
     @Override
     public String toString() {
         return "Statistics{" +
@@ -179,6 +189,7 @@ public class Statistics {
                 ", select=" + select +
                 ", condition='" + condition + '\'' +
                 ", categoryId=" + categoryId +
+                ", archivelogList=" + archivelogList +
                 '}';
     }
 }

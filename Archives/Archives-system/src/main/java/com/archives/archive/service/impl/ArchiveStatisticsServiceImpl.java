@@ -73,6 +73,7 @@ public class ArchiveStatisticsServiceImpl implements ArchiveStatisticsService {
         String condition = statistics.getCondition();
         List<Integer> dataCountList = statistics.getDataCountList();
         List<Statistics> countList = archiveStatisticsMapper.getFileCountByCondition(startData, endData, condition, dataCountList,dataPermiList);
+        System.out.println("countList:" + countList);
         for (Statistics s : countList) {
             if (s.getCondition() == null) {
                 s.setTotalSize(0L);
@@ -89,20 +90,27 @@ public class ArchiveStatisticsServiceImpl implements ArchiveStatisticsService {
     }
 
     public List<Statistics> getStatistics(int year) {
-        String[] dataPermiList =selectSearchByDataPermit();
+        String[] dataPermiList = selectSearchByDataPermit();
         List<Statistics> result = new ArrayList<>(12);
-        for (int i = 1; i <= 12; i++) {
+        for (int i = 0; i < 12; i++) {
             Statistics statistics = new Statistics();
             statistics.setLogCount(0);
             statistics.setDataCount(0);
             result.add(statistics);
         }
-        List<Statistics> statistics = archiveStatisticsMapper.importData(year,dataPermiList);
-        for (Statistics s : statistics) {
+        List<Statistics> statistics1 = archiveStatisticsMapper.importData(year, dataPermiList);
+        List<Statistics> statistics2 = archiveStatisticsMapper.getArchiveLog(year, dataPermiList);
+        for (Statistics s : statistics1) {
             int index = Integer.parseInt(s.getStartData()) - 1;
             if (index >= 0 && index < 12) {
                 result.get(index).setDataCount(s.getDataCount());
                 result.get(index).setLogCount(s.getLogCount());
+            }
+        }
+        for (Statistics s : statistics2) {
+            int index = Integer.parseInt(s.getStartData()) - 1;
+            if (index >= 0 && index < 12) {
+                result.get(index).setArchiveCount(s.getArchiveCount());
             }
         }
         return result;

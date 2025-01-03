@@ -75,7 +75,7 @@ export default {
             tableHeaders: [
                 {
                     name: 'category',
-                    label: '档案名称(分类)'
+                    label: '档案名称(条件)'
                 },
                 {
                     name: 'archiveCount',
@@ -165,10 +165,13 @@ export default {
             let resp = [];
             listItem(this.queryParams).then(response => {
                 resp = response.rows;
-                this.selection = resp.filter(item => !item.itemName.includes('备用') && !item.itemName.includes('ID')).map(item => ({
+                this.selection = resp.filter(item => !item.itemName.includes('备用') && !item.itemName.includes('ID') ).map(item => ({
                     name: item.columnName,
                     label: item.itemName
                 }))
+                .filter(item => ['全宗号','全宗名称','保管期限','年度','机构或问题'].includes(item.label))
+                console.log(this.selection);
+                
                 this.isClick = true;
             })
         },

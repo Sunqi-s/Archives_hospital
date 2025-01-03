@@ -44,6 +44,7 @@ export default {
       typeList:['接收','接收次数','归档','开放鉴定','销毁鉴定'],
       monthList:['一月', '二月', '三月', '四月', '五月', '六月', '七月','八月','九月','十月','十一月','十二月'],
       tableData: [],
+      archivelogCount: [],
     }
   },
   mounted() {
@@ -66,13 +67,16 @@ export default {
       this.importCount = []
       this.imporDatacount = []
       this.tableData = []
+      this.archivelogCount = []
       getStatistics(this.year).then(response => {
         response.data.forEach(element => {
           this.importCount.push(element.logCount)
           this.imporDatacount.push(element.dataCount)
+          this.archivelogCount.push(element.archiveCount)
         });
         this.makeTable(this.importCount)
         this.makeTable(this.imporDatacount)
+        this.makeTable(this.archivelogCount)
         this.updateMain()
         this.loading = false
       })
@@ -120,7 +124,7 @@ export default {
             name: '归档',
             type: 'line',
             stack: 'Total',
-            data: []
+            data: this.archivelogCount
           },
           {
             name: '开放鉴定',
@@ -142,7 +146,8 @@ export default {
       const data = {
         typeList:this.typeList,
         logCountList:this.importCount,
-        dataCountList:this.imporDatacount
+        dataCountList:this.imporDatacount,
+        archivelogList:this.archivelogCount
       }
       this.download('statistics/export', data, `模版.xlsx`)
 

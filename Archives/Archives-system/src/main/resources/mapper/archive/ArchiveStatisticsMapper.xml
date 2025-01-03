@@ -108,7 +108,7 @@
         ac.name AS category
         FROM archive_info ai
         JOIN archive_category ac ON ai.category_id = ac.id
-        WHERE YEAR(ai.create_time) BETWEEN #{startData} AND #{endData}
+        WHERE ai.field1 BETWEEN #{startData} AND #{endData}
         AND ai.category_id in
         <foreach collection="categoryIds" item="item" open="(" separator="," close=")">
             #{item}
@@ -136,7 +136,7 @@
         </choose>,
         COUNT(ai.id) AS archiveCount  <!-- 直接统计 archive_info 表的记录数 -->
         FROM archive_info ai
-        WHERE YEAR(ai.create_time) BETWEEN #{startData} AND #{endData}
+        WHERE ai.field1 BETWEEN #{startData} AND #{endData}
         <if test="dataCountList != null">
             AND ai.category_id IN
             <foreach collection="dataCountList" item="dataCount" open="(" separator="," close=")">
@@ -145,6 +145,17 @@
         </if>
         <include refid="selectSearchListBydataPermiList"/>
         GROUP BY ai.category_id, ai.${condition}
+    </select>
+
+    <select id="getArchiveLog" resultType="com.archives.archive.domain.Statistics">
+        select
+        MONTH(create_time) as startData,
+        SUM(placeonfile_info) as archiveCount
+        FROM placeonfile_log
+        WHERE YEAR(create_time) = #{year} AND type = 'guidang'
+        <include refid="selectSearchListBydataPermiList"/>
+        GROUP BY MONTH(create_time)
+        ORDER BY MONTH(create_time)
     </select>
 
 </mapper>

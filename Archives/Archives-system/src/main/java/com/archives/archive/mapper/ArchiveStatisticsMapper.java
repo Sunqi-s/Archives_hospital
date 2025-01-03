@@ -28,5 +28,6 @@ public interface ArchiveStatisticsMapper {
 
     List<Statistics> getFileCountByCondition(@Param("startData") String startData, @Param("endData") String endData, @Param("condition") String condition, @Param("dataCountList") List<Integer> dataCountList,@Param("dataPermiList") String[] dataPermiList);
 
+    public List<Statistics> getArchiveLog(@Param("year") int data,@Param("dataPermiList") String[] dataPermiList);
 
 }
