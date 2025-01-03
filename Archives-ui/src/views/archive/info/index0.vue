@@ -59,7 +59,7 @@
           </el-form>
 
           <div class="form-button-wrapper">
-            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach(1)">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach(1)" :disabled="!isClick">搜索</el-button>
             <el-button icon="el-icon-refresh" size="small" @click="resetQuery()">重置</el-button>
           </div>
 
@@ -663,7 +663,9 @@ export default {
           this.deleteQuery = this.queryParams
           this.infoList = response.rows;
           this.total = response.total;
-          this.isClick = true;
+          setTimeout(() => {
+            this.isClick = true;
+          }, 1000);
         });
       }
     },
@@ -1068,8 +1070,10 @@ export default {
     handleFilePreview(url) {
       // this.previewUrl = url;
       // this.showPreview = true;
-      const encodedUrl = encodeURIComponent(Base64.encode(process.env.VUE_APP_FILE_SERVER_BASE_URL + url));
+      const fullUrl = process.env.VUE_APP_FILE_SERVER_BASE_URL + url.substring(1);
+      const encodedUrl = encodeURIComponent(Base64.encode(fullUrl));
       // 打开新页面并调用在线预览接口
+      const previewUrl = process.env.VUE_APP_KKFILEVIEW_BASE_URL + '/onlinePreview?url=' + encodedUrl;
       window.open(process.env.VUE_APP_KKFILEVIEW_BASE_URL + '/onlinePreview?url=' + encodedUrl);
     },
 

@@ -59,7 +59,7 @@
           </el-form>
 
           <div class="form-button-wrapper">
-            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach" :disabled="!isClick">搜索</el-button>
             <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
           </div>
 
@@ -560,7 +560,9 @@ export default {
         getBeachList(this.queryParams).then(response => {
           this.infoList = response.rows;
           this.total = response.total;
-          this.isClick = true;
+          setTimeout(() => {
+            this.isClick = true;
+          }, 1000);
         });
       }
     },

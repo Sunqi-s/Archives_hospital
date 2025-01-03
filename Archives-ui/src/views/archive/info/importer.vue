@@ -609,14 +609,14 @@ export default {
         yesList.forEach((yes) => {
           const idx = headers.indexOf(yes.label);
           rowData[yes.prop] = row[idx];
-          const error = this.validateCell(row[idx], yes.length, yes.type, yes.isRequired, yes.prop);
+          const error = this.validateCell(row[idx], 1100, yes.type, yes.isRequired, yes.prop);
           if (error) {
             rowData.validationErrors.push({field: yes.prop, messsage: error});
           }
         });
         noList.forEach((no) => {
           rowData[no.prop] = null;
-          const error = this.validateCell(null, no.length, no.type, no.isRequired, no.prop);
+          const error = this.validateCell(null, 1100, no.type, no.isRequired, no.prop);
           if (error) {
             rowData.validationErrors.push({field: no.prop, messsage: error});
           }
@@ -631,7 +631,6 @@ export default {
       }
       return 2;
       }
-
     },
 
     // 验证单元格数据
