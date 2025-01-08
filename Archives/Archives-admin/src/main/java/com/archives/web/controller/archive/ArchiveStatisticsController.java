@@ -40,9 +40,11 @@ public class ArchiveStatisticsController {
     public void export(HttpServletResponse response, Statistics statistics) {
         StatisticsExport statisticsExport1 = new StatisticsExport("接收",statistics.getDataCountList());
         StatisticsExport statisticsExport2 = new StatisticsExport("接收次数",statistics.getLogCountList());
+        StatisticsExport statisticsExport3 = new StatisticsExport("归档",statistics.getArchivelogList());
         List<StatisticsExport> statisticsExportList = new ArrayList<>();
         statisticsExportList.add(statisticsExport1);
         statisticsExportList.add(statisticsExport2);
+        statisticsExportList.add(statisticsExport3);
         ExcelUtil<StatisticsExport> exportExcelUtil = new ExcelUtil<>(StatisticsExport.class);
         exportExcelUtil.exportExcel(response, statisticsExportList, "统计数据");
     }
