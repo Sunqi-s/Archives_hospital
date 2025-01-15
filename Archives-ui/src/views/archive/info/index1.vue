@@ -252,7 +252,6 @@ import { getDept, listDept } from "@/api/system/dept";
 import { pointRelation } from "@/api/archive/relation";
 import { Base64 } from "js-base64";
 import { addPlaceonlog, delPlaceonlog, getPlaceonlog, listPlaceonlog, updatePlaceonlog } from "@/api/archive/placeonlog";
-import { customAlphabet, nanoid } from 'nanoid';
 export default {
   name: "Resources",
   components: { 'file-tree': categoryTree, Treeselect },
@@ -766,8 +765,7 @@ export default {
           this.$modal.loading("正在处理中");
           return updatAarchiveStatus(ids)
         }).then(() => {
-          const nanoid = customAlphabet('1234567890', 14);
-          const id = nanoid();
+          const id = Date.now().toString();
           const logInfo = {
             placeonfileInfo: ids.length,
             infoId: ids.join(','),
@@ -793,8 +791,7 @@ export default {
           ExportQueryParams.pageNum = 1;
           ExportQueryParams.pageSize = 3000;
           const createTime = this.getDataTime(new Date());
-          const nanoid = customAlphabet('1234567890', 14);
-          const id = nanoid();
+          const id = Date.now().toString();
           // 定义递归函数
           const fetchAndProcessPageData = async (pageNum, pageTotal, concurrency = 5) => {
             try {
@@ -921,8 +918,7 @@ export default {
           this.$modal.loading("正在处理中");
           return sendInfo(ids)
         }).then(() => {
-          const nanoid = customAlphabet('1234567890', 14);
-          const id = nanoid();
+          const id = Date.now().toString();
           const logInfo = {
             placeonfileInfo: ids.length,
             infoId: ids.join(','),
@@ -948,8 +944,7 @@ export default {
           ExportQueryParams.pageNum = 1;
           ExportQueryParams.pageSize = 3000;
           const createTime = this.getDataTime(new Date());
-          const nanoid = customAlphabet('1234567890', 14);
-          const id = nanoid();
+          const id = Date.now().toString();
           // 定义递归函数
           const sendPageData = async (pageNum, pageTotal, concurrency = 5) => {
             try {
