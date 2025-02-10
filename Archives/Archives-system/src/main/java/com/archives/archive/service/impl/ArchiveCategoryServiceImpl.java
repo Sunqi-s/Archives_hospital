@@ -8,6 +8,7 @@ import com.archives.archive.mapper.ArchiveItemMapper;
 import com.archives.archive.service.IArchiveItemService;
 import com.archives.archive.util.ArchiveUtils;
 import com.archives.common.constant.ArchiveConstants;
+import com.archives.common.core.redis.RedisCache;
 import com.archives.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
     @Autowired
     private ArchiveItemMapper archiveItemMapper;
 
+    @Autowired
+    private RedisCache redisCache;
     /**
      * 查询档案分类
      *
@@ -48,7 +51,14 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
      */
     @Override
     public List<ArchiveCategory> selectArchiveCategoryList(ArchiveCategory archiveCategory) {
-        return archiveCategoryMapper.selectArchiveCategoryList(archiveCategory);
+        List<ArchiveCategory> categoryValue = redisCache.getCacheList("archives:category:value");
+        if(categoryValue!= null &&!categoryValue.isEmpty()){
+            return categoryValue;
+        }else {
+            List<ArchiveCategory> categoryList = archiveCategoryMapper.selectArchiveCategoryList(archiveCategory);
+            redisCache.setCacheList("archives:category:value", categoryList);
+            return categoryList;
+        }
     }
 
     /**
@@ -67,6 +77,7 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
         if (ArchiveConstants.ARCHIVE_TYPE_LIBRARY.equals(archiveCategory.getType())) {
             insertArchiveItemsForCategory(archiveCategory);
         }
+        redisCache.deleteObject("archives:category:value");
 
         return insertcnt;
     }
@@ -93,6 +104,7 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
             // 如果档案类型是"档案节点"，删除档案项目信息
             deleteArchiveItemsForCategory(archiveCategory);
         }
+        redisCache.deleteObject("archives:category:value");
 
         return archiveCategoryMapper.updateArchiveCategory(archiveCategory);
     }
@@ -116,6 +128,7 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
      */
     @Override
     public int deleteArchiveCategoryById(Long id) {
+        redisCache.deleteObject("archives:category:value");
         ArchiveCategory archiveCategory = archiveCategoryMapper.selectArchiveCategoryById(id);
 
         // 如果档案类型不是"档案库"，删除档案项目信息
@@ -139,6 +152,10 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
             });
             archiveItemMapper.insertArchiveItemsBatch(archiveTableColumns);
         }
+        List value =redisCache.getCacheList(String.valueOf(archiveCategory.getId()));
+        if(value!=null&&!value.isEmpty()){
+            redisCache.deleteObject(String.valueOf(archiveCategory.getId()));
+        }
     }
 
     /**
@@ -151,5 +168,7 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
             Long[] itemIds = archiveItems.stream().map(ArchiveItem::getId).toArray(Long[]::new);
             archiveItemMapper.deleteArchiveItemByIds(itemIds);
         }
+        redisCache.deleteObject(String.valueOf(archiveCategory.getId()));
+        redisCache.deleteObject("archives:category:value");
     }
 }

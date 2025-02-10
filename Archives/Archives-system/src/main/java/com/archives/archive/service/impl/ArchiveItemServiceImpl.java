@@ -1,6 +1,8 @@
 package com.archives.archive.service.impl;
 
 import java.util.List;
+
+import com.archives.common.core.redis.RedisCache;
 import com.archives.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ public class ArchiveItemServiceImpl implements IArchiveItemService
 {
     @Autowired
     private ArchiveItemMapper archiveItemMapper;
+    @Autowired
+    private RedisCache redisCache;
 
     /**
      * 查询档案信息模板
@@ -40,7 +44,14 @@ public class ArchiveItemServiceImpl implements IArchiveItemService
      */
     @Override
     public List<ArchiveItem> selectArchiveItemListByCategoryId(Long categoryId) {
-        return archiveItemMapper.selectArchiveItemListByCategoryId(categoryId);
+        List<ArchiveItem> itemValues = redisCache.getCacheList(String.valueOf(categoryId));
+        if(itemValues!=null && !itemValues.isEmpty()){
+            return itemValues;
+        }else {
+            List<ArchiveItem> archiveItemList = archiveItemMapper.selectArchiveItemListByCategoryId(categoryId);
+            redisCache.setCacheList(String.valueOf(categoryId),archiveItemList);
+            return archiveItemList;
+        }
     }
 
     /**
@@ -52,7 +63,14 @@ public class ArchiveItemServiceImpl implements IArchiveItemService
     @Override
     public List<ArchiveItem> selectArchiveItemList(ArchiveItem archiveItem)
     {
-        return archiveItemMapper.selectArchiveItemList(archiveItem);
+        List<ArchiveItem> itemValue = redisCache.getCacheList("archives:item:value");
+        if(itemValue!=null && !itemValue.isEmpty()){
+            return itemValue;
+        }else {
+            List<ArchiveItem> archiveItemList = archiveItemMapper.selectArchiveItemList(archiveItem);
+            redisCache.setCacheList("archives:item:value",archiveItemList);
+            return archiveItemList;
+        }
     }
 
     /**
@@ -64,6 +82,8 @@ public class ArchiveItemServiceImpl implements IArchiveItemService
     @Override
     public int insertArchiveItem(ArchiveItem archiveItem)
     {
+        Long categoryId = archiveItem.getCategoryId();
+        redisCache.deleteObject(String.valueOf(categoryId));
         archiveItem.setCreateTime(DateUtils.getNowDate());
         return archiveItemMapper.insertArchiveItem(archiveItem);
     }
@@ -77,7 +97,8 @@ public class ArchiveItemServiceImpl implements IArchiveItemService
     @Override
     public int updateArchiveItem(List<ArchiveItem> archiveItems)
     {
-
+        long categoryId = archiveItems.get(0).getCategoryId();
+        redisCache.deleteObject(String.valueOf(categoryId));
         //更新画面填写的项目
         for (ArchiveItem archiveItem : archiveItems) {
             // 更新每个archiveItem的逻辑

@@ -81,6 +81,9 @@
           and table_name = 'archive_info'
         order by ordinal_position
     </select>
+    <select id="selectCategoryId">
+        select category_id from archive_item group by category_id
+    </select>
 
     <insert id="insertArchiveItem" parameterType="ArchiveItem" useGeneratedKeys="true" keyProperty="id">
         insert into archive_item

@@ -84,4 +84,6 @@ public interface ArchiveItemMapper
      * @return 结果
      */
     public int deleteArchiveItemByIds(Long[] ids);
+
+    public int[] selectCategoryId();
 }
