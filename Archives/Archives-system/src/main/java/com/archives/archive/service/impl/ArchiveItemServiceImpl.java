@@ -84,7 +84,7 @@ public class ArchiveItemServiceImpl implements IArchiveItemService
     public int insertArchiveItem(ArchiveItem archiveItem)
     {
         Long categoryId = archiveItem.getCategoryId();
-        redisCache.deleteObject(String.valueOf(categoryId));
+        redisCache.deleteObject("hospital:item:"+categoryId);
         archiveItem.setCreateTime(DateUtils.getNowDate());
         return archiveItemMapper.insertArchiveItem(archiveItem);
     }
@@ -99,7 +99,7 @@ public class ArchiveItemServiceImpl implements IArchiveItemService
     public int updateArchiveItem(List<ArchiveItem> archiveItems)
     {
         long categoryId = archiveItems.get(0).getCategoryId();
-        redisCache.deleteObject(String.valueOf(categoryId));
+        redisCache.deleteObject("hospital:item:"+categoryId);
         //更新画面填写的项目
         for (ArchiveItem archiveItem : archiveItems) {
             // 更新每个archiveItem的逻辑

@@ -143,6 +143,7 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
      * 插入档案项目信息
      */
     private void insertArchiveItemsForCategory(ArchiveCategory archiveCategory) {
+        Long categoryId = archiveCategory.getId();
         List<ArchiveItem> archiveTableColumns = archiveItemMapper.selectDbTableColumnsForArchiveInfo();
 
         if (!archiveTableColumns.isEmpty()) {
@@ -152,9 +153,9 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
             });
             archiveItemMapper.insertArchiveItemsBatch(archiveTableColumns);
         }
-        List value =redisCache.getCacheList(String.valueOf(archiveCategory.getId()));
+        List value =redisCache.getCacheList("hospital:item:"+categoryId);
         if(value!=null&&!value.isEmpty()){
-            redisCache.deleteObject(String.valueOf(archiveCategory.getId()));
+            redisCache.deleteObject("hospital:item:"+categoryId);
         }
     }
 
@@ -162,13 +163,14 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
      * 删除档案项目信息
      */
     private void deleteArchiveItemsForCategory(ArchiveCategory archiveCategory) {
+        Long categoryId = archiveCategory.getId();
         List<ArchiveItem> archiveItems = archiveItemMapper.selectArchiveItemListByCategoryId(archiveCategory.getId());
 
         if (archiveItems != null && !archiveItems.isEmpty()) {
             Long[] itemIds = archiveItems.stream().map(ArchiveItem::getId).toArray(Long[]::new);
             archiveItemMapper.deleteArchiveItemByIds(itemIds);
         }
-        redisCache.deleteObject(String.valueOf(archiveCategory.getId()));
+        redisCache.deleteObject("hospital:item:"+categoryId);
         redisCache.deleteObject("hospital:category:value");
     }
 }
