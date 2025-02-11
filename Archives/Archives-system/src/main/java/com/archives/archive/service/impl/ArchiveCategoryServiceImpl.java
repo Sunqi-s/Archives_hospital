@@ -51,12 +51,12 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
      */
     @Override
     public List<ArchiveCategory> selectArchiveCategoryList(ArchiveCategory archiveCategory) {
-        List<ArchiveCategory> categoryValue = redisCache.getCacheList("archives:category:value");
+        List<ArchiveCategory> categoryValue = redisCache.getCacheList("hospital:category:value");
         if(categoryValue!= null &&!categoryValue.isEmpty()){
             return categoryValue;
         }else {
             List<ArchiveCategory> categoryList = archiveCategoryMapper.selectArchiveCategoryList(archiveCategory);
-            redisCache.setCacheList("archives:category:value", categoryList);
+            redisCache.setCacheList("hospital:category:value", categoryList);
             return categoryList;
         }
     }
@@ -77,7 +77,7 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
         if (ArchiveConstants.ARCHIVE_TYPE_LIBRARY.equals(archiveCategory.getType())) {
             insertArchiveItemsForCategory(archiveCategory);
         }
-        redisCache.deleteObject("archives:category:value");
+        redisCache.deleteObject("hospital:category:value");
 
         return insertcnt;
     }
@@ -104,7 +104,7 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
             // 如果档案类型是"档案节点"，删除档案项目信息
             deleteArchiveItemsForCategory(archiveCategory);
         }
-        redisCache.deleteObject("archives:category:value");
+        redisCache.deleteObject("hospital:category:value");
 
         return archiveCategoryMapper.updateArchiveCategory(archiveCategory);
     }
@@ -128,7 +128,7 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
      */
     @Override
     public int deleteArchiveCategoryById(Long id) {
-        redisCache.deleteObject("archives:category:value");
+        redisCache.deleteObject("hospital:category:value");
         ArchiveCategory archiveCategory = archiveCategoryMapper.selectArchiveCategoryById(id);
 
         // 如果档案类型不是"档案库"，删除档案项目信息
@@ -169,6 +169,6 @@ public class ArchiveCategoryServiceImpl implements IArchiveCategoryService {
             archiveItemMapper.deleteArchiveItemByIds(itemIds);
         }
         redisCache.deleteObject(String.valueOf(archiveCategory.getId()));
-        redisCache.deleteObject("archives:category:value");
+        redisCache.deleteObject("hospital:category:value");
     }
 }

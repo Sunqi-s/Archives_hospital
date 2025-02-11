@@ -44,12 +44,12 @@ public class ArchiveItemServiceImpl implements IArchiveItemService
      */
     @Override
     public List<ArchiveItem> selectArchiveItemListByCategoryId(Long categoryId) {
-        List<ArchiveItem> itemValues = redisCache.getCacheList(String.valueOf(categoryId));
+        List<ArchiveItem> itemValues = redisCache.getCacheList("hospital:item:"+categoryId);
         if(itemValues!=null && !itemValues.isEmpty()){
             return itemValues;
         }else {
             List<ArchiveItem> archiveItemList = archiveItemMapper.selectArchiveItemListByCategoryId(categoryId);
-            redisCache.setCacheList(String.valueOf(categoryId),archiveItemList);
+            redisCache.setCacheList("hospital:item:"+categoryId,archiveItemList);
             return archiveItemList;
         }
     }
@@ -63,12 +63,13 @@ public class ArchiveItemServiceImpl implements IArchiveItemService
     @Override
     public List<ArchiveItem> selectArchiveItemList(ArchiveItem archiveItem)
     {
-        List<ArchiveItem> itemValue = redisCache.getCacheList("archives:item:value");
+        Long categoryId = archiveItem.getCategoryId();
+        List<ArchiveItem> itemValue = redisCache.getCacheList("hospital:item:*");
         if(itemValue!=null && !itemValue.isEmpty()){
             return itemValue;
         }else {
             List<ArchiveItem> archiveItemList = archiveItemMapper.selectArchiveItemList(archiveItem);
-            redisCache.setCacheList("archives:item:value",archiveItemList);
+            redisCache.setCacheList("hospital:item:"+categoryId,archiveItemList);
             return archiveItemList;
         }
     }
