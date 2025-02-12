@@ -273,7 +273,7 @@
 
 <script>
 import {listCategory} from "@/api/archive/category";
-import {listItemSuccess} from "@/api/archive/item";
+import {listItemSuccess,getItemByCategoryId} from "@/api/archive/item";
 import * as XLSX from 'xlsx';
 import {bulkAdd} from "@/api/archive/info";
 import DataDisplay from "@/views/archive/info/DataDisplay.vue";
@@ -330,7 +330,7 @@ export default {
       categoryList: [], // 分类列表
       categoryTree: [], // 分类树
       itemList: [], // 项目列表
-      itemQueryParams: { categoryId: 0 }, // 项目查询参数
+      queryCategoryId: 0 , // 项目查询参数
       infoQueryParams: {}, // 信息查配置参数
       columnList: [], // 列表列
 
@@ -515,7 +515,7 @@ export default {
     },
     // 获取项目列表并设置列信息
     getItemList() {
-      listItemSuccess(this.itemQueryParams).then(response => {
+      getItemByCategoryId(this.queryCategoryId).then(response => {
         this.itemList = response.data; // 获取项目列表数据
         this.columnList = [];
         const toCamelCase = (str) => {
@@ -535,7 +535,7 @@ export default {
             });
           }
         });
-        this.$set(this.infoQueryParams, 'categoryId', this.itemQueryParams.categoryId);
+        this.$set(this.infoQueryParams, 'categoryId', this.queryCategoryId);
 
       }).catch(error => {
       });
@@ -548,14 +548,14 @@ export default {
           this.reset();
         }
         this.selectedNodeKey = data.id; // 设置选中的节点Key
-        this.itemQueryParams.categoryId = data.id;// 设置项目查询参数的分类ID
+        this.queryCategoryId = data.id;// 设置项目查询参数的分类ID
         this.getItemList(); // 获取项目列表
         this.categoryName = data.name;
         this.$message.success(`当前分类: ${data.label}`); // 显示当前分类
         this.active = 1; // 设置步骤条的活动步骤
       }else {
         this.selectedNodeKey = null; // 设置选中的节点Key
-        this.itemQueryParams.categoryId = 0;// 设置项目查询参数的分类ID
+        this.queryCategoryId = 0;// 设置项目查询参数的分类ID
         this.active = 0; // 设置步骤条的活动步骤
         this.categoryName = 0;
         this.reset();
@@ -604,7 +604,7 @@ export default {
         }
       });
       this.tableData = rows.map(row => {
-        const rowData = { validationErrors: [], categoryId: this.itemQueryParams.categoryId };
+        const rowData = { validationErrors: [], categoryId: this.queryCategoryId };
         yesList.forEach((yes) => {
           const idx = headers.indexOf(yes.label);
           rowData[yes.prop] = row[idx];

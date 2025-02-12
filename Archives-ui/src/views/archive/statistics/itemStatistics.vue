@@ -59,7 +59,7 @@ import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import categoryTree from '@/views/archive/category/categoryTree.vue';
 import { getCategory, listCategory } from '@/api/archive/category';
-import {listItem} from '@/api/archive/item';
+import {listItem,getItemByCategoryId} from '@/api/archive/item';
 import * as XLSX from 'xlsx';
 import YearPicker from './yearPicker.vue';
 import {getStatisticsByCondition} from '@/api/archive/statistics';
@@ -97,11 +97,6 @@ export default {
             Select: null,
             archiveItem: null,
             selection: [],
-            queryParams: {
-                categoryId: null,
-                pageNum: 1,
-                pageSize: 10
-            },
             total: 0,
             pageNum: 1,
             pageSize: 10,
@@ -156,21 +151,14 @@ export default {
         },
         clear(){
             this.categoryId = null;
-            this.queryParams = {
-                pageNum: 1,
-                pageSize: 10,
-                categoryId: null
-            }
             this.tableData = [];
             this.archiveItem = null;
             this.value = '';
         },
         getItem(){
-            this.queryParams.pageSize = 5000;
-            this.queryParams.categoryId = this.categoryId;
             let resp = [];
-            listItem(this.queryParams).then(response => {
-                resp = response.rows;
+            getItemByCategoryId(this.categoryId).then(response => {
+                resp = response.data;
                 this.selection = resp.filter(item => !item.itemName.includes('备用') && !item.itemName.includes('ID') ).map(item => ({
                     name: item.columnName,
                     label: item.itemName
