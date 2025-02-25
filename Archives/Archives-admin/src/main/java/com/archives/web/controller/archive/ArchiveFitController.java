@@ -37,7 +37,7 @@ public class ArchiveFitController extends BaseController
     /**
      * 查询保存对于文书的年度或科技的类型的列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:fit:list')")
+//    @PreAuthorize("@ss.hasPermi('archive:fit:list')")
     @GetMapping("/list")
     public TableDataInfo list(ArchiveFit archiveFit)
     {
@@ -49,7 +49,7 @@ public class ArchiveFitController extends BaseController
     /**
      * 导出保存对于文书的年度或科技的类型的列表
      */
-    @PreAuthorize("@ss.hasPermi('archive:fit:export')")
+//    @PreAuthorize("@ss.hasPermi('archive:fit:export')")
     @Log(title = "保存对于文书的年度或科技的类型的", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, ArchiveFit archiveFit)
@@ -62,7 +62,7 @@ public class ArchiveFitController extends BaseController
     /**
      * 获取保存对于文书的年度或科技的类型的详细信息
      */
-    @PreAuthorize("@ss.hasPermi('archive:fit:query')")
+//    @PreAuthorize("@ss.hasPermi('archive:fit:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
@@ -72,7 +72,7 @@ public class ArchiveFitController extends BaseController
     /**
      * 新增保存对于文书的年度或科技的类型的
      */
-    @PreAuthorize("@ss.hasPermi('archive:fit:add')")
+//    @PreAuthorize("@ss.hasPermi('archive:fit:add')")
     @Log(title = "保存对于文书的年度或科技的类型的", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody ArchiveFit archiveFit)
@@ -83,7 +83,7 @@ public class ArchiveFitController extends BaseController
     /**
      * 修改保存对于文书的年度或科技的类型的
      */
-    @PreAuthorize("@ss.hasPermi('archive:fit:edit')")
+//    @PreAuthorize("@ss.hasPermi('archive:fit:edit')")
     @Log(title = "保存对于文书的年度或科技的类型的", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody ArchiveFit archiveFit)
@@ -94,7 +94,7 @@ public class ArchiveFitController extends BaseController
     /**
      * 删除保存对于文书的年度或科技的类型的
      */
-    @PreAuthorize("@ss.hasPermi('archive:fit:remove')")
+//    @PreAuthorize("@ss.hasPermi('archive:fit:remove')")
     @Log(title = "保存对于文书的年度或科技的类型的", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
