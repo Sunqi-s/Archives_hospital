@@ -740,7 +740,7 @@ export default {
             ExportQueryParams.pageSize = 10000000;
             listInfo(ExportQueryParams).then(res => {
               listids = res.rows.map(item => item.id)
-              ids = listids.join(',');
+              ids = listids;
               print(response.name, ids)
             }
             )

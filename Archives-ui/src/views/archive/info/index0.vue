@@ -1280,10 +1280,8 @@ export default {
             console.log(ExportQueryParams);
             
             listInfo(ExportQueryParams).then(res => {
-              console.log(res);
-              
               listids = res.rows.map(item => item.id)
-              ids = listids.join(',');
+              ids = listids;
               print(response.name, ids)
             }
             )

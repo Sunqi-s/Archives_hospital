@@ -894,14 +894,8 @@ export default {
             console.log(ExportQueryParams);
 
             listInfo(ExportQueryParams).then(res => {
-              console.log(res);
-
               listids = res.rows.map(item => item.id)
-              console.log(listids);
-
               ids = listids;
-              console.log(ids);
-
               print(response.name, ids)
             }
             )
