@@ -55,7 +55,7 @@ public class ArchiveFitServiceImpl implements IArchiveFitService
                             return Integer.MAX_VALUE;
                         })
                 )).collect(Collectors.toList());
-        System.out.println("list = " + result);
+//        System.out.println("list = " + result);
         return result;
     }
 

@@ -42,7 +42,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="placeonfileLog.placeonfileBy != null  and placeonfileLog.placeonfileBy != ''"> and placeonfile_by like concat('%',#{placeonfileLog.placeonfileBy},'%')</if>
             <if test="placeonfileLog.formatCreateTime != null and placeonfileLog.formatCreateTime != '' "> and DATE(create_time) = DATE(#{placeonfileLog.formatCreateTime})</if>
             <if test="placeonfileLog.updateTime != null "> and update_time = #{placeonfileLog.updateTime}</if>
-            <if test="placeonfileLog.cayegoryId != null  and placeonfileLog.categoryId != ''"> and category_id = #{placeonfileLog.categoryId}</if>
+            <if test="placeonfileLog.categoryId != null  and placeonfileLog.categoryId != ''"> and category_id = #{placeonfileLog.categoryId}</if>
             <include refid="selectSearchListBydataPermiList"/>
         </where>
         group by odd_numbers,placeonfile_by, create_time
