@@ -41,7 +41,7 @@ export default {
       importCount: [],
       imporDatacount: [],
       mainChart:0,
-      typeList:['接收次数','接收','归档'],
+      typeList:['接收','接收次数','归档','开放鉴定','销毁鉴定'],
       monthList:['一月', '二月', '三月', '四月', '五月', '六月', '七月','八月','九月','十月','十一月','十二月'],
       tableData: [],
       archivelogCount: [],
@@ -104,35 +104,20 @@ export default {
           boundaryGap: false,
           data: this.monthList,
         },
-        yAxis: [
-          {
-            type: 'value',
-            name: '接收次数',
-            position: 'left',
-            min: 0,
-            max: 70000,
-          },
-          {
-            type: 'value',
-            name: '接收',
-            position: 'right',
-            min: 0,
-            max: 100000,
-          },
-        ],
+        yAxis: {
+          type: 'value'
+        },
         series: [
           {
             name: '接收',
             type: 'line',
             stack: 'Total',
-            yAxisIndex: 0, // 使用右边的Y轴
             data: this.imporDatacount
           },
           {
             name: '接收次数',
             type: 'line',
             stack: 'Total',
-            yAxisIndex: 1, // 使用左边的Y轴
             data: this.importCount
           },
           {
@@ -141,18 +126,18 @@ export default {
             stack: 'Total',
             data: this.archivelogCount
           },
-          // {
-          //   name: '开放鉴定',
-          //   type: 'line',
-          //   stack: 'Total',
-          //   data: []
-          // },
-          // {
-          //   name: '销毁鉴定',
-          //   type: 'line',
-          //   stack: 'Total',
-          //   data: []
-          // }
+          {
+            name: '开放鉴定',
+            type: 'line',
+            stack: 'Total',
+            data: []
+          },
+          {
+            name: '销毁鉴定',
+            type: 'line',
+            stack: 'Total',
+            data: []
+          }
         ]
       };
       this.mainChart.setOption(option);
