@@ -398,6 +398,7 @@ export default {
       unUploadList: [],//上传失败文件信息
       folderscountList:new Map(),
       exportBut: false,
+      exportCategory:[32,35,36,65,66],
     };
   },
   computed: {
