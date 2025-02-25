@@ -300,7 +300,7 @@
           pageNum: 1,
           pageSize: 10,
           categoryId: null,
-          archiveStatus: 0, //默认显示待归档数据
+          archiveStatus: 1, //默认显示待归档数据
           searchValue: ''
         },//搜索框内容
         showPasswordPrompt: false,//是否显示密码输入框
@@ -516,7 +516,7 @@
           this.isClick = false;
           this.queryParams = {
             categoryId: this.categoryId,
-            archiveStatus: 2,
+            archiveStatus: 1,
             searchValue: this.saveSearch.searchValue,
             pageNum: 1,
             pageSize: this.queryParams.pageSize
@@ -525,7 +525,7 @@
             searchValue: this.saveSearch.searchValue,
             pageNum: 1,
             pageSize: 10,
-            archiveStatus: 2,
+            archiveStatus: 1,
             categoryId: this.categoryId
           }
           this.getList();
@@ -536,7 +536,7 @@
           this.isClick = false;
           this.queryParams.categoryId = this.categoryId;
           this.queryParams.pageNum = this.queryParams.pageNum;
-          this.queryParams.archiveStatus = 2;
+          this.queryParams.archiveStatus = 1;
           this.queryFields.forEach(field => {
             this.$set(this.queryParams, field.name, this.saveSearch[field.name]);
           });
@@ -561,7 +561,7 @@
             categoryId: this.categoryId,
             pageNum: 1,
             pageSize: 10,
-            archiveStatus: 2,
+            archiveStatus: 1,
             searchValue: ''
           };
           this.saveSearch = this.queryParams;
@@ -578,7 +578,7 @@
           ...this.queryParams, // 保留现有的查询参数
           pageNum: this.queryParams.pageNum, // 当前页码
           pageSize: this.queryParams.pageSize, // 每页显示条数
-          archiveStatus: 2 // 归档状态
+          archiveStatus: 1 // 归档状态
         };
         listInfo(params).then(response => {
           if (this.queryParams.searchValue) {
@@ -738,7 +738,7 @@
                 categoryId: this.categoryId,
                 ...this.queryParams
               }
-              ExportQueryParams.archiveStatus = 2;
+              ExportQueryParams.archiveStatus = 1;
               ExportQueryParams.pageNum = 1;
               ExportQueryParams.pageSize = 10000000;
               listInfo(ExportQueryParams).then(res => {
@@ -811,7 +811,7 @@
             const pageTotal = Math.ceil(this.total / 3000);
             const ExportQueryParams = {
               categoryId: this.categoryId,
-              archiveStatus: 2,
+              archiveStatus: 1,
               ...this.queryParams
             };
             ExportQueryParams.pageNum = 1;
@@ -829,7 +829,7 @@
                   return;
                 }
                 ExportQueryParams.pageNum = pageNum;
-                ExportQueryParams.archiveStatus = 2;
+                ExportQueryParams.archiveStatus = 1;
                 const res = await listInfo(ExportQueryParams);
                 const ids = res.rows ? res.rows.map(item => item.id) : [];
                 const batchSize = 400;
@@ -896,7 +896,7 @@
           pageNum: 1,
           pageSize: 10,
           categoryId: null,
-          archiveStatus: 2, //默认显示待归档数据
+          archiveStatus: 1, //默认显示已归档数据
           searchValue: ''
         }
         this.passwordInput = '';

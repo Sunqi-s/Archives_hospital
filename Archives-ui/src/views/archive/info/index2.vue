@@ -260,7 +260,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
-        archiveStatus: 1, //默认显示已归档数据
+        archiveStatus: 2, //默认显示已归档数据
         searchValue: ''
       },
       ids: [],
@@ -297,7 +297,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
-        archiveStatus: 0, //默认显示待归档数据
+        archiveStatus: 2, //默认显示待归档数据
         searchValue: ''
       },//搜索框内容
       showPasswordPrompt: false,//是否显示密码输入框
@@ -894,7 +894,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
-        archiveStatus: 2, //默认显示待归档数据
+        archiveStatus: 2, //默认显示利用数据
         searchValue: ''
       }
       this.passwordInput = '';
