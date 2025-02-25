@@ -733,9 +733,9 @@ export default {
             let listids = []
             let ExportQueryParams = {
               categoryId: this.categoryId,
-              archiveStatus: 2,
               ...this.queryParams
             }
+            ExportQueryParams.archiveStatus = 2;
             ExportQueryParams.pageNum = 1;
             ExportQueryParams.pageSize = 10000000;
             listInfo(ExportQueryParams).then(res => {
@@ -749,13 +749,32 @@ export default {
           this.$message.error("未找到打印模板");
         }
       })
-      const print = (name, ids) => {
-        const tpl_name = name;
-        const pageIndex = 1;     // 页码
-        const renderOption = 1;  // 渲染选项
-        const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
-        window.open(url, '_blank');
-      }
+      const print = async (name, ids) => {
+        // 定义一个打开URL的函数
+        const openUrl = (name, ids, pageIndex) => {
+          const tpl_name = name;
+          const renderOption = 1;  // 渲染选项
+          const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
+          window.open(url, '_blank'); // 在新标签页中打开URL
+        };
+        // 如果ids的长度超过500，则分页处理
+        if (ids.length >= 500) {
+          for (let i = 0; i < ids.length; i += 500) {
+            const chunk = ids.slice(i, i + 500).join(','); // 每次取500个id
+            openUrl(name, chunk, 1); // 打开当前分页的URL
+            // 如果不是最后一次分块，才提示用户是否继续
+            if (i + 500 < ids.length) {
+              const shouldContinue = await this.$modal.confirm('是否继续打印？');
+              if (!shouldContinue) {
+                break; // 如果用户选择不继续，则退出循环
+              }
+            }
+          }
+        } else {
+          // 如果ids长度小于500，直接打开URL
+          openUrl(name, ids, 1);
+        }
+      };
     },
     handleNextPage() {
       // this.savedids = this.savedids.concat(this.ids);

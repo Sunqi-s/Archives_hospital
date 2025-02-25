@@ -59,7 +59,8 @@
           </el-form>
 
           <div class="form-button-wrapper">
-            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach" :disabled="!isClick">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach"
+              :disabled="!isClick">搜索</el-button>
             <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
           </div>
 
@@ -885,14 +886,22 @@ export default {
             let listids = []
             let ExportQueryParams = {
               categoryId: this.categoryId,
-              archiveStatus: 1,
               ...this.queryParams
             }
+            ExportQueryParams.archiveStatus = 1;
             ExportQueryParams.pageNum = 1;
             ExportQueryParams.pageSize = 10000000;
+            console.log(ExportQueryParams);
+
             listInfo(ExportQueryParams).then(res => {
+              console.log(res);
+
               listids = res.rows.map(item => item.id)
-              ids = listids.join(',');
+              console.log(listids);
+
+              ids = listids;
+              console.log(ids);
+
               print(response.name, ids)
             }
             )
@@ -901,141 +910,160 @@ export default {
           this.$message.error("未找到打印模板");
         }
       })
-      const print = (name, ids) => {
-        const tpl_name = name;
-        const pageIndex = 1;     // 页码
-        const renderOption = 1;  // 渲染选项
-        const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
-        window.open(url, '_blank');
-      }
-    },
-    handleNextPage() {
-      // this.savedids = this.savedids.concat(this.ids);
-      this.getList();
-    },
-    handleSendUtilize() {
-      if (this.ids.length >= 1) {
-        const ids = this.ids;
-        this.$modal.confirm('确认发送利用选中数据？').then(() => {
-          this.$modal.loading("正在处理中");
-          return sendInfo(ids)
-        }).then(() => {
-          const id = Date.now().toString();
-          const logInfo = {
-            categoryId: this.categoryId,
-            placeonfileInfo: ids.length,
-            infoId: ids.join(','),
-            type: 'liyong',
-            oddNumbers: id,
-            createTime: this.getDataTime(new Date())
-          }
-          addPlaceonlog(logInfo)
-          this.$modal.closeLoading();
-          this.getList();
-          this.$modal.msgSuccess("发送成功");
-        }).catch(() => {
-        });
-      } else {
-        this.$modal.confirm('确认发送利用全部' + this.total + '条数据？').then(async () => {
-          this.$modal.loading("正在处理中");
-          const pageTotal = Math.ceil(this.total / 3000);
-          const ExportQueryParams = {
-            categoryId: this.categoryId,
-            archiveStatus: 1,
-            ...this.queryParams
-          };
-          ExportQueryParams.pageNum = 1;
-          ExportQueryParams.pageSize = 3000;
-          const createTime = this.getDataTime(new Date());
-          const id = Date.now().toString();
-          // 定义递归函数
-          const sendPageData = async (pageNum, pageTotal, concurrency = 5) => {
-            try {
-              if (pageNum > pageTotal) {
-                // 达到页数上限，递归结束
-                this.$modal.closeLoading();
-                this.getList();
-                this.$modal.msgSuccess("发送成功");
-                return;
-              }
-              ExportQueryParams.pageNum = pageNum;
-              ExportQueryParams.archiveStatus = 1;
-              const res = await listInfo(ExportQueryParams);
-              const ids = res.rows ? res.rows.map(item => item.id) : [];
-              const batchSize = 400;
-              const batchCount = Math.ceil(ids.length / batchSize);
-              const tasks = [];
-              const batchList = [];
-              for (let i = 0; i < batchCount; i++) {
-                const start = i * batchSize;
-                const end = Math.min(start + batchSize, ids.length);
-                const list = ids.slice(start, end);
-                batchList.push(list);
-              }
-              const taskcount = Math.floor(batchList.length / concurrency)
-              const last = batchList.length % concurrency
-              for (let index = 0; index < taskcount; index++) {
-                for (let i = 0; i < concurrency; i++) {
-                  const list = batchList[i + index * concurrency];
-                  tasks.push(sendInfo(list).then(() => list.length));
+      const print = async (name, ids) => {
+        // 定义一个打开URL的函数
+        const openUrl = (name, ids, pageIndex) => {
+          const tpl_name = name;
+          const renderOption = 1;  // 渲染选项
+          const url = `/ureport/preview?_u=mysql:${tpl_name}&_i=${pageIndex}&_r=${renderOption}&ids=${ids}`;
+          window.open(url, '_blank'); // 在新标签页中打开URL
+        };
+        // 如果ids的长度超过500，则分页处理
+          if (ids.length >= 500) {
+            for (let i = 0; i < ids.length; i += 500) {
+              const chunk = ids.slice(i, i + 500).join(','); // 每次取500个id
+              openUrl(name, chunk, 1); // 打开当前分页的URL
+              // 如果不是最后一次分块，才提示用户是否继续
+              if (i + 500 < ids.length) {
+                const shouldContinue = await this.$modal.confirm('是否继续打印？');
+                if (!shouldContinue) {
+                  break; // 如果用户选择不继续，则退出循环
                 }
-                await Promise.all(tasks);
               }
-              if (last !== 0) {
-                for (let i = 0; i < last; i++) {
-                  const list = batchList[i + taskcount * concurrency];
-                  tasks.push(sendInfo(list).then(() => list.length));
-                }
-                await Promise.all(tasks);
-              }
-              const logInfo = {
-                categoryId: this.categoryId,
-                placeonfileInfo: ids.length,
-                infoId: ids.join(','),
-                type: 'liyong',
-                oddNumbers: id,
-                createTime: createTime
-              }
-              addPlaceonlog(logInfo)
-              // 递归调用，处理下一页
-              await sendPageData(pageNum + 1, pageTotal, concurrency);
-            } catch (error) {
-              this.$modal.closeLoading();
-              this.$modal.msgError("发送失败：" + error.message);
-              console.error("发送失败：", error);
             }
-          };
-          // 调用递归函数，从第1页开始
-          await sendPageData(1, pageTotal);
-        })
-      }
-    },
-    getDataTime(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const seconds = String(date.getSeconds()).padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    },
-    clearSearch() {
-      this.categoryId = null;
-      this.queryParams = {
-        pageNum: 1,
-        pageSize: 10,
-        categoryId: null,
-        archiveStatus: 1, //默认显示待归档数据
-        searchValue: ''
-      }
-      this.passwordInput = '';
-      this.saveSearch = this.queryParams;
-      this.queryFields.forEach(field => {
-        this.$set(this.queryParams, field.name, '');
-      });
-    },
-  }
-};
+          } else {
+            // 如果ids长度小于500，直接打开URL
+            openUrl(name, ids, 1);
+          }
+        };
+      },
+        handleNextPage() {
+          // this.savedids = this.savedids.concat(this.ids);
+          this.getList();
+        },
+          handleSendUtilize() {
+        if (this.ids.length >= 1) {
+          const ids = this.ids;
+          this.$modal.confirm('确认发送利用选中数据？').then(() => {
+            this.$modal.loading("正在处理中");
+            return sendInfo(ids)
+          }).then(() => {
+            const id = Date.now().toString();
+            const logInfo = {
+              categoryId: this.categoryId,
+              placeonfileInfo: ids.length,
+              infoId: ids.join(','),
+              type: 'liyong',
+              oddNumbers: id,
+              createTime: this.getDataTime(new Date())
+            }
+            addPlaceonlog(logInfo)
+            this.$modal.closeLoading();
+            this.getList();
+            this.$modal.msgSuccess("发送成功");
+          }).catch(() => {
+          });
+        } else {
+          this.$modal.confirm('确认发送利用全部' + this.total + '条数据？').then(async () => {
+            this.$modal.loading("正在处理中");
+            const pageTotal = Math.ceil(this.total / 3000);
+            const ExportQueryParams = {
+              categoryId: this.categoryId,
+              archiveStatus: 1,
+              ...this.queryParams
+            };
+            ExportQueryParams.pageNum = 1;
+            ExportQueryParams.pageSize = 3000;
+            const createTime = this.getDataTime(new Date());
+            const id = Date.now().toString();
+            // 定义递归函数
+            const sendPageData = async (pageNum, pageTotal, concurrency = 5) => {
+              try {
+                if (pageNum > pageTotal) {
+                  // 达到页数上限，递归结束
+                  this.$modal.closeLoading();
+                  this.getList();
+                  this.$modal.msgSuccess("发送成功");
+                  return;
+                }
+                ExportQueryParams.pageNum = pageNum;
+                ExportQueryParams.archiveStatus = 1;
+                const res = await listInfo(ExportQueryParams);
+                const ids = res.rows ? res.rows.map(item => item.id) : [];
+                const batchSize = 400;
+                const batchCount = Math.ceil(ids.length / batchSize);
+                const tasks = [];
+                const batchList = [];
+                for (let i = 0; i < batchCount; i++) {
+                  const start = i * batchSize;
+                  const end = Math.min(start + batchSize, ids.length);
+                  const list = ids.slice(start, end);
+                  batchList.push(list);
+                }
+                const taskcount = Math.floor(batchList.length / concurrency)
+                const last = batchList.length % concurrency
+                for (let index = 0; index < taskcount; index++) {
+                  for (let i = 0; i < concurrency; i++) {
+                    const list = batchList[i + index * concurrency];
+                    tasks.push(sendInfo(list).then(() => list.length));
+                  }
+                  await Promise.all(tasks);
+                }
+                if (last !== 0) {
+                  for (let i = 0; i < last; i++) {
+                    const list = batchList[i + taskcount * concurrency];
+                    tasks.push(sendInfo(list).then(() => list.length));
+                  }
+                  await Promise.all(tasks);
+                }
+                const logInfo = {
+                  categoryId: this.categoryId,
+                  placeonfileInfo: ids.length,
+                  infoId: ids.join(','),
+                  type: 'liyong',
+                  oddNumbers: id,
+                  createTime: createTime
+                }
+                addPlaceonlog(logInfo)
+                // 递归调用，处理下一页
+                await sendPageData(pageNum + 1, pageTotal, concurrency);
+              } catch (error) {
+                this.$modal.closeLoading();
+                this.$modal.msgError("发送失败：" + error.message);
+                console.error("发送失败：", error);
+              }
+            };
+            // 调用递归函数，从第1页开始
+            await sendPageData(1, pageTotal);
+          })
+        }
+      },
+      getDataTime(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      },
+      clearSearch() {
+        this.categoryId = null;
+        this.queryParams = {
+          pageNum: 1,
+          pageSize: 10,
+          categoryId: null,
+          archiveStatus: 1, //默认显示待归档数据
+          searchValue: ''
+        }
+        this.passwordInput = '';
+        this.saveSearch = this.queryParams;
+        this.queryFields.forEach(field => {
+          this.$set(this.queryParams, field.name, '');
+        });
+      },
+    }
+  };
 </script>
 <style scoped>
 /* 未选择分类，水平垂直居中对齐内容 */
