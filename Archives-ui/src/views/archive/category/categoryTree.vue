@@ -1,14 +1,14 @@
 <template>
   <div class="file-style">
     <!-- 搜索输入框 -->
-    <el-input
+    <!-- <el-input
       v-model="searchText"
       placeholder="请输入搜索内容"
       clearable
       size="small"
       prefix-icon="el-icon-search"
       @input="debounceFilterTree"
-    ></el-input>
+    ></el-input> -->
     <!-- 树形结构 -->
     <el-tree
       v-if="fileOptions"
