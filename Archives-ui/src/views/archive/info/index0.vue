@@ -1265,7 +1265,7 @@ export default {
           let ids = ''
           if (this.selectedItems.length > 0) {
             this.savedids = this.ids;
-            ids = this.savedids.join(',');
+            ids = this.savedids;
             print(response.name, ids)
           }
           else {
@@ -1313,6 +1313,7 @@ export default {
           }
         } else {
           // 如果ids长度小于500，直接打开URL
+          ids = ids.join(',');
           openUrl(name, ids, 1);
         }
       };
