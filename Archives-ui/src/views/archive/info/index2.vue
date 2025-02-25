@@ -260,7 +260,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
-        archiveStatus: 1, //默认显示已归档数据
+        archiveStatus: 2, //默认显示已归档数据
         searchValue: ''
       },
       ids: [],
@@ -297,7 +297,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
-        archiveStatus: 0, //默认显示待归档数据
+        archiveStatus: 2, //默认显示待归档数据
         searchValue: ''
       },//搜索框内容
       showPasswordPrompt: false,//是否显示密码输入框
@@ -726,7 +726,7 @@ export default {
           let ids = ''
           if (this.selectedItems.length > 0) {
             this.savedids = this.ids;
-            ids = this.savedids.join(',');
+            ids = this.savedids;
             print(response.name, ids)
           }
           else {
@@ -764,7 +764,7 @@ export default {
             openUrl(name, chunk, 1); // 打开当前分页的URL
             // 如果不是最后一次分块，才提示用户是否继续
             if (i + 500 < ids.length) {
-              const shouldContinue = await this.$modal.confirm('是否继续打印？');
+              const shouldContinue = await this.$modal.confirm('已打印到模板500条，是否继续打印？');
               if (!shouldContinue) {
                 break; // 如果用户选择不继续，则退出循环
               }
@@ -772,6 +772,7 @@ export default {
           }
         } else {
           // 如果ids长度小于500，直接打开URL
+          ids = ids.join(',');
           openUrl(name, ids, 1);
         }
       };
@@ -893,7 +894,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         categoryId: null,
-        archiveStatus: 2, //默认显示待归档数据
+        archiveStatus: 2, //默认显示利用数据
         searchValue: ''
       }
       this.passwordInput = '';
