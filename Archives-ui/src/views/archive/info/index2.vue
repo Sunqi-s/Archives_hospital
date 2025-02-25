@@ -764,7 +764,7 @@ export default {
             openUrl(name, chunk, 1); // 打开当前分页的URL
             // 如果不是最后一次分块，才提示用户是否继续
             if (i + 500 < ids.length) {
-              const shouldContinue = await this.$modal.confirm('是否继续打印？');
+              const shouldContinue = await this.$modal.confirm('已打印到模板500条，是否继续打印？');
               if (!shouldContinue) {
                 break; // 如果用户选择不继续，则退出循环
               }
