@@ -5,6 +5,8 @@
         <el-date-picker v-model="value" type="year" placeholder="选择年">
         </el-date-picker>
       </el-col>
+      <el-col :span="1">
+      </el-col>
       <el-col :span="1.5">
         <el-button type="primary" @click="getData()">查询</el-button>
       </el-col>
