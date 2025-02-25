@@ -14,10 +14,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="dataPermit"    column="data_permit"    />
         <result property="type"    column="type"    />
         <result property="oddNumbers"    column="odd_numbers"    />
+        <result property="categoryId"    column="category_id"    />
     </resultMap>
 
     <sql id="selectPlaceonfileLogVo">
-        select placeonfile_id, placeonfile_info, info_id, placeonfile_by, create_time, update_time, data_permit, type, odd_numbers from placeonfile_log
+        select placeonfile_id, placeonfile_info, info_id, placeonfile_by, create_time, update_time, data_permit, type, odd_numbers, category_id from placeonfile_log
     </sql>
 
     <sql id="selectSearchListBydataPermiList">
@@ -41,6 +42,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="placeonfileLog.placeonfileBy != null  and placeonfileLog.placeonfileBy != ''"> and placeonfile_by like concat('%',#{placeonfileLog.placeonfileBy},'%')</if>
             <if test="placeonfileLog.formatCreateTime != null and placeonfileLog.formatCreateTime != '' "> and DATE(create_time) = DATE(#{placeonfileLog.formatCreateTime})</if>
             <if test="placeonfileLog.updateTime != null "> and update_time = #{placeonfileLog.updateTime}</if>
+            <if test="placeonfileLog.cayegoryId != null  and placeonfileLog.categoryId != ''"> and category_id = #{placeonfileLog.categoryId}</if>
             <include refid="selectSearchListBydataPermiList"/>
         </where>
         group by odd_numbers,placeonfile_by, create_time
@@ -70,6 +72,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="dataPermit != null">data_permit,</if>
             <if test="type != null">type,</if>
             <if test="oddNumbers != null">odd_numbers,</if>
+            <if test="categoryId != null and categoryId != ''">category_id,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="placeonfileInfo != null">#{placeonfileInfo},</if>
@@ -80,6 +83,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="dataPermit != null">#{dataPermit},</if>
             <if test="type != null">#{type},</if>
             <if test="oddNumbers != null">#{oddNumbers},</if>
+            <if test="categoryId != null and categoryId != ''">#{categoryId},</if>
          </trim>
     </insert>
 
@@ -94,6 +98,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="dataPermit != null">data_permit = #{dataPermit},</if>
             <if test="type != null">type = #{type},</if>
             <if test="oddNumbers != null">odd_numbers = #{oddNumbers},</if>
+            <if test="categoryId != null and categoryId != ''">category_id = #{categoryId},</if>
         </trim>
         where placeonfile_id = #{placeonfileId}
     </update>

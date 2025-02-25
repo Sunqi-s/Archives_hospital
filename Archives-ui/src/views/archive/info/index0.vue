@@ -1135,6 +1135,7 @@ export default {
         }).then(() => {
           const id = Date.now().toString();
           const logInfo = {
+            categoryId:this.categoryId,
             placeonfileInfo: ids.length,
             infoId: ids.join(','),
             type: 'guidang',
@@ -1201,6 +1202,7 @@ export default {
                 await Promise.all(tasks);
               }
               const logInfo = {
+                categoryId: this.categoryId,
                 placeonfileInfo: ids.length,
                 infoId: ids.join(','),
                 type: 'guidang',

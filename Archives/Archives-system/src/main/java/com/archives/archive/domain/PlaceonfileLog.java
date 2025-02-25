@@ -54,6 +54,16 @@ public class PlaceonfileLog extends BaseEntity {
 
     private String formatCreateTime;
 
+    private int categoryId;
+
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
+
     public void setPlaceonfileId(Long placeonfileId) {
         this.placeonfileId = placeonfileId;
     }
@@ -131,6 +141,7 @@ public class PlaceonfileLog extends BaseEntity {
                 .append("type", getType())
                 .append("oddNumbers", getOddNumbers())
                 .append("formatCreateTime", getFormatCreateTime())
+                .append("categoryId", getCategoryId())
                 .toString();
     }
 }
