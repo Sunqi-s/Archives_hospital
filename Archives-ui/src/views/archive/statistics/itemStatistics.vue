@@ -178,8 +178,8 @@ export default {
                 this.loading = false;
                 return;
             }
-            if(!this.value || this.value.length != 2){
-                this.$message.error('请选择有效时间范围');
+            if(!this.value || this.value.length != 2&& this.value.length != 0){
+                this.$message.error('请选择有效时间范围或不选择');
                 this.loading = false;
                 return;
             }

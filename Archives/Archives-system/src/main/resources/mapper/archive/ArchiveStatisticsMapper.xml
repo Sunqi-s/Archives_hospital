@@ -103,17 +103,25 @@
 
     <select id="getCategoryCountStatistics" resultType="com.archives.archive.domain.Statistics">
         SELECT
-        GROUP_CONCAT(CASE WHEN ai.oss_status = 1 THEN ai.id END) AS `condition`,
         COUNT(*) AS archiveCount,
         ac.name AS category
         FROM archive_info ai
         JOIN archive_category ac ON ai.category_id = ac.id
-        WHERE ai.field1 BETWEEN #{startData} AND #{endData}
-        AND ai.category_id in
+        WHERE <if test="startData != null and endData != null and startData != '' and endData != ''">ai.field1 BETWEEN #{startData} AND #{endData} AND</if>
+         ai.category_id in
         <foreach collection="categoryIds" item="item" open="(" separator="," close=")">
             #{item}
         </foreach>
+        <include refid="selectSearchListBydataPermiList"/>
         GROUP BY ac.name
+    </select>
+    <select id="getCategoryIdStatistics" resultType="string">
+        SELECT id from archive_info
+            where
+                oss_status = 1
+        <if test="startData != null and endData != null and startData != '' and endData != ''">AND field1 BETWEEN #{startData} AND #{endData} </if>
+        AND category_id = #{categoryId}
+        <include refid="selectSearchListBydataPermiList"/>
     </select>
 
     <select id="getPageColumn" resultType="com.archives.archive.domain.Statistics">
@@ -124,8 +132,6 @@
 
     <select id="getFileCountByCondition" resultType="com.archives.archive.domain.Statistics">
         SELECT
-        GROUP_CONCAT(CASE WHEN ai.oss_status = 1 THEN ai.id END) AS `condition`,
-        ai.category_id AS categoryId,
         <choose>
             <when test="condition != null">
                 ai.${condition} AS category
@@ -136,17 +142,22 @@
         </choose>,
         COUNT(ai.id) AS archiveCount  <!-- 直接统计 archive_info 表的记录数 -->
         FROM archive_info ai
-        WHERE ai.field1 BETWEEN #{startData} AND #{endData}
-        <if test="dataCountList != null">
-            AND ai.category_id IN
-            <foreach collection="dataCountList" item="dataCount" open="(" separator="," close=")">
-                #{dataCount}
-            </foreach>
+        WHERE <if test="startData != null and endData != null and startData != '' and endData != ''"> ai.field1 BETWEEN #{startData} AND #{endData} AND</if>
+        <if test="dataCount != null">
+             ai.category_id = #{dataCount}
         </if>
         <include refid="selectSearchListBydataPermiList"/>
-        GROUP BY ai.category_id, ai.${condition}
+        GROUP BY ai.${condition}
     </select>
-
+    <select id="getFileIdByCondition" resultType="string">
+        SELECT id from archive_info
+        where
+        oss_status = 1
+        <if test="startData != null and endData != null and startData != '' and endData != ''">AND field1 BETWEEN #{startData} AND #{endData} </if>
+        AND category_id = #{categoryId}
+        and ${condition} = #{value}
+        <include refid="selectSearchListBydataPermiList"/>
+    </select>
     <select id="getArchiveLog" resultType="com.archives.archive.domain.Statistics">
         select
         MONTH(create_time) as startData,

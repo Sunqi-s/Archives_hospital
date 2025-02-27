@@ -71,17 +71,18 @@ public class ArchiveStatisticsServiceImpl implements ArchiveStatisticsService {
         String startData = statistics.getStartData();
         String endData = statistics.getEndData();
         String condition = statistics.getCondition();
-        List<Integer> dataCountList = statistics.getDataCountList();
-        List<Statistics> countList = archiveStatisticsMapper.getFileCountByCondition(startData, endData, condition, dataCountList,dataPermiList);
-        System.out.println("countList:" + countList);
+        Integer dataCount = statistics.getDataCountList().get(0);
+        List<Statistics> countList = archiveStatisticsMapper.getFileCountByCondition(startData, endData, condition, dataCount,dataPermiList);
         for (Statistics s : countList) {
-            if (s.getCondition() == null) {
+            s.setCondition(dataCount.toString());
+            s.setTypeList(archiveStatisticsMapper.getFileIdByCondition(startData, endData, condition, dataCount,s.getCategory(),dataPermiList));
+            if (s.getTypeList().isEmpty()) {
                 s.setTotalSize(0L);
                 s.setFileCount(0);
             }else {
-                String ids = s.getCondition();
-                String[] idArr = ids.split(",");
-                Statistics returnStatistics = archiveStatisticsMapper.getStatisticsByCondition(idArr);
+                List<String> ids = s.getTypeList();
+                Statistics returnStatistics = archiveStatisticsMapper.getStatisticsByCondition(ids);
+                s.setTypeList(null);
                 s.setTotalSize(returnStatistics.getTotalSize());
                 s.setFileCount(returnStatistics.getFileCount());
             }
@@ -119,18 +120,27 @@ public class ArchiveStatisticsServiceImpl implements ArchiveStatisticsService {
     @Override
     public List<Statistics> getCategoryStatistics(Statistics statistics) {
         String[] dataPermiList =selectSearchByDataPermit();
-        String startData = statistics.getTypeList().get(0);
-        String endData = statistics.getTypeList().get(1);
+        String startData = null;
+        String endData = null;
+        if (statistics.getTypeList().size() >= 2){
+            startData = statistics.getTypeList().get(0);
+            endData = statistics.getTypeList().get(1);
+        }
         List<Integer> categoryIds = statistics.getDataCountList();
         List<Statistics> categoryStatistics = archiveStatisticsMapper.getCategoryCountStatistics(categoryIds, startData, endData,dataPermiList);
-        for (Statistics s : categoryStatistics) {
-            if (s.getCondition() == null) {
+        for (int i = 0; i < categoryStatistics.size(); i++) {
+            Statistics s = categoryStatistics.get(i);
+            Integer categoryId = categoryIds.get(i);
+            // 设置 typeList
+            List<String> typeList = archiveStatisticsMapper.getCategoryIdStatistics(categoryId, startData, endData, dataPermiList);
+            s.setTypeList(typeList);
+
+            // 根据 typeList 计算 totalSize 和 fileCount
+            if (typeList == null || typeList.isEmpty()) {
                 s.setTotalSize(0L);
                 s.setFileCount(0);
-            }else {
-                String ids = s.getCondition();
-                String[] idArr = ids.split(",");
-                Statistics returnStatistics = archiveStatisticsMapper.getStatisticsByCondition(idArr);
+            } else {
+                Statistics returnStatistics = archiveStatisticsMapper.getStatisticsByCondition(typeList);
                 s.setTotalSize(returnStatistics.getTotalSize());
                 s.setFileCount(returnStatistics.getFileCount());
             }

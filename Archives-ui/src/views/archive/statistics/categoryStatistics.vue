@@ -91,13 +91,18 @@ export default {
         handleQuery() {
             let queryParams = {};
             queryParams.dataCountList = this.checkCategory.filter(item => item.ancestors === 1).map(item => item.id);
-            queryParams.typeList = this.yearList
+            if(this.yearList.length != 0){
+                queryParams.typeList = this.yearList;
+            }else{
+                queryParams.typeList = [];
+            }
+
             if (queryParams.dataCountList.length == 0) {
                 this.$message.error('请勾选档案分类');
                 return;
             }
-            if (queryParams.typeList.length != 2) {
-                this.$message.error('请选择年份');
+            if (queryParams.typeList.length != 2&&queryParams.typeList.length != 0) {
+                this.$message.error('请正确选择年份或不选择年份');
                 return;
             }
             getCategoryStatistics(queryParams).then(response => {
