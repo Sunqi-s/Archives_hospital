@@ -88,6 +88,14 @@ export function sendInfo(id) {
   })
 }
 
+export function updatAarchiveStatusAll(data) {
+  return request({
+    url:'/archive/info/documentAll/',
+    method: 'post',
+    data: data
+  })
+}
+
 //发送利用档案信息
 export function sendInfoByIds(ids,type,categoryId,oddNumbers) {
   return request({
@@ -99,6 +107,14 @@ export function sendInfoByIds(ids,type,categoryId,oddNumbers) {
       categoryId: categoryId,
       archiveNumber: oddNumbers
     }
+  })
+}
+
+export function sendInfoAll(data) {
+  return request({
+    url:'/archive/info/sendAll',
+    method: 'post',
+    data: data
   })
 }
 

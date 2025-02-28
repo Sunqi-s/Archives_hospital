@@ -54,6 +54,9 @@ public interface IArchiveInfoService
      * @return 结果
      */
         public int updateArchiveStatusByIds(SearchJson searchJson);
+
+        public int updateArchiveStatusAll(ArchiveInfo archiveInfo);
+
     /**
      * 归档档案信息
      */
@@ -87,8 +90,8 @@ public interface IArchiveInfoService
     /**
      * 批量发送利用档案信息
      */
-    public int sendArchiveInfo(Long[] ids);
 
+    public int sendArchiveAll(ArchiveInfo archiveInfo);
 
     /**
      * 高级搜索
@@ -98,12 +101,7 @@ public interface IArchiveInfoService
     /**
      * 获取删除档案信息的数量
      */
-    public List<Integer> getDeleteCount(ArchiveInfo archiveInfo);
-
-    /**
-     * 获取快速搜索删除档案信息的数量
-     */
-    public List<Integer> getDeleteCountByQuerySearch(SearchJson searchJson);
+    public int getDeleteCount(ArchiveInfo archiveInfo);
 
     public List<ArchiveInfo> selectArchiveInfoByIds(List<Long> ids);
 }
