@@ -70,7 +70,7 @@ export default {
     },
     data() {
         return {
-            value: '',
+            value: [],
             fileOptions: [],
             isClick: true,
             tableData: [],
@@ -153,7 +153,7 @@ export default {
             this.categoryId = null;
             this.tableData = [];
             this.archiveItem = null;
-            this.value = '';
+            this.value = [];
         },
         getItem(){
             let resp = [];
@@ -212,7 +212,7 @@ export default {
             this.sliceData = this.tableData.slice(start, end);
         },
         handleReset(){
-            this.value = '',
+            this.value = [],
             this.radio = 1,
             this.categoryId = null,
             this.isClick = true,
