@@ -30,7 +30,9 @@ public interface ArchiveInfoMapper
      * @param archiveInfo 档案信息
      * @return 档案信息集合
      */
-    public List<ArchiveInfo> selectArchiveInfoList(@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
+    public List<Long> selectIdList(@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
+
+    public List<Long> selectIdListByKeyword(@Param("keyword") String keyword,@Param("categoryId")Long categoryId,@Param("archiveStatus")Long archiveStatus,@Param("dataPermit") String[] dataPermiList);
 
     /**
      * 查询档案信息列表
@@ -106,7 +108,7 @@ public interface ArchiveInfoMapper
      * @param ids
      * @return
      */
-    public int sendArchiveInfo(@Param("array") Long[] ids,@Param("archiveInfoStatus") ArchiveInfo archiveInfoStatus);
+    public int sendArchiveInfo(@Param("array") Long[] ids);
 
 
     /**
@@ -123,12 +125,12 @@ public interface ArchiveInfoMapper
      * @param dataPermiList
      * @return
      */
-    public List<Integer> getArchiveInfoCount(@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
+    public int delArchiveInfo(@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
 
     /**
      * 获取快速搜索删除档案信息数量
      */
-    public List<Integer> getDeleteCountByQuerySearch(@Param("searchJson") SearchJson searchJson, @Param("dataPermit") String[] dataPermiList);
+    public int delByQuerySearch(@Param("archiveInfo") ArchiveInfo archiveInfo, @Param("dataPermit") String[] dataPermiList);
 
     public List<ArchiveInfo> selectArchiveInfoByIds(@Param("ids") List<Long> ids);
 }

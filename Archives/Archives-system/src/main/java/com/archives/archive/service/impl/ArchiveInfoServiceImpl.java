@@ -5,7 +5,6 @@ import com.archives.archive.domain.DeptIdHolder;
 import com.archives.archive.domain.PlaceonfileLog;
 import com.archives.archive.domain.SearchJson;
 import com.archives.archive.mapper.ArchiveInfoMapper;
-import com.archives.archive.mapper.PlaceonfileLogMapper;
 import com.archives.archive.service.IArchiveInfoService;
 import com.archives.common.core.domain.entity.SysUser;
 import com.archives.common.exception.ServiceException;
@@ -37,7 +36,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     private SysOssMapper sysOssMapper;
 
     @Autowired
-    private PlaceonfileLogMapper placeonfileLogMapper;
+    private PlaceonfileLogServiceImpl placeonfileLogService;
 
     @Autowired
     private final ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
@@ -198,18 +197,11 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public int updateArchiveStatusById(SearchJson searchJson)
     {
-        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
         Long[] ids = searchJson.getIds();
-        PlaceonfileLog placeonfileLog = new PlaceonfileLog();
+        PlaceonfileLog placeonfileLog = buildPlaceonfileLog(Arrays.asList(ids), Long.parseLong(searchJson.getCategoryId()), null,null);
         placeonfileLog.setType(searchJson.getArchiveStatus());
-        placeonfileLog.setCategoryId(Integer.parseInt(searchJson.getCategoryId()));
-        placeonfileLog.setInfoId(Arrays.toString(ids));
-        placeonfileLog.setOddNumbers(Long.valueOf(searchJson.getArchiveNumber()));
-        placeonfileLog.setCreateTime(DateUtils.getNowDate());
-        placeonfileLog.setPlaceonfileInfo(Long.valueOf(ids.length));
-        placeonfileLog.setPlaceonfileBy(currentUser.getNickName());
 
-        placeonfileLogMapper.insertPlaceonfileLog(placeonfileLog);
+        placeonfileLogService.insertPlaceonfileLog(placeonfileLog);
 
         ArchiveInfo archiveInfoStatus = new ArchiveInfo();
         archiveInfoStatus.setArchiveDate(DateUtils.getNowDate());
@@ -217,23 +209,44 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     }
 
     @Override
-    public int sendArchiveInfoByIds(SearchJson searchJson) {
+    public int updateArchiveStatusAll(ArchiveInfo archiveInfo) {
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        String[] dataPermiList = "all".equals(currentUser.getDataPermi()) ? new String[0] : currentUser.getDataPermi().split(",");
+
+        // 获取需要更新的档案ID列表
+        List<Long> ids = getIdsToArchive(archiveInfo, dataPermiList);
+
+        // 如果没有找到需要更新的档案，直接返回0
+        if (ids.isEmpty()) {
+            return 0;
+        }
+        Long categoryId = archiveInfo.getCategoryId();
+        Long time = new Date().getTime();
+        Date archiveDate = DateUtils.getNowDate();
+        // 构建PlaceonfileLog对象
+        for (int i = 0; i < ids.size(); i += 3000) {
+            List<Long> subList = ids.subList(i, Math.min(i + 3000, ids.size()));
+            PlaceonfileLog placeonfileLog = buildPlaceonfileLog(subList, categoryId, time, archiveDate);
+            // 设置日志类型
+            placeonfileLog.setType(archiveInfo.getArchiveStatus() == 1 ? "huidang" : "guidang");
+            // 插入日志
+            placeonfileLogService.insertPlaceonfileLog(placeonfileLog);
+        }
+
+        // 更新归档信息
+        archiveInfo.setArchiveDate(DateUtils.getNowDate());
+        return archiveInfoMapper.updateArchiveStatusByIds(ids.toArray(new Long[0]), archiveInfo);
+    }
+
+    @Override
+    public int sendArchiveInfoByIds(SearchJson searchJson) {
         Long[] ids = searchJson.getIds();
-        PlaceonfileLog placeonfileLog = new PlaceonfileLog();
+        PlaceonfileLog placeonfileLog = buildPlaceonfileLog(Arrays.asList(ids), Long.parseLong(searchJson.getCategoryId()), null,null);
         placeonfileLog.setType(searchJson.getArchiveStatus());
-        placeonfileLog.setCategoryId(Integer.parseInt(searchJson.getCategoryId()));
-        placeonfileLog.setInfoId(Arrays.toString(ids));
-        placeonfileLog.setOddNumbers(Long.valueOf(searchJson.getArchiveNumber()));
-        placeonfileLog.setCreateTime(DateUtils.getNowDate());
-        placeonfileLog.setPlaceonfileInfo(Long.valueOf(ids.length));
-        placeonfileLog.setPlaceonfileBy(currentUser.getNickName());
 
-        placeonfileLogMapper.insertPlaceonfileLog(placeonfileLog);
+        placeonfileLogService.insertPlaceonfileLog(placeonfileLog);
 
-        ArchiveInfo archiveInfoStatus = new ArchiveInfo();
-        archiveInfoStatus.setArchiveDate(DateUtils.getNowDate());
-        return archiveInfoMapper.sendArchiveInfo(ids,archiveInfoStatus);
+        return archiveInfoMapper.sendArchiveInfo(ids);
     }
 
     /**
@@ -344,14 +357,33 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         }, executorService);
     }
 
-    //批量发送档案信息
     @Override
-    public int sendArchiveInfo(Long[] ids) {
-        ArchiveInfo archiveInfo = new ArchiveInfo();
-        archiveInfo.setArchiveDate(DateUtils.getNowDate());
-        return archiveInfoMapper.sendArchiveInfo(ids,archiveInfo);
-    }
+    public int sendArchiveAll(ArchiveInfo archiveInfo) {
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        String[] dataPermiList = "all".equals(currentUser.getDataPermi()) ? new String[0] : currentUser.getDataPermi().split(",");
 
+        // 获取需要更新的档案ID列表
+        List<Long> ids = getIdsToArchive(archiveInfo, dataPermiList);
+
+        // 如果没有找到需要更新的档案，直接返回0
+        if (ids.isEmpty()) {
+            return 0;
+        }
+        Long time = new Date().getTime();
+        Date createTime = DateUtils.getNowDate();
+        // 如果ids数量超过3000，则拆分成多个List
+        int maxIdsSize = 3000;
+        for (int i = 0; i < ids.size(); i += maxIdsSize) {
+            List<Long> subList = ids.subList(i, Math.min(i + maxIdsSize, ids.size()));
+            PlaceonfileLog placeonfileLog = buildPlaceonfileLog(subList, archiveInfo.getCategoryId(), time, createTime);
+            placeonfileLog.setType("liyong");
+            placeonfileLog.setPlaceonfileBy("系统");
+            placeonfileLog.setDataPermit("all");
+            placeonfileLogService.insertPlaceonfileLog(placeonfileLog);
+        }
+
+        return archiveInfoMapper.sendArchiveInfo(ids.toArray(new Long[0]));
+    }
 
     @Override
     public List<ArchiveInfo> beachSearch(ArchiveInfo archiveInfo) {
@@ -367,7 +399,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     //获取档案信息数量
     @Override
-    public List<Integer> getDeleteCount(ArchiveInfo archiveInfo) {
+    public int getDeleteCount(ArchiveInfo archiveInfo) {
         String[] dataPermiList = new String[0];
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
         if("all".equals(currentUser.getDataPermi())){
@@ -375,39 +407,47 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         }else {
             dataPermiList = (currentUser.getDataPermi().split(","));
         }
-        return archiveInfoMapper.getArchiveInfoCount(archiveInfo,dataPermiList);
+        if(archiveInfo.getSearchValue() != null && !archiveInfo.getSearchValue().isEmpty()){
+            return archiveInfoMapper.delByQuerySearch(archiveInfo,dataPermiList);
+        }else{
+            return archiveInfoMapper.delArchiveInfo(archiveInfo,dataPermiList);
+        }
+
     }
 
-    @Override
-    public List<Integer> getDeleteCountByQuerySearch(SearchJson searchJson) {
-        String[] dataPermiList = new String[0];
-        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
-        if("all".equals(currentUser.getDataPermi())){
-            dataPermiList = new String[0];
-        }else {
-            dataPermiList = (currentUser.getDataPermi().split(","));
-        }
-        return archiveInfoMapper.getDeleteCountByQuerySearch(searchJson,dataPermiList);
-    }
 
     @Override
     public List<ArchiveInfo> selectArchiveInfoByIds(List<Long> ids) {
         return archiveInfoMapper.selectArchiveInfoByIds(ids);
     }
 
-    public String getRandom(){
-        Random random=new Random();
-        String str="";
-        for (int i = 0; i <12; i++) {
-            if(i==0){
-                //首位不能为0且数字取值区间为 [1,9]
-                str+=(random.nextInt(9)+1);
-            }else{
-                //其余位的数字的取值区间为 [0,9]
-                str+=random.nextInt(10);
-            }
+    // 根据搜索条件获取需要归档的档案ID列表
+    private List<Long> getIdsToArchive(ArchiveInfo archiveInfo, String[] dataPermiList) {
+        if (archiveInfo.getSearchValue() != null && !archiveInfo.getSearchValue().isEmpty()) {
+            return archiveInfoMapper.selectIdListByKeyword(
+                    archiveInfo.getSearchValue(),
+                    archiveInfo.getCategoryId(),
+                    archiveInfo.getArchiveStatus(),
+                    dataPermiList
+            );
+        } else {
+            return archiveInfoMapper.selectIdList(archiveInfo, dataPermiList);
         }
-        return str;
+    }
+
+    // 构建PlaceonfileLog对象
+    private PlaceonfileLog buildPlaceonfileLog(List<Long> ids, Long categoryId, Long oddNumbers, Date createTime) {
+        PlaceonfileLog placeonfileLog = new PlaceonfileLog();
+        placeonfileLog.setPlaceonfileInfo((long) ids.size());
+        placeonfileLog.setInfoId(ids.stream().map(String::valueOf).collect(Collectors.joining(",")));
+        placeonfileLog.setOddNumbers(oddNumbers != null ? oddNumbers : new Date().getTime());
+        placeonfileLog.setCategoryId(Math.toIntExact(categoryId));
+        placeonfileLog.setCreateTime(createTime != null ? createTime : DateUtils.getNowDate());
+        return placeonfileLog;
+    }
+
+    private PlaceonfileLog buildPlaceonfileLog(List<Long> ids, Long categoryId) {
+        return buildPlaceonfileLog(ids, categoryId, null, null);
     }
 }
 

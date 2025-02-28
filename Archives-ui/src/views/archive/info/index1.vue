@@ -243,7 +243,7 @@ import { getDicts } from "@/api/system/dict/data";
 import { getItemByCategoryId } from "@/api/archive/item";
 import { listCategory, getCategory } from "@/api/archive/category";
 import { deptTreeSelect } from "@/api/system/user";
-import { getBeachList, getInfo, listInfo, sendInfo, updatAarchiveStatus, updateArchiveStatusById, sendInfoByIds } from '@/api/archive/info'
+import { getBeachList, getInfo, listInfo, sendInfo, updatAarchiveStatus, updateArchiveStatusById, sendInfoByIds,sendInfoAll,updatAarchiveStatusAll } from '@/api/archive/info'
 import categoryTree from "@/views/archive/category/categoryTree.vue";
 import Treeselect from "@riophae/vue-treeselect";
 import { treeselect } from "@/api/system/menu";
@@ -777,74 +777,24 @@ export default {
       } else {
         this.$modal.confirm('确认回档全部' + this.total + '条数据？').then(async () => {
           this.$modal.loading("正在处理中");
-          const pageTotal = Math.ceil(this.total / 3000);
           const ExportQueryParams = {
             categoryId: this.categoryId,
             archiveStatus: 1,
             ...this.queryParams
           };
-          ExportQueryParams.pageNum = 1;
-          ExportQueryParams.pageSize = 3000;
-          const id = Date.now().toString();
-          // 定义递归函数
-          const fetchAndProcessPageData = async (pageNum, pageTotal, concurrency = 5) => {
-            try {
-              if (pageNum > pageTotal) {
-                // 达到页数上限，递归结束
-                this.$modal.closeLoading();
-                this.getList();
-                this.$modal.msgSuccess("回档成功");
-                return;
-              }
-              ExportQueryParams.pageNum = pageNum;
-              ExportQueryParams.archiveStatus = 1;
-              const res = await listInfo(ExportQueryParams);
-              const ids = res.rows ? res.rows.map(item => item.id) : [];
-              const batchSize = 400;
-              const batchCount = Math.ceil(ids.length / batchSize);
-              const tasks = [];
-              const batchList = [];
-              for (let i = 0; i < batchCount; i++) {
-                const start = i * batchSize;
-                const end = Math.min(start + batchSize, ids.length);
-                const list = ids.slice(start, end);
-                batchList.push(list);
-              }
-              const taskcount = Math.floor(batchList.length / concurrency)
-              const last = batchList.length % concurrency
-              for (let index = 0; index < taskcount; index++) {
-                for (let i = 0; i < concurrency; i++) {
-                  const list = batchList[i + index * concurrency];
-                  tasks.push(updatAarchiveStatus(list).then(() => list.length));
-                }
-                await Promise.all(tasks);
-              }
-              if (last !== 0) {
-                for (let i = 0; i < last; i++) {
-                  const list = batchList[i + taskcount * concurrency];
-                  tasks.push(updatAarchiveStatus(list).then(() => list.length));
-                }
-                await Promise.all(tasks);
-              }
-              const logInfo = {
-                categoryId: this.categoryId,
-                placeonfileInfo: ids.length,
-                infoId: ids.join(','),
-                type: 'huidang',
-                oddNumbers: id,
-              }
-              addPlaceonlog(logInfo)
-              // 递归调用，处理下一页
-              await fetchAndProcessPageData(pageNum + 1, pageTotal, concurrency);
-            } catch (error) {
+          ExportQueryParams.archiveStatus = 1;
+          updatAarchiveStatusAll(ExportQueryParams).then((res) => {
+            if (res.code === 200) {
+              this.$modal.closeLoading();
+              this.getList();
+              this.$modal.msgSuccess("回档成功");
+              return;
+            } else {
               this.$modal.closeLoading();
               this.$modal.msgError("回档失败：" + error.message);
               console.error("回档失败：", error);
             }
-          };
-
-          // 调用递归函数，从第1页开始
-          await fetchAndProcessPageData(1, pageTotal);
+          })
         })
       }
     },
@@ -944,73 +894,25 @@ export default {
       } else {
         this.$modal.confirm('确认发送利用全部' + this.total + '条数据？').then(async () => {
           this.$modal.loading("正在处理中");
-          const pageTotal = Math.ceil(this.total / 3000);
           const ExportQueryParams = {
             categoryId: this.categoryId,
             archiveStatus: 1,
             ...this.queryParams
           };
-          ExportQueryParams.pageNum = 1;
-          ExportQueryParams.pageSize = 3000;
-          const id = Date.now().toString();
-          // 定义递归函数
-          const sendPageData = async (pageNum, pageTotal, concurrency = 5) => {
-            try {
-              if (pageNum > pageTotal) {
-                // 达到页数上限，递归结束
-                this.$modal.closeLoading();
-                this.getList();
-                this.$modal.msgSuccess("发送成功");
-                return;
-              }
-              ExportQueryParams.pageNum = pageNum;
-              ExportQueryParams.archiveStatus = 1;
-              const res = await listInfo(ExportQueryParams);
-              const ids = res.rows ? res.rows.map(item => item.id) : [];
-              const batchSize = 400;
-              const batchCount = Math.ceil(ids.length / batchSize);
-              const tasks = [];
-              const batchList = [];
-              for (let i = 0; i < batchCount; i++) {
-                const start = i * batchSize;
-                const end = Math.min(start + batchSize, ids.length);
-                const list = ids.slice(start, end);
-                batchList.push(list);
-              }
-              const taskcount = Math.floor(batchList.length / concurrency)
-              const last = batchList.length % concurrency
-              for (let index = 0; index < taskcount; index++) {
-                for (let i = 0; i < concurrency; i++) {
-                  const list = batchList[i + index * concurrency];
-                  tasks.push(sendInfo(list).then(() => list.length));
-                }
-                await Promise.all(tasks);
-              }
-              if (last !== 0) {
-                for (let i = 0; i < last; i++) {
-                  const list = batchList[i + taskcount * concurrency];
-                  tasks.push(sendInfo(list).then(() => list.length));
-                }
-                await Promise.all(tasks);
-              }
-              const logInfo = {
-                categoryId: this.categoryId,
-                placeonfileInfo: ids.length,
-                infoId: ids.join(','),
-                type: 'liyong',
-                oddNumbers: id,
-              }
-              addPlaceonlog(logInfo)
-              // 递归调用，处理下一页
-              await sendPageData(pageNum + 1, pageTotal, concurrency);
-            } catch (error) {
+          ExportQueryParams.archiveStatus = 1;
+          sendInfoAll(ExportQueryParams).then((res) => {
+            if (res.code === 200) {
+              // 达到页数上限，递归结束
+              this.$modal.closeLoading();
+              this.getList();
+              this.$modal.msgSuccess("发送成功");
+              return;
+            } else {
               this.$modal.closeLoading();
               this.$modal.msgError("发送失败：" + error.message);
               console.error("发送失败：", error);
             }
-          };
-          // 调用递归函数，从第1页开始
-          await sendPageData(1, pageTotal);
+          })
         })
       }
     },

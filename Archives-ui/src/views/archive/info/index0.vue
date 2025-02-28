@@ -275,7 +275,7 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import { addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo, getBeachList, getDelCount, getDeleteCountBySearch, updateArchiveStatusById } from "@/api/archive/info";
+import { addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo, getBeachList, getDelCount, getDeleteCountBySearch,updatAarchiveStatusAll,updateArchiveStatusById } from "@/api/archive/info";
 import { getCategory, listCategory } from '@/api/archive/category'
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
@@ -1142,74 +1142,24 @@ export default {
       } else {
         this.$modal.confirm('确认归档全部' + this.total + '条数据？').then(async () => {
           this.$modal.loading("正在处理中");
-          const pageTotal = Math.ceil(this.total / 3000);
           const ExportQueryParams = {
             categoryId: this.categoryId,
             archiveStatus: 0,
             ...this.queryParams
           };
-          ExportQueryParams.pageNum = 1;
-          ExportQueryParams.pageSize = 3000;
-          const id = Date.now().toString();
-          // 定义递归函数
-          const fetchAndProcessPageData = async (pageNum, pageTotal, concurrency = 5) => {
-            try {
-              if (pageNum > pageTotal) {
-                // 达到页数上限，递归结束
-                this.$modal.closeLoading();
-                this.getList();
-                this.$modal.msgSuccess("归档成功");
-                return;
-              }
-              ExportQueryParams.pageNum = pageNum;
-              ExportQueryParams.archiveStatus = 0;
-              const res = await listInfo(ExportQueryParams);
-              const ids = res.rows ? res.rows.map(item => item.id) : [];
-              const batchSize = 400;
-              const batchCount = Math.ceil(ids.length / batchSize);
-              const tasks = [];
-              const batchList = [];
-              for (let i = 0; i < batchCount; i++) {
-                const start = i * batchSize;
-                const end = Math.min(start + batchSize, ids.length);
-                const list = ids.slice(start, end);
-                batchList.push(list);
-              }
-              const taskcount = Math.floor(batchList.length / concurrency)
-              const last = batchList.length % concurrency
-              for (let index = 0; index < taskcount; index++) {
-                for (let i = 0; i < concurrency; i++) {
-                  const list = batchList[i + index * concurrency];
-                  tasks.push(updatAarchiveStatus(list).then(() => list.length));
-                }
-                await Promise.all(tasks);
-              }
-              if (last !== 0) {
-                for (let i = 0; i < last; i++) {
-                  const list = batchList[i + taskcount * concurrency];
-                  tasks.push(updatAarchiveStatus(list).then(() => list.length));
-                }
-                await Promise.all(tasks);
-              }
-              const logInfo = {
-                categoryId: this.categoryId,
-                placeonfileInfo: ids.length,
-                infoId: ids.join(','),
-                type: 'guidang',
-                oddNumbers: id,
-              }
-              addPlaceonlog(logInfo)
-              // 递归调用，处理下一页
-              await fetchAndProcessPageData(pageNum + 1, pageTotal, concurrency);
-            } catch (error) {
+          ExportQueryParams.archiveStatus = 0;
+          updatAarchiveStatusAll(ExportQueryParams).then((res) => {
+            if (res.code === 200) {
+              this.$modal.closeLoading();
+              this.getList();
+              this.$modal.msgSuccess("归档成功");
+              return;
+            } else {
               this.$modal.closeLoading();
               this.$modal.msgError("归档失败：" + error.message);
               console.error("归档失败：", error);
             }
-          };
-
-          // 调用递归函数，从第1页开始
-          await fetchAndProcessPageData(1, pageTotal);
+          })
         })
       }
     },
@@ -1321,57 +1271,8 @@ export default {
         this.$modal.loading("正在处理中");
         /**
          * 处理删除操作
-         * @param {Array} res - 待删除的数据列表
-         */
-        const handleDeletion = async (res) => {
-          // 计算需要删除的批次
-          delRes = Math.ceil(res.length / 300);
-          // 分批处理删除列表
-          for (let i = 0; i < delRes; i++) {
-            let start = i * 300;
-            let end = Math.min(start + 300, res.length);
-            let list = res.slice(start, end);
-            deleteList.push(list);
-          }
-          // 初始化任务数组
-          let tasks = [];
-          const taskCount = Math.floor(deleteList.length / 5);
-          const last = deleteList.length % 5;
-          // 并发执行删除任务，每次最多5个
-          for (let index = 0; index < taskCount; index++) {
-            for (let i = 0; i < 5; i++) {
-              const list = deleteList[i + index * 5];
-              tasks.push(delInfo(list).then(() => list.length));
-            }
-            await Promise.all(tasks);
-          }
-          // 处理剩余的删除任务
-          if (last !== 0) {
-            for (let i = 0; i < last; i++) {
-              const list = deleteList[i + taskCount * 5];
-              tasks.push(delInfo(list).then(() => list.length));
-            }
-            await Promise.all(tasks);
-          }
-        };
-        // 根据是否有搜索值来选择删除操作
-        if (this.deleteQuery.searchValue !== '') {
-          this.deleteQuery.keyWord = this.deleteQuery.searchValue;
-          getDeleteCountBySearch(this.deleteQuery)
-            .then(res => handleDeletion(res))
-            .catch(error => {
-              console.error("删除过程中发生错误:", error);
-              this.$modal.msgError("删除过程中发生错误");
-            })
-            // 关闭加载中状态，并显示删除成功消息
-            .finally(() => setTimeout(() => {
-              this.getList()
-              this.$modal.closeLoading();
-              this.$modal.msgSuccess("删除成功");
-            }, 2000));
-        } else {
+        */
           getDelCount(this.deleteQuery)
-            .then(res => handleDeletion(res))
             .catch(error => {
               console.error("删除过程中发生错误:", error);
               this.$modal.msgError("删除过程中发生错误");
@@ -1382,7 +1283,6 @@ export default {
               this.$modal.closeLoading();
               this.$modal.msgSuccess("删除成功");
             }, 2000));
-        }
       })
     },
     clearSearch() {

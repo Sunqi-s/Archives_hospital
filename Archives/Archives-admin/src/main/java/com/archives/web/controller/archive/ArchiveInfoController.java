@@ -103,6 +103,12 @@ public class ArchiveInfoController extends BaseController
         return toAjax(archiveInfoService.updateArchiveStatusById(searchJson));
     }
 
+    @PostMapping("/documentAll")
+    public AjaxResult documentAll(@RequestBody ArchiveInfo archiveInfo)
+    {
+        return toAjax(archiveInfoService.updateArchiveStatusAll(archiveInfo));
+    }
+
     /**
      * 删除档案信息
      */
@@ -129,15 +135,6 @@ public class ArchiveInfoController extends BaseController
             return AjaxResult.error("操作失败: " + e.getMessage());
         }
     }
-    /**
-     * 批量发送利用档案信息
-     */
-    @Log(title = "批量发送利用档案信息", businessType = BusinessType.UPDATE)
-    @PutMapping("/send/{ids}")
-    public AjaxResult send(@PathVariable Long[] ids)
-    {
-       return toAjax(archiveInfoService.sendArchiveInfo(ids));
-    }
 
     //发送利用档案信息
     @PostMapping("/sendInfoByIds")
@@ -145,6 +142,11 @@ public class ArchiveInfoController extends BaseController
         return toAjax(archiveInfoService.sendArchiveInfoByIds(searchJson));
     }
 
+    @PostMapping("/sendAll")
+    public AjaxResult sendAll(@RequestBody ArchiveInfo archiveInfo)
+    {
+        return toAjax(archiveInfoService.sendArchiveAll(archiveInfo));
+    }
 
     /**
      * 高级搜索
@@ -160,17 +162,8 @@ public class ArchiveInfoController extends BaseController
      * 获取待删除档案数量
      */
     @GetMapping("/getDeleteCount")
-    public List<Integer> getDeleteCount(ArchiveInfo archiveInfo) {
+    public int getDeleteCount(ArchiveInfo archiveInfo) {
         return archiveInfoService.getDeleteCount(archiveInfo);
-    }
-
-    /**
-     *
-     * 获取快速搜索后待删除档案数量
-     */
-    @GetMapping("/getDeleteCountByQuickSearch")
-    public List<Integer> getDeleteCountByQuerySearch(SearchJson searchJson) {
-        return archiveInfoService.getDeleteCountByQuerySearch(searchJson);
     }
 
     @PostMapping("/getInfoByIds")
