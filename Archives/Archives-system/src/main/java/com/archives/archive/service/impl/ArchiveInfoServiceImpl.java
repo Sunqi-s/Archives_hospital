@@ -100,7 +100,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public int insertArchiveInfo(ArchiveInfo archiveInfo)
     {
-        String deptIds = DeptIdHolder.getDeptIds();
+        String deptIds = String.valueOf(SecurityUtils.getLoginUser().getDeptId());
         archiveInfo.setDataPermit(deptIds);
         archiveInfo.setCreateTime(DateUtils.getNowDate());
         int cnt = archiveInfoMapper.insertArchiveInfo(archiveInfo);

@@ -363,7 +363,6 @@ export default {
         ossProcessedRecords: 0,          // oss 表的已处理记录数初始化为 0
         infoImportRecords: 0,            // info 表的待导入记录数初始化为 0
         ossImportRecords: 0,             // oss 表的待导入记录数初始化为 0
-        startTime: '', // 返回包含日期和时间的字符串
         type: '',
       },
       showPasswordPrompt: false,//是否显示密码输入框
@@ -833,16 +832,6 @@ export default {
             } else {
               this.logQueryParams.infoImportRecords = 1;
               this.logQueryParams.ossImportRecords = 0;
-              const options = {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false // 强制使用 24 小时制
-              };
-              this.logQueryParams.startTime = new Date().toLocaleString('zh-CN', options);
               this.logQueryParams.status = 'pending';
               this.logQueryParams.type = 'luru';
               if (this.form.sysOssList.length > 0 && this.$refs.fileUpload) {
