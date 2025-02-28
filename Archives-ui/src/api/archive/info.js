@@ -52,22 +52,53 @@ export function bulkAdd(data) {
   })
 }
 
-//归档档案信息
-export function updatAarchiveStatus(ids) {
+//批量归档档案信息
+export function updatAarchiveStatus(ids,type,categoryId,oddNumbers) {
   return request({
     url:'/archive/info/document/',
     method: 'post',
     data: {
       ids: ids,
+      archiveStatus: type,
+      categoryId: categoryId,
+      archiveNumber: oddNumbers
     }
   })
 }
 
-//发送利用档案信息
+//归档档案信息
+export function updateArchiveStatusById(ids,type,categoryId,oddNumbers) {
+  return request({
+    url:'/archive/info/updateArchiveStatusById',
+    method: 'post',
+    data: {
+      ids: ids,
+      categoryId: categoryId,
+      archiveStatus: type,
+      archiveNumber: oddNumbers,
+    }
+  })
+}
+
+//批量发送利用档案信息
 export function sendInfo(id) {
   return request({
     url:'/archive/info/send/' + id,
     method: 'put',
+  })
+}
+
+//发送利用档案信息
+export function sendInfoByIds(ids,type,categoryId,oddNumbers) {
+  return request({
+    url:'/archive/info/sendInfoByIds',
+    method: 'post',
+    data: {
+      ids: ids,
+      archiveStatus: type,
+      categoryId: categoryId,
+      archiveNumber: oddNumbers
+    }
   })
 }
 

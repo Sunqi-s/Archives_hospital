@@ -106,7 +106,7 @@ public interface ArchiveInfoMapper
      * @param ids
      * @return
      */
-    public int sendArchiveInfo(Long[] ids);
+    public int sendArchiveInfo(@Param("array") Long[] ids,@Param("archiveInfoStatus") ArchiveInfo archiveInfoStatus);
 
 
     /**

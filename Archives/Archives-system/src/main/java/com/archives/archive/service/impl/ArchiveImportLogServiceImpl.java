@@ -57,6 +57,7 @@ public class ArchiveImportLogServiceImpl implements IArchiveImportLogService
     public ArchiveImportLog insertArchiveImportLog(ArchiveImportLog archiveImportLog)
     {
         String dataPermit = selectSearchByDataPermit().toString();
+        archiveImportLog.setStartTime(DateUtils.getNowDate());
         archiveImportLog.setCreateTime(DateUtils.getNowDate());
         archiveImportLog.setDataPermit(dataPermit);
         archiveImportLogMapper.insertArchiveImportLog(archiveImportLog);

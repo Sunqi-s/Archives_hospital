@@ -88,13 +88,19 @@ public class ArchiveInfoController extends BaseController
     }
 
     /**
-     * 归档档案信息
+     * 批量归档档案信息
      */
 //    @PreAuthorize("@ss.hasPermi('archive:info:document')")
     @PostMapping("/document/")
     public AjaxResult document(@RequestBody SearchJson searchJson)
     {
         return toAjax(archiveInfoService.updateArchiveStatusByIds(searchJson));
+    }
+
+    //归档档案信息
+    @PostMapping("/updateArchiveStatusById")
+    public AjaxResult updateArchiveStatusById(@RequestBody SearchJson searchJson) {
+        return toAjax(archiveInfoService.updateArchiveStatusById(searchJson));
     }
 
     /**
@@ -131,6 +137,12 @@ public class ArchiveInfoController extends BaseController
     public AjaxResult send(@PathVariable Long[] ids)
     {
        return toAjax(archiveInfoService.sendArchiveInfo(ids));
+    }
+
+    //发送利用档案信息
+    @PostMapping("/sendInfoByIds")
+    public AjaxResult sendArchiveInfoByIds(@RequestBody SearchJson searchJson) {
+        return toAjax(archiveInfoService.sendArchiveInfoByIds(searchJson));
     }
 
 

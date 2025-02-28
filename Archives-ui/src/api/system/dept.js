@@ -50,3 +50,18 @@ export function delDept(deptId) {
     method: 'delete'
   })
 }
+
+export function saveDeptIdsToBackend(deptIds) {
+  return request({
+    url: '/system/dept/saveDeptIds',
+    method: 'post',
+    data: { deptIds }
+  })
+}
+
+export function resetDeptIds() {
+  return request({
+    url: '/system/dept/resetDeptIds',
+    method: 'post'
+  })
+}

@@ -59,7 +59,8 @@
           </el-form>
 
           <div class="form-button-wrapper">
-            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach(1)" :disabled="!isClick">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach(1)"
+              :disabled="!isClick">搜索</el-button>
             <el-button icon="el-icon-refresh" size="small" @click="resetQuery()">重置</el-button>
           </div>
 
@@ -274,7 +275,7 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import { addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo, getBeachList, getDelCount, getDeleteCountBySearch } from "@/api/archive/info";
+import { addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo, getBeachList, getDelCount, getDeleteCountBySearch, updateArchiveStatusById } from "@/api/archive/info";
 import { getCategory, listCategory } from '@/api/archive/category'
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
@@ -832,7 +833,16 @@ export default {
             } else {
               this.logQueryParams.infoImportRecords = 1;
               this.logQueryParams.ossImportRecords = 0;
-              this.logQueryParams.startTime = new Date().toLocaleString();
+              const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false // 强制使用 24 小时制
+              };
+              this.logQueryParams.startTime = new Date().toLocaleString('zh-CN', options);
               this.logQueryParams.status = 'pending';
               this.logQueryParams.type = 'luru';
               if (this.form.sysOssList.length > 0 && this.$refs.fileUpload) {
@@ -1131,18 +1141,10 @@ export default {
         this.$modal.confirm('确认归档选中数据？').then(() => {
           this.$modal.loading("正在处理中");
           const type = 'guidang'
-          return updatAarchiveStatus(ids, type)
+          const categoryId = this.categoryId;
+          const oddNumbers = Date.now().toString();
+          return updateArchiveStatusById(ids, type ,categoryId, oddNumbers)
         }).then(() => {
-          const id = Date.now().toString();
-          const logInfo = {
-            categoryId:this.categoryId,
-            placeonfileInfo: ids.length,
-            infoId: ids.join(','),
-            type: 'guidang',
-            oddNumbers: id,
-            createTime: this.getDataTime(new Date())
-          }
-          addPlaceonlog(logInfo)
           this.$modal.closeLoading();
           this.getList();
           this.$modal.msgSuccess("归档成功");
@@ -1159,7 +1161,6 @@ export default {
           };
           ExportQueryParams.pageNum = 1;
           ExportQueryParams.pageSize = 3000;
-          const createTime = this.getDataTime(new Date());
           const id = Date.now().toString();
           // 定义递归函数
           const fetchAndProcessPageData = async (pageNum, pageTotal, concurrency = 5) => {
@@ -1207,7 +1208,6 @@ export default {
                 infoId: ids.join(','),
                 type: 'guidang',
                 oddNumbers: id,
-                createTime: createTime
               }
               addPlaceonlog(logInfo)
               // 递归调用，处理下一页
@@ -1223,15 +1223,6 @@ export default {
           await fetchAndProcessPageData(1, pageTotal);
         })
       }
-    },
-    getDataTime(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const seconds = String(date.getSeconds()).padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     },
     getTexted(name) {
       name = name.replace(/<\/?span[^>]*>/g, '');
@@ -1277,8 +1268,7 @@ export default {
             ExportQueryParams.archiveStatus = 0;
             ExportQueryParams.pageNum = 1;
             ExportQueryParams.pageSize = 10000000;
-            console.log(ExportQueryParams);
-            
+
             listInfo(ExportQueryParams).then(res => {
               listids = res.rows.map(item => item.id)
               ids = listids;
@@ -1404,7 +1394,7 @@ export default {
               this.$modal.msgSuccess("删除成功");
             }, 2000));
         }
-      })  
+      })
     },
     clearSearch() {
       this.categoryId = null;

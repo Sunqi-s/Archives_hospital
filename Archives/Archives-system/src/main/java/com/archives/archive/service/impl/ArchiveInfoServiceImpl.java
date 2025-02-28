@@ -1,6 +1,7 @@
 package com.archives.archive.service.impl;
 
 import com.archives.archive.domain.ArchiveInfo;
+import com.archives.archive.domain.DeptIdHolder;
 import com.archives.archive.domain.PlaceonfileLog;
 import com.archives.archive.domain.SearchJson;
 import com.archives.archive.mapper.ArchiveInfoMapper;
@@ -99,8 +100,8 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public int insertArchiveInfo(ArchiveInfo archiveInfo)
     {
-        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
-        archiveInfo.setDataPermit(String.valueOf(currentUser.getDeptId()));
+        String deptIds = DeptIdHolder.getDeptIds();
+        archiveInfo.setDataPermit(deptIds);
         archiveInfo.setCreateTime(DateUtils.getNowDate());
         int cnt = archiveInfoMapper.insertArchiveInfo(archiveInfo);
         Long fid = archiveInfo.getId();
@@ -193,14 +194,46 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         return archiveInfoMapper.updateArchiveStatusByIds(searchJson.getIds(),archiveInfoStatus);
     }
 
+    //归档档案信息
     @Override
-    public int updateArchiveStatusById(Long id)
+    public int updateArchiveStatusById(SearchJson searchJson)
     {
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        Long[] ids = searchJson.getIds();
+        PlaceonfileLog placeonfileLog = new PlaceonfileLog();
+        placeonfileLog.setType(searchJson.getArchiveStatus());
+        placeonfileLog.setCategoryId(Integer.parseInt(searchJson.getCategoryId()));
+        placeonfileLog.setInfoId(Arrays.toString(ids));
+        placeonfileLog.setOddNumbers(Long.valueOf(searchJson.getArchiveNumber()));
+        placeonfileLog.setCreateTime(DateUtils.getNowDate());
+        placeonfileLog.setPlaceonfileInfo(Long.valueOf(ids.length));
+        placeonfileLog.setPlaceonfileBy(currentUser.getNickName());
+
+        placeonfileLogMapper.insertPlaceonfileLog(placeonfileLog);
+
         ArchiveInfo archiveInfoStatus = new ArchiveInfo();
-        archiveInfoStatus.setId(id);
-        archiveInfoStatus.setArchiveStatus(1L);
         archiveInfoStatus.setArchiveDate(DateUtils.getNowDate());
-        return archiveInfoMapper.updateArchiveStatusById(archiveInfoStatus);
+        return archiveInfoMapper.updateArchiveStatusByIds(ids,archiveInfoStatus);
+    }
+
+    @Override
+    public int sendArchiveInfoByIds(SearchJson searchJson) {
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        Long[] ids = searchJson.getIds();
+        PlaceonfileLog placeonfileLog = new PlaceonfileLog();
+        placeonfileLog.setType(searchJson.getArchiveStatus());
+        placeonfileLog.setCategoryId(Integer.parseInt(searchJson.getCategoryId()));
+        placeonfileLog.setInfoId(Arrays.toString(ids));
+        placeonfileLog.setOddNumbers(Long.valueOf(searchJson.getArchiveNumber()));
+        placeonfileLog.setCreateTime(DateUtils.getNowDate());
+        placeonfileLog.setPlaceonfileInfo(Long.valueOf(ids.length));
+        placeonfileLog.setPlaceonfileBy(currentUser.getNickName());
+
+        placeonfileLogMapper.insertPlaceonfileLog(placeonfileLog);
+
+        ArchiveInfo archiveInfoStatus = new ArchiveInfo();
+        archiveInfoStatus.setArchiveDate(DateUtils.getNowDate());
+        return archiveInfoMapper.sendArchiveInfo(ids,archiveInfoStatus);
     }
 
     /**
@@ -236,6 +269,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public CompletableFuture<List<ArchiveInfo>> insertArchiveInfoList(List<ArchiveInfo> archiveInfoList) {
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+
+        //拿到数据权限
+        String deptIds = DeptIdHolder.getDeptIds();
         return CompletableFuture.supplyAsync(() -> {
 
             if (archiveInfoList == null || archiveInfoList.isEmpty()) {
@@ -246,7 +282,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
                 if(archiveInfo.getCategoryId() == null) {archiveInfo.setCategoryId(0L);}
                 if(archiveInfo.getArchiveStatus() == null) {archiveInfo.setArchiveStatus(0L);}
                 if(archiveInfo.getArchiveDate() == null) {archiveInfo.setArchiveDate(DateUtils.getNowDate());}
-                if(archiveInfo.getCreateTime() == null) {archiveInfo.setCreateTime(DateUtils.getNowDate());}
                 if(archiveInfo.getArchiver() == null) {archiveInfo.setArchiver("");}
                 if(archiveInfo.getFondsNumber() == null){archiveInfo.setFondsNumber("");}
                 if(archiveInfo.getFondsName() == null){archiveInfo.setFondsName("");}
@@ -287,8 +322,8 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
                 if(archiveInfo.getField28() == null){archiveInfo.setField28("");}
                 if(archiveInfo.getField29() == null){archiveInfo.setField29("");}
                 if(archiveInfo.getField30() == null){archiveInfo.setField30("");}
-
-                archiveInfo.setDataPermit(String.valueOf(currentUser.getDeptId()));
+                archiveInfo.setCreateTime(DateUtils.getNowDate());
+                archiveInfo.setDataPermit(deptIds);
                 archiveInfo.setCreateBy(currentUser.getNickName());
             }
             // 调用mapper里写好的批量插入方法
@@ -309,9 +344,12 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         }, executorService);
     }
 
+    //批量发送档案信息
     @Override
     public int sendArchiveInfo(Long[] ids) {
-        return archiveInfoMapper.sendArchiveInfo(ids);
+        ArchiveInfo archiveInfo = new ArchiveInfo();
+        archiveInfo.setArchiveDate(DateUtils.getNowDate());
+        return archiveInfoMapper.sendArchiveInfo(ids,archiveInfo);
     }
 
 

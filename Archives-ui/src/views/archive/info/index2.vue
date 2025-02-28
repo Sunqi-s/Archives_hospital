@@ -232,7 +232,7 @@ import { getDicts } from "@/api/system/dict/data";
 import { getItemByCategoryId } from "@/api/archive/item";
 import { listCategory, getCategory } from "@/api/archive/category";
 import { deptTreeSelect } from "@/api/system/user";
-import { getBeachList, getInfo, listInfo, sendInfo } from '@/api/archive/info'
+import { getBeachList, getInfo, listInfo, sendInfo, sendInfoByIds } from '@/api/archive/info'
 import categoryTree from "@/views/archive/category/categoryTree.vue";
 import Treeselect from "@riophae/vue-treeselect";
 import { treeselect } from "@/api/system/menu";
@@ -786,18 +786,11 @@ export default {
         const ids = this.ids;
         this.$modal.confirm('确认退回选中数据？').then(() => {
           this.$modal.loading("正在处理中");
-          return sendInfo(ids)
+          const type = 'tuihui';
+          const categoryId = this.categoryId;
+          const oddNumbers = Date.now().toString();
+          return sendInfoByIds(ids, type, categoryId, oddNumbers)
         }).then(() => {
-          const id = Date.now().toString();
-          const logInfo = {
-            categoryId: this.categoryId,
-            placeonfileInfo: ids.length,
-            infoId: ids.join(','),
-            type: 'tuihui',
-            oddNumbers: id,
-            createTime: this.getDataTime(new Date())
-          }
-          addPlaceonlog(logInfo)
           this.$modal.closeLoading();
           this.getList();
           this.$modal.msgSuccess("退回成功");
@@ -814,7 +807,6 @@ export default {
           };
           ExportQueryParams.pageNum = 1;
           ExportQueryParams.pageSize = 3000;
-          const createTime = this.getDataTime(new Date());
           const id = Date.now().toString();
           // 定义递归函数
           const sendPageData = async (pageNum, pageTotal, concurrency = 5) => {
@@ -862,7 +854,6 @@ export default {
                 infoId: ids.join(','),
                 type: 'tuihui',
                 oddNumbers: id,
-                createTime: createTime
               }
               addPlaceonlog(logInfo)
               // 递归调用，处理下一页

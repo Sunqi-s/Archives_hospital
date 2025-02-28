@@ -57,7 +57,9 @@ public interface IArchiveInfoService
     /**
      * 归档档案信息
      */
-    public int updateArchiveStatusById(Long id);
+    public int updateArchiveStatusById(SearchJson searchJson);
+
+    public int sendArchiveInfoByIds(SearchJson searchJson);
     /**
      * 批量删除档案信息
      *
