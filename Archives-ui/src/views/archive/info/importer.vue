@@ -37,7 +37,7 @@
                     @sheet-change="handleSheetChange" />
                 </slot>
                 <el-col :span="1"></el-col>
-                <el-cascader v-model="selectedDept" :options="deptOptions" :props="{ checkStrictly: true }" clearable
+                <el-cascader v-model="selectedDept" :options="deptOptions" :props="{ multiple: true }" clearable
                   @change="handleDeptChange" placeholder="请选择部门" />
                 <el-col :span="1"></el-col>
               </el-row>
@@ -441,12 +441,11 @@ export default {
     },
     // 处理联级选择器的变化
     handleDeptChange(value) {
-      // value 是选中的部门 ID 数组
       if (value && value.length > 0) {
-        // 将选中的部门 ID 拼接为逗号分隔的字符串
-        this.dataPermint = value.join(',');
+        // 提取每个子数组的最后一个元素
+        const lastValues = value.map(subArr => subArr[subArr.length - 1]);
+        this.dataPermint = lastValues.join(',');
       } else {
-        // 如果没有选中任何部门，清空 dataPermint
         this.dataPermint = '';
       }
     },
@@ -1310,6 +1309,7 @@ export default {
         this.uploadFiles = [];
         this.filteredFileList = [];
         this.selectedNodeKey = null;
+        this.dataPermint = '';
       });
     },
 
