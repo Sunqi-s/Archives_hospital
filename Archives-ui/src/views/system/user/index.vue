@@ -689,28 +689,28 @@ export default {
     },
     dataPermi() {
       if (Array.isArray(this.deptOptions)) {
-        this.dataPermiOptions = this.deptOptions.map(item => {
-          return {
-            value: item.id,
-            label: item.label,
-            children: Array.isArray(item.children) ? item.children.map(child => {
-              return {
-                value: child.id,
-                label: child.label,
-                children: Array.isArray(child.children) ? child.children.map(grandson => {
-                  return {
-                    value: grandson.id,
-                    label: grandson.label,
-                  };
-                }) : []
-              };
-            }) : []
-          };
-        });
+        this.dataPermiOptions = this.deptOptions.map(item => ({
+          value: item.id,
+          label: item.label,
+          // 只在有子节点时添加children属性
+          ...(Array.isArray(item.children) && item.children.length > 0 && {
+            children: item.children.map(child => ({
+              value: child.id,
+              label: child.label,
+              // 同理处理孙子节点
+              ...(Array.isArray(child.children) && child.children.length > 0 && {
+                children: child.children.map(grandson => ({
+                  value: grandson.id,
+                  label: grandson.label
+                }))
+              })
+            }))
+          })
+        }));
       } else {
-        return [];
+        this.dataPermiOptions = [];
       }
-      return this.dataPermiOptions; // 明确返回
+      return this.dataPermiOptions;
     },
     //数据权限修改
     handleAuthDataPermi(row){
