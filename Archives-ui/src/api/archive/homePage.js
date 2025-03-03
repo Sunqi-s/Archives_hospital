@@ -35,3 +35,11 @@ export function getStatusList(){
         method:'get',
     })
 }
+
+export function getHeTong(query){
+    return request({
+        url:'/home/getHeTong',
+        method:'get',
+        params:query
+    })
+}

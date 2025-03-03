@@ -217,22 +217,22 @@
                 <el-row>
                   <el-col :span="6">
                     <div class="grid-content bg-purple" style="float: right">
-                      <el-button type="text">上月</el-button>
+                      <el-button type="text" @click="getHeTong('上月')">上月</el-button>
                     </div>
                   </el-col>
                   <el-col :span="6">
                     <div class="grid-content bg-purple-light" style="float: right">
-                      <el-button type="text">本月</el-button>
+                      <el-button type="text" @click="getHeTong('本月')">本月</el-button>
                     </div>
                   </el-col>
                   <el-col :span="6">
                     <div class="grid-content bg-purple" style="float: right">
-                      <el-button type="text">本年</el-button>
+                      <el-button type="text" @click="getHeTong('本年')">本年</el-button>
                     </div>
                   </el-col>
                   <el-col :span="6">
                     <div class="grid-content bg-purple-light" style="float: right">
-                      <el-button type="text">全部</el-button>
+                      <el-button type="text" @click="getHeTong('全部')">全部</el-button>
                     </div>
                   </el-col>
                 </el-row>
@@ -370,7 +370,7 @@
 
 <script>
 import * as echarts from 'echarts'
-import {getData, getList, getStatusList, getImpertOssData} from "@/api/archive/homePage";
+import {getData, getList, getStatusList, getImpertOssData, getHeTong} from "@/api/archive/homePage";
 
 export default {
   name: "Index",
@@ -410,6 +410,7 @@ export default {
     this.getCount('0','本月');
     this.getCount('1','本月');
     this.getCount('2','本月');
+    this.getHeTong('本月');
   },
   methods: {
     goTarget(href) {
@@ -562,6 +563,15 @@ export default {
         path: '/ArchiveManagement/info2',
       });
     },
+    getHeTong(time){
+      const params = {
+        time: time
+      }
+      getHeTong(params).then(response => {
+        this.contractCount = response.data
+        this.timeClick5 = time
+      })
+    }
     // 获取oss数据
     // fetchOssData(){
     //   getImpertOssData().then(response => {

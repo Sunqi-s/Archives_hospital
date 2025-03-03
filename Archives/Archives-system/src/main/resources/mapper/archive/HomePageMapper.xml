@@ -92,4 +92,32 @@
         WHERE archive_status = 2
         <include refid="selectSearchListBydataPermiList"/>
     </select>
+    <select id="lastMonthHeTong" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM archive_info
+        WHERE MONTH(field30) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
+        AND category_id = 36
+        <include refid="selectSearchListBydataPermiList"/>
+    </select>
+    <select id="thisMonthHeTong" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM archive_info
+        WHERE MONTH(field30) = MONTH(CURRENT_DATE())
+        AND category_id = 36
+        <include refid="selectSearchListBydataPermiList"/>
+    </select>
+    <select id="thisYearHeTong" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM archive_info
+        WHERE YEAR(field30) = YEAR(CURRENT_DATE())
+        AND category_id = 36
+        <include refid="selectSearchListBydataPermiList"/>
+    </select>
+    <select id="allHeTong" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM archive_info
+        WHERE category_id = 36
+        AND (field30 != '' AND field30 IS NOT NULL)
+        <include refid="selectSearchListBydataPermiList"/>
+    </select>
 </mapper>

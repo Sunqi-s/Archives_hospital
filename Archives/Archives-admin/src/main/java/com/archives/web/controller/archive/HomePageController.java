@@ -16,7 +16,6 @@ public class HomePageController extends BaseController {
 
     @GetMapping("/data")
     public AjaxResult data( HomeData homeData) {
-        System.out.println("homeData: " + homeData);
         return AjaxResult.success(homePageService.getData(homeData));
     }
 
@@ -33,5 +32,8 @@ public class HomePageController extends BaseController {
 
     @GetMapping("/getStatus")
     public AjaxResult getStatus() {return AjaxResult.success(homePageService.getStatus());}
+
+    @GetMapping("/getHeTong")
+    public AjaxResult getHeTong(HomeData homeData) {return AjaxResult.success(homePageService.getHeTong(homeData));}
 
 }

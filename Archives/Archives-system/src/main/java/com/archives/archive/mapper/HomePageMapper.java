@@ -26,4 +26,10 @@ public interface HomePageMapper {
     public int getStatus1(@Param("dataPermiList") String[] dataPermiList);
     public int getStatus2(@Param("dataPermiList") String[] dataPermiList);
     public int getStatus3(@Param("dataPermiList") String[] dataPermiList);
+
+    public int lastMonthHeTong(@Param("dataPermiList") String[] dataPermiList);
+    public int thisMonthHeTong(@Param("dataPermiList") String[] dataPermiList);
+    public int thisYearHeTong(@Param("dataPermiList") String[] dataPermiList);
+    public int allHeTong(@Param("dataPermiList") String[] dataPermiList);
 }
+
