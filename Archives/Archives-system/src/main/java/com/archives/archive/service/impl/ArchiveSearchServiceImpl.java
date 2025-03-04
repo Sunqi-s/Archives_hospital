@@ -35,6 +35,9 @@ public class ArchiveSearchServiceImpl implements ArchiveSearchService {
             dataPermiList = new String[0];
         }else {
             dataPermiList = (currentUser.getDataPermi().split(","));
+            for (int i = 0; i < dataPermiList.length; i++){
+                dataPermiList[i] = "%" + dataPermiList[i] + "%";
+            }
         }
         return dataPermiList;
     }

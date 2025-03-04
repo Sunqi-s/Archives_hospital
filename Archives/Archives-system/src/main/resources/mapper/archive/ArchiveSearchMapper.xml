@@ -66,10 +66,9 @@
     </sql>
 
     <sql id="selectSearchListBydataPermiList">
-        <if test="dataPermiList.length > 0" >
-            and data_permit in
-            <foreach collection="dataPermiList" item="itemDataPermi" open="(" separator="," close=")">
-                #{itemDataPermi}
+        <if test="dataPermiList.length > 0">and
+            <foreach collection="dataPermiList" item="item" open="(" separator=" or " close=")">
+                data_permit like #{item}
             </foreach>
         </if>
     </sql>

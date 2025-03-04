@@ -74,13 +74,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public List<ArchiveInfo> selectArchiveInfoList(ArchiveInfo archiveInfo)
     {
-        String[] dataPermiList = new String[0];
-        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
-        if("all".equals(currentUser.getDataPermi())){
-            dataPermiList = new String[0];
-        }else {
-            dataPermiList = (currentUser.getDataPermi().split(","));
-        }
+        String[] dataPermiList = getDataPermit();
         String searchValue = archiveInfo.getSearchValue();
         Long categoryId = archiveInfo.getCategoryId();
         Long archiveStatus = archiveInfo.getArchiveStatus();
@@ -211,7 +205,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public int updateArchiveStatusAll(ArchiveInfo archiveInfo) {
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
-        String[] dataPermiList = "all".equals(currentUser.getDataPermi()) ? new String[0] : currentUser.getDataPermi().split(",");
+        String[] dataPermiList = getDataPermit();
 
         // 获取需要更新的档案ID列表
         List<Long> ids = getIdsToArchive(archiveInfo, dataPermiList);
@@ -360,7 +354,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public int sendArchiveAll(ArchiveInfo archiveInfo) {
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
-        String[] dataPermiList = "all".equals(currentUser.getDataPermi()) ? new String[0] : currentUser.getDataPermi().split(",");
+        String[] dataPermiList = getDataPermit();
 
         // 获取需要更新的档案ID列表
         List<Long> ids = getIdsToArchive(archiveInfo, dataPermiList);
@@ -387,26 +381,14 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Override
     public List<ArchiveInfo> beachSearch(ArchiveInfo archiveInfo) {
-        String[] dataPermiList = new String[0];
-        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
-        if("all".equals(currentUser.getDataPermi())){
-            dataPermiList = new String[0];
-        }else {
-            dataPermiList = (currentUser.getDataPermi().split(","));
-        }
+        String[] dataPermiList = getDataPermit();
         return archiveInfoMapper.beachSearch(archiveInfo, dataPermiList);
     }
 
     //获取档案信息数量
     @Override
     public int getDeleteCount(ArchiveInfo archiveInfo) {
-        String[] dataPermiList = new String[0];
-        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
-        if("all".equals(currentUser.getDataPermi())){
-            dataPermiList = new String[0];
-        }else {
-            dataPermiList = (currentUser.getDataPermi().split(","));
-        }
+        String[] dataPermiList = getDataPermit();
         if(archiveInfo.getSearchValue() != null && !archiveInfo.getSearchValue().isEmpty()){
             return archiveInfoMapper.delByQuerySearch(archiveInfo,dataPermiList);
         }else{
@@ -433,6 +415,20 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         } else {
             return archiveInfoMapper.selectIdList(archiveInfo, dataPermiList);
         }
+    }
+
+    public String[] getDataPermit() {
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        String[] dataPermiList;
+        if("all".equals(currentUser.getDataPermi())){
+            dataPermiList = new String[0];
+        }else {
+            dataPermiList = (currentUser.getDataPermi().split(","));
+            for (int i = 0; i < dataPermiList.length; i++){
+                dataPermiList[i] = "%" + dataPermiList[i] + "%";
+            }
+        }
+        return dataPermiList;
     }
 
     // 构建PlaceonfileLog对象

@@ -61,10 +61,10 @@
     </sql>
 
     <sql id="selectArchiveInfoDataPermit">
-        <if test="dataPermit.length > 0">and data_permit in
-         <foreach collection="dataPermit" item="item" open="(" separator="," close=")">
-            #{item}
-         </foreach>
+        <if test="dataPermit.length > 0">and
+            <foreach collection="dataPermit" item="item" open="(" separator=" or " close=")">
+                data_permit like #{item}
+            </foreach>
         </if>
     </sql>
 
