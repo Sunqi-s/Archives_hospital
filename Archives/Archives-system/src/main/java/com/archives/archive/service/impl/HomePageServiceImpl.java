@@ -137,6 +137,31 @@ public class HomePageServiceImpl implements IHomePageService {
         return homeDataList;
     }
 
+    @Override
+    public int getHeTong(HomeData homeData) {
+        String[] dataPermiList = selectSearchByDataPermit();
+        int data = 0;
+
+        switch (homeData.getTime()){
+            case "上月":
+                data = homePageMapper.lastMonthHeTong(dataPermiList);
+                break;
+            case "本月":
+                data = homePageMapper.thisMonthHeTong(dataPermiList);
+                break;
+            case "本年":
+                data = homePageMapper.thisYearHeTong(dataPermiList);
+                break;
+            case "全部":
+                data = homePageMapper.allHeTong(dataPermiList);
+                break;
+            default:
+                System.out.println("Invalid time!");
+        }
+
+        return data;
+    }
+
     public String[] selectSearchByDataPermit() {
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
         String[] dataPermiList;

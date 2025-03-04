@@ -18,4 +18,6 @@ public interface IHomePageService {
     public HomeData importOss();
 
     public List<HomeData> getStatus();
+
+    public int getHeTong(HomeData homeData);
 }
