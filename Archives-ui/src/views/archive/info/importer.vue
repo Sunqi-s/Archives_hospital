@@ -36,10 +36,6 @@
                     :selectedSheet="selectedSheet" @file-change="handleFileChange" @before-upload="beforeUpload"
                     @sheet-change="handleSheetChange" />
                 </slot>
-                <el-col :span="1"></el-col>
-                <el-cascader v-model="selectedDept" :options="deptOptions" :props="{ multiple: true }" clearable
-                  @change="handleDeptChange" placeholder="请选择部门" />
-                <el-col :span="1"></el-col>
               </el-row>
               <el-row style="margin-top: 15px">
                 <!-- 删除选中行 -->
@@ -250,7 +246,7 @@ import { addImportLog, getImportLog, getServerFileList, getServerFolderList, upd
 import { addOss } from "@/api/system/oss";
 import Treeselect from "@riophae/vue-treeselect";
 import categoryTree from "@/views/archive/category/categoryTree.vue";
-import { listDept, saveDeptIdsToBackend, resetDeptIds } from "@/api/system/dept";
+import { listDept } from "@/api/system/dept";
 
 export default {
   components: {
@@ -366,8 +362,6 @@ export default {
       exportBut: false,
       exportCategory: [32, 35, 36, 65, 66],
       deptOptions: [], // 部门选项
-      selectedDept: [], // 选中的部门
-      dataPermint: '', // 部门权限
     };
   },
   computed: {
@@ -410,44 +404,14 @@ export default {
   methods: {
     getDeptList() {
       listDept().then(response => {
-        // 直接转换为联级选择器格式
-        const cascaderOptions = this.convertToCascaderFormat(response.data);
-        // 更新联级选择器的选项
-        this.deptOptions = cascaderOptions;
+        const data = response.data;
+        const parentIds = new Set(data.map(dept => dept.parentId));
+        const leafDepts = data.filter(dept =>
+          !parentIds.has(dept.deptId)
+        ).map(dept => dept.deptName.trim()); // 去除部门名称前后空格
+
+        this.deptOptions = leafDepts;
       });
-    },
-
-    // 直接转换扁平数据为联级选择器格式
-    convertToCascaderFormat(deptList, parentId = 0) {
-      return deptList
-        .filter(dept => dept.parentId === parentId) // 过滤出当前层级的部门
-        .map(dept => {
-          // 递归处理子部门
-          const children = this.convertToCascaderFormat(deptList, dept.deptId);
-
-          // 构建当前部门节点
-          const node = {
-            value: dept.deptId, // 部门ID作为 value
-            label: dept.deptName, // 部门名称作为 label
-          };
-
-          // 如果 children 不为空，则添加到节点中
-          if (children.length > 0) {
-            node.children = children;
-          }
-
-          return node;
-        });
-    },
-    // 处理联级选择器的变化
-    handleDeptChange(value) {
-      if (value && value.length > 0) {
-        // 提取每个子数组的最后一个元素
-        const lastValues = value.map(subArr => subArr[subArr.length - 1]);
-        this.dataPermint = lastValues.join(',');
-      } else {
-        this.dataPermint = '';
-      }
     },
     //本地批量挂接方法
     formatTableData() {
@@ -677,6 +641,15 @@ export default {
           return null;
         }
       }
+      if(prop === 'department') {
+        const trimmedValue = value ? value.toString().trim() : '';
+        if (!trimmedValue) {
+          return '归档部门不能为空';
+        }
+        if(!this.deptOptions.some(dept => dept === trimmedValue)) {
+          return '归档部门不存在或不为最后一级部门';
+        }
+      }
 
       // 添加对 field3 的特殊验证
       if (prop === 'field3') {
@@ -700,23 +673,9 @@ export default {
 
     // 导入文件表单和文件挂接列表
     submitFileForm() {
-      if (this.dataPermint === '') {
-        this.$message.error('请选择部门');
-        return;
-      } else {
-        const deptIds = this.dataPermint;
-        saveDeptIdsToBackend(deptIds).then(response => {
-          this.isSubmitDateTriggered = false;
-          this.importChoice = 1;
-          this.submitData(); // 提交数据
-        }).catch(error => {
-          this.$message.error('部门 ID 保存失败');
-        });
-      }
-    },
-    // 保存选中的部门 ID 到后端
-    saveDeptIds(deptIds) {
-      
+        this.isSubmitDateTriggered = false;
+        this.importChoice = 1;
+        this.submitData(); // 提交数据
     },
     // 批量上传数据
     async batchInsertData(data) {
@@ -934,31 +893,15 @@ export default {
 
     // 打开批量挂接对话框
     openBatchAttachmentDialog() {
-      if (this.dataPermint === '') {
-        this.$message.error('请选择部门');
-        return;
-      } else {
-        const deptIds = this.dataPermint;
-        saveDeptIdsToBackend(deptIds).then(() => {
-          this.circleStep = 0;
-          this.importChoice = 0;
-          this.batchAttachmentDialogVisible = true;
-        });
-      }
+      this.circleStep = 0;
+      this.importChoice = 0;
+      this.batchAttachmentDialogVisible = true;
     },
     //打开在线批量挂接对话框
     openBatchAttachmentFromFolderDialog() {
-      if (this.dataPermint === '') {
-        this.$message.error('请选择部门');
-        return;
-      } else {
-        const deptIds = this.dataPermint;
-        saveDeptIdsToBackend(deptIds).then(() => {
-          this.batchAttachmentFromFolderDialogVisible = true;
-          this.circleStep = 0;
-          this.importChoice = 0;
-        });
-      }
+      this.batchAttachmentFromFolderDialogVisible = true;
+      this.circleStep = 0;
+      this.importChoice = 0;
     },
     //选择文件点击事件
     async handleBatchFileChange(file, fileList) {
@@ -1298,19 +1241,17 @@ export default {
     },
     //批量挂接完成
     complete() {
-      resetDeptIds().then(() => {
-        this.showOn = 0;
-        this.active = 4; // 设置步骤条的活动步骤
-        this.isSubmitDateTriggered = true;
-        this.displayOutput = true;
-        this.upLoad = false;
-        this.upFileList = [];
-        this.fileList = [];
-        this.uploadFiles = [];
-        this.filteredFileList = [];
-        this.selectedNodeKey = null;
-        this.dataPermint = '';
-      });
+      this.showOn = 0;
+      this.active = 4; // 设置步骤条的活动步骤
+      this.isSubmitDateTriggered = true;
+      this.displayOutput = true;
+      this.upLoad = false;
+      this.upFileList = [];
+      this.fileList = [];
+      this.uploadFiles = [];
+      this.filteredFileList = [];
+      this.selectedNodeKey = null;
+      this.dataPermint = '';
     },
 
     //选择文件夹方法

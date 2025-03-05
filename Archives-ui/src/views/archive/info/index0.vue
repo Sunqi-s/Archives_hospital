@@ -371,6 +371,7 @@ export default {
       fitList: [],
       isSubmit: false,
       placeon: {},//归档信息
+      lastDept: [],//最后一级部门
     };
   },
   created() {
@@ -441,7 +442,8 @@ export default {
             return {
               placeholder: `请选择${field.label}`,
               options: this.deptOptions,
-              default: null
+              default: null,
+              disableBranchNodes: true,
             };
           }
         case 'el-checkbox-group':
@@ -542,7 +544,21 @@ export default {
     /** 查询部门下拉树结构 */
     getDeptTree() {
       deptTreeSelect().then(response => {
-        this.deptOptions = response.data;
+        const disableNonLeafNodes = (nodes) => {
+          return nodes.map(node => {
+            const newNode = { ...node };
+            if (newNode.children && newNode.children.length > 0) {
+              // 非叶子节点，禁用并递归处理子节点
+              newNode.disabled = true;
+              newNode.children = disableNonLeafNodes(newNode.children);
+            } else {
+              // 叶子节点，确保禁用状态为false
+              newNode.disabled = false;
+            }
+            return newNode;
+          });
+        };
+        this.deptOptions = disableNonLeafNodes(response.data);
       });
     },
     handleFileOptions(data, idKey, parentKey) {

@@ -11,6 +11,7 @@ import com.archives.common.exception.ServiceException;
 import com.archives.common.utils.DateUtils;
 import com.archives.common.utils.SecurityUtils;
 import com.archives.system.domain.SysOss;
+import com.archives.system.mapper.SysDeptMapper;
 import com.archives.system.mapper.SysOssMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Autowired
     private PlaceonfileLogServiceImpl placeonfileLogService;
+
+    @Autowired
+    private SysDeptMapper sysDeptMapper;
 
     @Autowired
     private final ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
@@ -93,8 +97,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public int insertArchiveInfo(ArchiveInfo archiveInfo)
     {
-        String deptIds = String.valueOf(SecurityUtils.getLoginUser().getDeptId());
-        archiveInfo.setDataPermit(deptIds);
+        archiveInfo.setDataPermit( String.valueOf(archiveInfo.getDepartment()));
         archiveInfo.setCreateTime(DateUtils.getNowDate());
         int cnt = archiveInfoMapper.insertArchiveInfo(archiveInfo);
         Long fid = archiveInfo.getId();
@@ -278,7 +281,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
 
         //拿到数据权限
-        String deptIds = DeptIdHolder.getDeptIds();
         return CompletableFuture.supplyAsync(() -> {
 
             if (archiveInfoList == null || archiveInfoList.isEmpty()) {
@@ -329,8 +331,14 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
                 if(archiveInfo.getField28() == null){archiveInfo.setField28("");}
                 if(archiveInfo.getField29() == null){archiveInfo.setField29("");}
                 if(archiveInfo.getField30() == null){archiveInfo.setField30("");}
+
+                String deptIds = String.valueOf(sysDeptMapper.selectDeptIdByName(archiveInfo.getDepartment()));
+                if(deptIds != null&&deptIds != "null"){
+                    archiveInfo.setDataPermit(deptIds);
+                }else{
+                    throw new ServiceException("导入信息中归档部门与部门信息不匹配！");
+                }
                 archiveInfo.setCreateTime(DateUtils.getNowDate());
-                archiveInfo.setDataPermit(deptIds);
                 archiveInfo.setCreateBy(currentUser.getNickName());
             }
             // 调用mapper里写好的批量插入方法
