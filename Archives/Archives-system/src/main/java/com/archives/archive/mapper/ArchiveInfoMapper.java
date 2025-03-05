@@ -133,4 +133,13 @@ public interface ArchiveInfoMapper
     public int delByQuerySearch(@Param("archiveInfo") ArchiveInfo archiveInfo, @Param("dataPermit") String[] dataPermiList);
 
     public List<ArchiveInfo> selectArchiveInfoByIds(@Param("ids") List<Long> ids);
+
+    public ArchiveInfo getColumn(@Param("itemName") String list,@Param("categoryId") Long categoryId);
+
+    public List<ArchiveInfo> getNumberByKeyword(@Param("map") List<ArchiveInfo> list, @Param("keyword") String keyword, @Param("categoryId")Long categoryId, @Param("archiveStatus")Long archiveStatus, @Param("dataPermit") String[] dataPermiList);
+
+    public List<ArchiveInfo> getNumberBeachSearch(@Param("map") List<ArchiveInfo> list,@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
+
+    public int updateArchiveNumber(@Param("list") List<ArchiveInfo> list);
+
 }

@@ -151,3 +151,11 @@ export function getInfoByIds(query) {
     data: query
   })
 }
+
+export function updateArchiveNumber(query) {
+  return request({
+    url: '/archive/info/updateArchiveNumber',
+    method: 'post',
+    data: query
+  })
+}

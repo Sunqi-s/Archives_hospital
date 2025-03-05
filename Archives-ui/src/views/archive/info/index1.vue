@@ -73,13 +73,13 @@
               v-hasPermi="['archive:info:export']">导出</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button type="success" icon="el-icon-s-flag" size="small" @click="handleDocument">回档</el-button>
+            <el-button type="success" icon="el-icon-s-flag" size="small" :disabled="infoList.length === 0" @click="handleDocument">回档</el-button>
           </el-col>
           <el-col :span="1.5">
             <el-button type="success" icon="el-icon-s-flag" size="small" @click="handlePrint">打印</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button type="success" icon="el-icon-s-flag" size="small" @click="handleSendUtilize">发送利用</el-button>
+            <el-button type="success" icon="el-icon-s-flag" size="small" :disabled="infoList.length === 0" @click="handleSendUtilize">发送利用</el-button>
           </el-col>
           <!--          <el-col :span="1.5">-->
           <!--            <i>已选择{{savedids.length+ids.length}}项</i>-->

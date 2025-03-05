@@ -170,4 +170,10 @@ public class ArchiveInfoController extends BaseController
     public AjaxResult getInfoByIds(@RequestBody List<Long> ids) {
         return AjaxResult.success(archiveInfoService.selectArchiveInfoByIds(ids));
     }
+
+    @PostMapping("/updateArchiveNumber")
+    public int updateArchiveNumber(@RequestBody ArchiveInfo archiveInfo) {
+        return archiveInfoService.updateArchiveNumber(archiveInfo);
+    }
+
 }

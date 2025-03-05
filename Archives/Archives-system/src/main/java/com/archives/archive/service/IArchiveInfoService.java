@@ -104,4 +104,6 @@ public interface IArchiveInfoService
     public int getDeleteCount(ArchiveInfo archiveInfo);
 
     public List<ArchiveInfo> selectArchiveInfoByIds(List<Long> ids);
+
+    public int updateArchiveNumber(ArchiveInfo archiveInfo);
 }

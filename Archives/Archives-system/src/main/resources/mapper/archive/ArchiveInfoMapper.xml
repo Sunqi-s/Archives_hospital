@@ -615,4 +615,147 @@
             #{id}
         </foreach>
     </delete>
+
+    <select id="getColumn" resultMap="ArchiveInfoResult">
+        SELECT item_name AS field1,column_name AS field2
+        FROM archive_item
+        WHERE item_name = #{itemName}
+        AND category_id = #{categoryId}
+    </select>
+
+    <select id="getNumberByKeyword"  resultMap="ArchiveInfoResult">
+        select id,
+        <foreach collection="map" item="entry" separator=",">
+            <if test="entry != null">
+                ${entry.field2} as ${entry.field1}
+            </if>
+        </foreach>
+        from archive_info
+        <where>
+            and CONCAT_WS('|',
+            fonds_number,
+            fonds_name,
+            retention_period,
+            item_number,
+            archive_number,
+            department,
+            archiver,
+            remarks,
+            create_by,
+            update_by,
+            field1,
+            field2,
+            field3,
+            field4,
+            field5,
+            field6,
+            field7,
+            field8,
+            field9,
+            field10,
+            field11,
+            field12,
+            field13,
+            field14,
+            field15,
+            field16,
+            field17,
+            field18,
+            field19,
+            field20,
+            field21,
+            field22,
+            field23,
+            field24,
+            field25,
+            field26,
+            field27,
+            field28,
+            field29,
+            field30,
+            oss_status
+            ) LIKE CONCAT('%', #{keyword}, '%')
+            and category_id = #{categoryId}
+            and archive_status = #{archiveStatus}
+            <include refid="selectArchiveInfoDataPermit" />
+        </where>
+    </select>
+
+    <select id="getNumberBeachSearch" resultMap="ArchiveInfoResult">
+        select id,
+        <foreach collection="map" item="entry" separator=",">
+            <if test="entry != null">
+                ${entry.field2} as ${entry.field1}
+            </if>
+        </foreach>
+        from archive_info
+        <where>
+            <if test="archiveInfo.categoryId != null "> and category_id = #{archiveInfo.categoryId}</if>
+            <if test="archiveInfo.fondsNumber != null  and archiveInfo.fondsNumber != ''"> and fonds_number Like concat('%', #{archiveInfo.fondsNumber}, '%')</if>
+            <if test="archiveInfo.fondsName != null  and archiveInfo.fondsName != ''"> and fonds_name like concat('%', #{archiveInfo.fondsName}, '%')</if>
+            <if test="archiveInfo.retentionPeriod != null  and archiveInfo.retentionPeriod != ''"> and retention_period Like concat('%', #{archiveInfo.retentionPeriod}, '%')</if>
+            <if test="archiveInfo.itemNumber != null  and archiveInfo.itemNumber != ''"> and item_number = #{archiveInfo.itemNumber}</if>
+            <if test="archiveInfo.archiveNumber != null  and archiveInfo.archiveNumber != ''"> and archive_number = #{archiveInfo.archiveNumber}</if>
+            <if test="archiveInfo.department != null  and archiveInfo.department != ''"> and department = #{archiveInfo.department}</if>
+            <if test="archiveInfo.archiver != null  and archiveInfo.archiver != ''"> and archiver Like concat('%', #{archiveInfo.archiver}, '%')</if>
+            <if test="archiveInfo.archiveDate != null "> and archive_date = #{archiveInfo.archiveDate}</if>
+            <if test="archiveInfo.remarks != null  and archiveInfo.remarks != ''"> and remarks Like concat('%', #{archiveInfo.remarks}, '%')</if>
+            <if test="archiveInfo.archiveStatus != null "> and archive_status = #{archiveInfo.archiveStatus}</if>
+            <if test="archiveInfo.categoryCode != null  and archiveInfo.categoryCode != ''"> and category_code = #{archiveInfo.categoryCode}</if>
+            <if test="archiveInfo.field1 != null  and archiveInfo.field1 != ''"> and field1 Like concat('%', #{archiveInfo.field1}, '%')</if>
+            <if test="archiveInfo.field2 != null  and archiveInfo.field2 != ''"> and field2 Like concat('%', #{archiveInfo.field2}, '%')</if>
+            <if test="archiveInfo.field3 != null  and archiveInfo.field3 != ''"> and field3 Like concat('%', #{archiveInfo.field3}, '%')</if>
+            <if test="archiveInfo.field4 != null  and archiveInfo.field4 != ''"> and field4 Like concat('%', #{archiveInfo.field4}, '%')</if>
+            <if test="archiveInfo.field5 != null  and archiveInfo.field5 != ''"> and field5 Like concat('%', #{archiveInfo.field5}, '%')</if>
+            <if test="archiveInfo.field6 != null  and archiveInfo.field6 != ''"> and field6 Like concat('%', #{archiveInfo.field6}, '%')</if>
+            <if test="archiveInfo.field7 != null  and archiveInfo.field7 != ''"> and field7 Like concat('%', #{archiveInfo.field7}, '%')</if>
+            <if test="archiveInfo.field8 != null  and archiveInfo.field8 != ''"> and field8 Like concat('%', #{archiveInfo.field8}, '%')</if>
+            <if test="archiveInfo.field9 != null  and archiveInfo.field9 != ''"> and field9 Like concat('%', #{archiveInfo.field9}, '%')</if>
+            <if test="archiveInfo.field10 != null  and archiveInfo.field10 != ''"> and field10 Like concat('%', #{archiveInfo.field10}, '%')</if>
+            <if test="archiveInfo.field11 != null  and archiveInfo.field11 != ''"> and field11 Like concat('%', #{archiveInfo.field11}, '%')</if>
+            <if test="archiveInfo.field12 != null  and archiveInfo.field12 != ''"> and field12 Like concat('%', #{archiveInfo.field12}, '%')</if>
+            <if test="archiveInfo.field13 != null  and archiveInfo.field13 != ''"> and field13 Like concat('%', #{archiveInfo.field13}, '%')</if>
+            <if test="archiveInfo.field14 != null  and archiveInfo.field14 != ''"> and field14 Like concat('%', #{archiveInfo.field14}, '%')</if>
+            <if test="archiveInfo.field15 != null  and archiveInfo.field15 != ''"> and field15 Like concat('%', #{archiveInfo.field15}, '%')</if>
+            <if test="archiveInfo.field16 != null  and archiveInfo.field16 != ''"> and field16 Like concat('%', #{archiveInfo.field16}, '%')</if>
+            <if test="archiveInfo.field17 != null  and archiveInfo.field17 != ''"> and field17 Like concat('%', #{archiveInfo.field17}, '%')</if>
+            <if test="archiveInfo.field18 != null  and archiveInfo.field18 != ''"> and field18 Like concat('%', #{archiveInfo.field18}, '%')</if>
+            <if test="archiveInfo.field19 != null  and archiveInfo.field19 != ''"> and field19 Like concat('%', #{archiveInfo.field19}, '%')</if>
+            <if test="archiveInfo.field20 != null  and archiveInfo.field20 != ''"> and field20 Like concat('%', #{archiveInfo.field20}, '%')</if>
+            <if test="archiveInfo.field21 != null  and archiveInfo.field21 != ''"> and field21 Like concat('%', #{archiveInfo.field21}, '%')</if>
+            <if test="archiveInfo.field22 != null  and archiveInfo.field22 != ''"> and field22 Like concat('%', #{archiveInfo.field22}, '%')</if>
+            <if test="archiveInfo.field23 != null  and archiveInfo.field23 != ''"> and field23 Like concat('%', #{archiveInfo.field23}, '%')</if>
+            <if test="archiveInfo.field24 != null  and archiveInfo.field24 != ''"> and field24 Like concat('%', #{archiveInfo.field24}, '%')</if>
+            <if test="archiveInfo.field25 != null  and archiveInfo.field25 != ''"> and field25 Like concat('%', #{archiveInfo.field25}, '%')</if>
+            <if test="archiveInfo.field26 != null  and archiveInfo.field26 != ''"> and field26 Like concat('%', #{archiveInfo.field26}, '%')</if>
+            <if test="archiveInfo.field27 != null  and archiveInfo.field27 != ''"> and field27 Like concat('%', #{archiveInfo.field27}, '%')</if>
+            <if test="archiveInfo.field28 != null  and archiveInfo.field28 != ''"> and field28 Like concat('%', #{archiveInfo.field28}, '%')</if>
+            <if test="archiveInfo.field29 != null  and archiveInfo.field29 != ''"> and field29 Like concat('%', #{archiveInfo.field29}, '%')</if>
+            <if test="archiveInfo.field30 != null  and archiveInfo.field30 != ''"> and field30 Like concat('%', #{archiveInfo.field30}, '%')</if>
+            <if test="archiveInfo.ossStatus != null and archiveInfo.ossStatus != 0">and oss_status = #{archiveInfo.ossStatus}</if>
+            <include refid="selectArchiveInfoDataPermit"/>
+        </where>
+        <choose>
+            <when test="archiveInfo.archiveStatus != 1">
+                ORDER BY id DESC
+            </when>
+            <otherwise>
+                ORDER BY archive_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <update id="updateArchiveNumber">
+        UPDATE archive_info
+        SET archive_number = CASE
+        <foreach collection="list" item="value" index="key">
+            WHEN id = #{value.id} THEN #{value.archiveNumber}
+        </foreach>
+        ELSE archive_number
+        END
+        WHERE id IN
+        <foreach collection="list" item="value" index="key" open="(" separator="," close=")">
+            #{value.id}
+        </foreach>
+    </update>
 </mapper>

@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 /**
  * 档案信息Service业务层处理
  *
@@ -192,7 +193,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     public int updateArchiveStatusById(SearchJson searchJson)
     {
         Long[] ids = searchJson.getIds();
-        PlaceonfileLog placeonfileLog = buildPlaceonfileLog(Arrays.asList(ids), Long.parseLong(searchJson.getCategoryId()), null,null);
+        PlaceonfileLog placeonfileLog = buildPlaceonfileLog(Arrays.asList(ids), Long.valueOf(searchJson.getCategoryId()), null,null);
         placeonfileLog.setType(searchJson.getArchiveStatus());
 
         placeonfileLogService.insertPlaceonfileLog(placeonfileLog);
@@ -215,7 +216,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             return 0;
         }
         Long categoryId = archiveInfo.getCategoryId();
-        Long time = new Date().getTime();
+        Long time = (Long) new Date().getTime();
         Date archiveDate = DateUtils.getNowDate();
         // 构建PlaceonfileLog对象
         for (int i = 0; i < ids.size(); i += 3000) {
@@ -235,7 +236,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public int sendArchiveInfoByIds(SearchJson searchJson) {
         Long[] ids = searchJson.getIds();
-        PlaceonfileLog placeonfileLog = buildPlaceonfileLog(Arrays.asList(ids), Long.parseLong(searchJson.getCategoryId()), null,null);
+        PlaceonfileLog placeonfileLog = buildPlaceonfileLog(Arrays.asList(ids), Long.valueOf(searchJson.getCategoryId()), null,null);
         placeonfileLog.setType(searchJson.getArchiveStatus());
 
         placeonfileLogService.insertPlaceonfileLog(placeonfileLog);
@@ -286,8 +287,8 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             }
 
             for (ArchiveInfo archiveInfo : archiveInfoList) {
-                if(archiveInfo.getCategoryId() == null) {archiveInfo.setCategoryId(0L);}
-                if(archiveInfo.getArchiveStatus() == null) {archiveInfo.setArchiveStatus(0L);}
+                if(archiveInfo.getCategoryId() == null) {archiveInfo.setCategoryId(Long.valueOf(0));}
+                if(archiveInfo.getArchiveStatus() == null) {archiveInfo.setArchiveStatus(Long.valueOf(0));}
                 if(archiveInfo.getArchiveDate() == null) {archiveInfo.setArchiveDate(DateUtils.getNowDate());}
                 if(archiveInfo.getArchiver() == null) {archiveInfo.setArchiver("");}
                 if(archiveInfo.getFondsNumber() == null){archiveInfo.setFondsNumber("");}
@@ -297,7 +298,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
                 if(archiveInfo.getArchiveNumber() == null){archiveInfo.setArchiveNumber("");}
                 if(archiveInfo.getArchiveDate() == null){archiveInfo.setArchiveDate(null);}
                 if(archiveInfo.getRemarks() == null){archiveInfo.setRemarks("");}
-                if(archiveInfo.getArchiveStatus() == null){archiveInfo.setArchiveStatus(0L);}
+                if(archiveInfo.getArchiveStatus() == null){archiveInfo.setArchiveStatus(Long.valueOf(0));}
                 if(archiveInfo.getCategoryCode() == null){archiveInfo.setCategoryCode("");}
                 if(archiveInfo.getField1() == null){archiveInfo.setField1("");}
                 if(archiveInfo.getField2() == null){archiveInfo.setField2("");}
@@ -363,7 +364,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         if (ids.isEmpty()) {
             return 0;
         }
-        Long time = new Date().getTime();
+        Long time = (Long) new Date().getTime();
         Date createTime = DateUtils.getNowDate();
         // 如果ids数量超过3000，则拆分成多个List
         int maxIdsSize = 3000;
@@ -403,6 +404,65 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         return archiveInfoMapper.selectArchiveInfoByIds(ids);
     }
 
+    @Override
+    public int updateArchiveNumber(ArchiveInfo archiveInfo) {
+        try {
+            String[] dataPermiList = getDataPermit();
+
+            // 定义需要获取的列
+            List<String> columns = Arrays.asList("全宗号", "门类代码", "年度", "保管期限", "机构或问题", "件号");
+            List<ArchiveInfo> archiveInfoList = columns.stream()
+                    .map(column -> archiveInfoMapper.getColumn(column, archiveInfo.getCategoryId()))
+                    .collect(Collectors.toList());
+
+            // 构建mapList
+            List<ArchiveInfo> mapList = IntStream.range(0, columns.size())
+                    .mapToObj(i -> {
+                        ArchiveInfo archive = new ArchiveInfo();
+                        archive.setField1("field" + (i + 1));
+                        archive.setField2(archiveInfoList.get(i).getField2());
+                        return archive;
+                    })
+                    .collect(Collectors.toList());
+
+            // 获取查询结果
+            List<ArchiveInfo> resultList;
+            if (archiveInfo.getSearchValue() != null && !archiveInfo.getSearchValue().isEmpty()) {
+                resultList = archiveInfoMapper.getNumberByKeyword(
+                        mapList,
+                        archiveInfo.getSearchValue(),
+                        archiveInfo.getCategoryId(),
+                        archiveInfo.getArchiveStatus(),
+                        dataPermiList
+                );
+            } else {
+                resultList = archiveInfoMapper.getNumberBeachSearch(mapList, archiveInfo, dataPermiList);
+            }
+            if (resultList.isEmpty()) {
+                return 1;
+            }
+            // 更新档案编号
+            resultList.forEach(archiveInfo1 -> {
+                String[] newNumber = {
+                        String.valueOf(archiveInfo1.getField1()),
+                        String.valueOf(archiveInfo1.getField2()),
+                        String.valueOf(archiveInfo1.getField3()),
+                        String.valueOf(archiveInfo1.getField4()),
+                        String.valueOf(archiveInfo1.getField5()),
+                        String.valueOf(archiveInfo1.getField6())
+                };
+                String newNumberStr = String.join("-", newNumber[0], newNumber[1]) + "·" + String.join("-", newNumber[2], newNumber[3], newNumber[4], newNumber[5]);
+                archiveInfo1.setArchiveNumber(newNumberStr);
+            });
+            // 更新数据库中的档案编号
+            return archiveInfoMapper.updateArchiveNumber(resultList);
+        } catch (Exception e) {
+            System.err.println("Error updating archive number: " + e.getMessage());
+            throw new ServiceException("更新档号时发生错误");
+        }
+    }
+
+
     // 根据搜索条件获取需要归档的档案ID列表
     private List<Long> getIdsToArchive(ArchiveInfo archiveInfo, String[] dataPermiList) {
         if (archiveInfo.getSearchValue() != null && !archiveInfo.getSearchValue().isEmpty()) {
@@ -434,9 +494,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     // 构建PlaceonfileLog对象
     private PlaceonfileLog buildPlaceonfileLog(List<Long> ids, Long categoryId, Long oddNumbers, Date createTime) {
         PlaceonfileLog placeonfileLog = new PlaceonfileLog();
-        placeonfileLog.setPlaceonfileInfo((long) ids.size());
+        placeonfileLog.setPlaceonfileInfo(Long.valueOf(ids.size()));
         placeonfileLog.setInfoId(ids.stream().map(String::valueOf).collect(Collectors.joining(",")));
-        placeonfileLog.setOddNumbers(oddNumbers != null ? oddNumbers : new Date().getTime());
+        placeonfileLog.setOddNumbers(Long.valueOf(oddNumbers != null ? oddNumbers : new Date().getTime()));
         placeonfileLog.setCategoryId(Math.toIntExact(categoryId));
         placeonfileLog.setCreateTime(createTime != null ? createTime : DateUtils.getNowDate());
         return placeonfileLog;

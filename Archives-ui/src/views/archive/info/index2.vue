@@ -71,7 +71,7 @@
             <el-button type="success" icon="el-icon-s-flag" size="small" @click="handlePrint">打印</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button type="success" icon="el-icon-s-flag" size="small" @click="handleSendUtilize">退回资源</el-button>
+            <el-button type="success" icon="el-icon-s-flag" size="small" :disabled="infoList.length === 0" @click="handleSendUtilize">退回资源</el-button>
           </el-col>
         </el-row>
 

@@ -81,14 +81,18 @@
               v-hasPermi="['archive:info:export']">导出</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button type="success" icon="el-icon-s-flag" size="small" @click="handleDocument">归档</el-button>
+            <el-button type="success" icon="el-icon-s-flag" size="small" :disabled="infoList.length === 0" @click="handleDocument">归档</el-button>
           </el-col>
           <el-col :span="1.5">
             <el-button type="success" icon="el-icon-s-flag" size="small" @click="handlePrint">打印</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button type="deanger" icon="el-icon-s-promotion" size="small"
+            <el-button type="deanger" icon="el-icon-s-promotion" size="small" :disabled="infoList.length === 0"
               @click="handleBatchDelete">一键删除</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button type="deanger" icon="el-icon-s-promotion" size="small" :disabled="infoList.length === 0"
+              @click="updateArchiveNumber">重整档号</el-button>
           </el-col>
         </el-row>
 
@@ -275,7 +279,7 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import { addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo, getBeachList, getDelCount, getDeleteCountBySearch,updatAarchiveStatusAll,updateArchiveStatusById } from "@/api/archive/info";
+import { addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo, getBeachList, getDelCount, updateArchiveNumber,updatAarchiveStatusAll,updateArchiveStatusById } from "@/api/archive/info";
 import { getCategory, listCategory } from '@/api/archive/category'
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
@@ -1284,6 +1288,29 @@ export default {
               this.$modal.msgSuccess("删除成功");
             }, 2000));
       })
+    },
+    updateArchiveNumber(){
+      this.$modal.confirm('确认重整档号？').then(async () => {
+          this.$modal.loading("正在处理中");
+          const ExportQueryParams = {
+            categoryId: this.categoryId,
+            archiveStatus: 0,
+            ...this.queryParams
+          };
+          ExportQueryParams.archiveStatus = 0;
+          updateArchiveNumber(ExportQueryParams).then((res) => {
+            if (res>0) {
+              this.$modal.closeLoading();
+              this.getList();
+              this.$modal.msgSuccess("重整档号成功");
+              return;
+            } else {
+              this.$modal.closeLoading();
+              this.$modal.msgError("重整档号失败：" + error.message);
+              console.error("重整档号失败：", error);
+            }
+          })
+        })
     },
     clearSearch() {
       this.categoryId = null;
