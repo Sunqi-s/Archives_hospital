@@ -43,6 +43,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Autowired
     private final ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
 
+    @Autowired
+    private SysDeptMapper sysDeptMapper;
+
     public ArchiveInfoServiceImpl(ArchiveInfoMapper archiveInfoMapper, SysOssMapper sysOssMapper) {
         this.archiveInfoMapper = archiveInfoMapper;
         this.sysOssMapper = sysOssMapper;
@@ -330,9 +333,10 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
                 if(archiveInfo.getField29() == null){archiveInfo.setField29("");}
                 if(archiveInfo.getField30() == null){archiveInfo.setField30("");}
 
-                String deptIds = String.valueOf(archiveInfo.getDepartment());
+                String deptIds = String.valueOf(sysDeptMapper.selectDeptIdByName(archiveInfo.getDepartment()));
                 if(deptIds != null&&deptIds != "null"){
                     archiveInfo.setDataPermit(deptIds);
+                    archiveInfo.setDepartment(deptIds);
                 }else{
                     throw new ServiceException("导入信息中归档部门与部门信息不匹配！");
                 }

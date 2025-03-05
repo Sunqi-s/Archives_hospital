@@ -586,25 +586,11 @@ export default {
           const rowData = { validationErrors: [], categoryId: this.queryCategoryId };
           yesList.forEach((yes) => {
             const idx = headers.indexOf(yes.label);
-            let value = row[idx];
-            if(yes.prop === 'department'){
-              const trimmedValue = value? value.toString().trim(): '';
-              const dept = this.deptOptions.find(d => d.label === trimmedValue); 
-              if(dept){
-                value = dept.value;
-              }else{
-                rowData.validationErrors.push({
-                  field: yes.prop,
-                  messsage: '归档部门不存在或不为最后一级部门'
-                })
-              }
-            }else {
-              const error = this.validateCell(value, 1100, yes.type, yes.isRequired, yes.prop);
-              if (error) {
-                rowData.validationErrors.push({ field: yes.prop, messsage: error });
-              }
+            rowData[yes.prop] = row[idx];
+            const error = this.validateCell(row[idx], 1100, yes.type, yes.isRequired, yes.prop);
+            if (error) {
+              rowData.validationErrors.push({ field: yes.prop, messsage: error });
             }
-            rowData[yes.prop] = value;
           });
           noList.forEach((no) => {
             rowData[no.prop] = null;
@@ -656,6 +642,16 @@ export default {
         } else {
           this.exportList.splice(idx, 1)
           return null;
+        }
+      }
+
+      if(prop === 'department'){
+        const trimmedValue = value ? value.toString().trim() : '';
+        if (!trimmedValue) {
+          return '归档部门不能为空';
+        }
+        if(!this.deptOptions.some(dept => dept.label === trimmedValue)) {
+          return '归档部门不存在或不为最后一级部门';
         }
       }
 
