@@ -408,8 +408,12 @@ export default {
         const parentIds = new Set(data.map(dept => dept.parentId));
         const leafDepts = data.filter(dept =>
           !parentIds.has(dept.deptId)
-        ).map(dept => dept.deptName.trim()); // 去除部门名称前后空格
-
+        ).map(dept => {
+          return {
+            value: dept.deptId,
+            label: dept.deptName.trim()
+          };
+        }); // 去除部门名称前后空格
         this.deptOptions = leafDepts;
       });
     },
@@ -614,7 +618,6 @@ export default {
         return null;
       }
 
-
       if (type === 'String') {
         if (isRequired === '1' && (value === null || value === undefined || (typeof value === 'string' && value.trim() === ''))) {
           return '不许为空';
@@ -641,12 +644,13 @@ export default {
           return null;
         }
       }
-      if(prop === 'department') {
+
+      if(prop === 'department'){
         const trimmedValue = value ? value.toString().trim() : '';
         if (!trimmedValue) {
           return '归档部门不能为空';
         }
-        if(!this.deptOptions.some(dept => dept === trimmedValue)) {
+        if(!this.deptOptions.some(dept => dept.label === trimmedValue)) {
           return '归档部门不存在或不为最后一级部门';
         }
       }
@@ -809,7 +813,6 @@ export default {
             this.$message.error('数据插入失败', error);
           }
         }
-
       };
 
       await insertBatch(0);
