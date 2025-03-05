@@ -104,6 +104,13 @@
           <el-button
             size="mini"
             type="text"
+            icon="el-icon-plus"
+            @click="handleNumberRule(scope.row)"
+            v-hasPermi="['archive:category:add']"
+          >档号规则</el-button>
+          <el-button
+            size="mini"
+            type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['archive:category:remove']"
@@ -151,6 +158,21 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+    <el-dialog title="档号规则" :visible.sync="isRule" width="500px" append-to-body>
+      <el-select v-model="archiveItem" placeholder="请选择字段">
+                            <el-option v-for="item in selection" :key="item" :label="item"
+                                :value="item">
+                            </el-option>
+                        </el-select>
+                        <el-select v-model="joinItem" placeholder="请选择间隔符">
+                            <el-option v-for="item in joinSelection" :key="item" :label="item"
+                                :value="item">
+                            </el-option>
+                        </el-select>
+                        <el-button type="primary" @click="addRule">添加</el-button>
+                        <el-input v-model="numberRule" placeholder="结果" />
+                        <el-button type="primary" @click="updateRule">确定</el-button>
+    </el-dialog>
   </div>
 </template>
 
@@ -158,6 +180,7 @@
 import { listCategory, getCategory, delCategory, addCategory, updateCategory } from "@/api/archive/category";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
+import { addRule } from "@/api/archive/archiveRule";
 
 export default {
   name: "Category",
@@ -196,7 +219,23 @@ export default {
           { required: true, message: "类别不能为空", trigger: "change" }
         ],        isActive: [
           { required: true, message: "显示状态不能为空", trigger: "change" }
-        ],      }
+        ],      },
+        ruleForm : {
+        id: null,
+        categoryId: null,
+        ruleItem: null,
+        ruleJoin: null,
+        itemName: null,
+        numberCount: null
+      },
+        isRule: false,
+        selection:["全宗号", "门类代码", "年度", "保管期限", "机构或问题", "件号", "保管期限缩写", "机构或问题缩写"],
+        archiveItem:'',
+        numberRule:'',
+        joinSelection:["","-", "·"],
+        joinItem:'',
+        trueRule:[],
+        trueItem:[]
     };
   },
   created() {
@@ -343,6 +382,41 @@ export default {
       const categoryId = row.id ;
       const categoryName = row.name;
       this.$tab.openPage("设置[" + categoryName + "]项目模板", '/system/biz-settings/item-edit/index/' + categoryId);
+    },
+    handleNumberRule(row){
+      this.ruleForm.categoryId = row.id;
+      this.isRule = true;
+      this.archiveItem = "";
+      this.numberRule = "";
+      this.isRule = true;
+    },
+    addRule(){
+      this.numberRule = this.numberRule + this.archiveItem + this.joinItem;
+      this.trueRule.push(this.joinItem);
+      this.trueItem.push(this.archiveItem);
+    },
+    updateRule(){
+      if(this.trueItem.length != 6 || this.trueRule.length != 6){
+        this.$modal.msgError("请选择完整的档号规则");
+        return;
+      }
+      this.ruleForm.ruleJoin = this.trueRule.join(",");
+      this.ruleForm.ruleItem = this.trueItem.join(",");
+      addRule(this.ruleForm).then(response => {
+              this.$modal.msgSuccess("新增成功");
+              this.isRule = false;
+              this.numberRule = "";
+              this.trueRule = [];
+              this.trueItem = [];
+              ruleForm = {
+        id: null,
+        categoryId: null,
+        ruleItem: null,
+        ruleJoin: null,
+        itemName: null,
+        numberCount: null
+      };
+            });
     },
   }
 };

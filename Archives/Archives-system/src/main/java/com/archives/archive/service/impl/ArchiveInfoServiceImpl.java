@@ -1,10 +1,8 @@
 package com.archives.archive.service.impl;
 
-import com.archives.archive.domain.ArchiveInfo;
-import com.archives.archive.domain.DeptIdHolder;
-import com.archives.archive.domain.PlaceonfileLog;
-import com.archives.archive.domain.SearchJson;
+import com.archives.archive.domain.*;
 import com.archives.archive.mapper.ArchiveInfoMapper;
+import com.archives.archive.mapper.ArchiveRuleMapper;
 import com.archives.archive.service.IArchiveInfoService;
 import com.archives.common.core.domain.entity.SysUser;
 import com.archives.common.exception.ServiceException;
@@ -42,6 +40,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Autowired
     private SysDeptMapper sysDeptMapper;
+
+    @Autowired
+    private ArchiveRuleMapper archiveRuleMapper;
 
     @Autowired
     private final ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
@@ -414,21 +415,33 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Override
     public int updateArchiveNumber(ArchiveInfo archiveInfo) {
-        try {
+//        try {
             String[] dataPermiList = getDataPermit();
-
+            ArchiveRule archiveRule = new ArchiveRule();
+            archiveRule.setCategoryId(archiveInfo.getCategoryId());
+            List<ArchiveRule> ruleList = archiveRuleMapper.selectArchiveRuleList(archiveRule);
+//        System.out.println("ruleList:" + ruleList);
+            if (ruleList.isEmpty()) {
+                throw new ServiceException("档号规则不存在！");
+            }
+            ArchiveRule archiveRule1 = ruleList.get(0);
             // 定义需要获取的列
-            List<String> columns = Arrays.asList("全宗号", "门类代码", "年度", "保管期限", "机构或问题", "件号");
+            List<String> columns = Arrays.asList(archiveRule1.getRuleItem().split(","));
+            String[] rule = archiveRule1.getRuleJoin().split(",");
+//            String[] item = archiveRule1.getItemName().split(",");
+//            String[] count = archiveRule1.getNumberCount().split(",");
+
             List<ArchiveInfo> archiveInfoList = columns.stream()
                     .map(column -> archiveInfoMapper.getColumn(column, archiveInfo.getCategoryId()))
                     .collect(Collectors.toList());
-
+//        System.out.println("archiveInfoList:" + archiveInfoList);
             // 构建mapList
             List<ArchiveInfo> mapList = IntStream.range(0, columns.size())
                     .mapToObj(i -> {
                         ArchiveInfo archive = new ArchiveInfo();
                         archive.setField1("field" + (i + 1));
                         archive.setField2(archiveInfoList.get(i).getField2());
+                        archive.setField3(archiveInfoList.get(i).getField1());
                         return archive;
                     })
                     .collect(Collectors.toList());
@@ -449,32 +462,41 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             if (resultList.isEmpty()) {
                 return 1;
             }
+//        System.out.println("resultList:" + resultList.get(0));
             // 更新档案编号
             resultList.forEach(archiveInfo1 -> {
-                String field1Str = String.valueOf(archiveInfo1.getField1());
-                String newNumber1;
-                if (field1Str.matches("\\d+")) { // 检查是否为纯数字
-                    newNumber1 = field1Str.length() > 5 ? field1Str.substring(field1Str.length() - 5) : String.format("%05d", Integer.parseInt(field1Str));
-                } else {
-                    newNumber1 = field1Str; // 如果不是纯数字，则保持不变
-                }
+
                 String[] newNumber = {
-                        newNumber1,
-                        String.valueOf(archiveInfo1.getField2()),
-                        String.valueOf(archiveInfo1.getField3()),
-                        String.valueOf(archiveInfo1.getField4()),
-                        String.valueOf(archiveInfo1.getField5()),
-                        String.valueOf(archiveInfo1.getField6())
+                        getString(mapList, String.valueOf(archiveInfo1.getField1()),0),
+                        getString(mapList, String.valueOf(archiveInfo1.getField2()),1),
+                        getString(mapList, String.valueOf(archiveInfo1.getField3()),2),
+                        getString(mapList, String.valueOf(archiveInfo1.getField4()),3),
+                        getString(mapList, String.valueOf(archiveInfo1.getField5()),4),
+                        getString(mapList, String.valueOf(archiveInfo1.getField6()),5)
                 };
-                String newNumberStr = String.join("-", newNumber[0], newNumber[1]) + "·" + String.join("-", newNumber[2], newNumber[3], newNumber[4], newNumber[5]);
+                String newNumberStr =  newNumber[0]+rule[0]+ newNumber[1] + rule[1] + newNumber[2] + rule[2] + newNumber[3] + rule[3] + newNumber[4] + rule[4] + newNumber[5];
                 archiveInfo1.setArchiveNumber(newNumberStr);
             });
+//        System.out.println("newNumberStr:" + resultList.get(0));
             // 更新数据库中的档案编号
             return archiveInfoMapper.updateArchiveNumber(resultList);
-        } catch (Exception e) {
-            System.err.println("Error updating archive number: " + e.getMessage());
-            throw new ServiceException("更新档号时发生错误");
-        }
+//        } catch (Exception e) {
+//            System.err.println("Error updating archive number: " + e.getMessage());
+//            throw new ServiceException("更新档号时发生错误");
+//        }
+    }
+
+    private static String getString(List<ArchiveInfo> mapList, String field1Str, int index) {
+        String newNumber1 = "";
+//        System.out.println("field1Str:" + field1Str);
+//        System.out.println("全宗号:" + mapList.get(index).getField3());
+            if (Objects.equals(mapList.get(index).getField3(), "全宗号") && field1Str.matches("\\d+")) { // 检查是否为纯数字
+//                System.out.println("\n纯数字\n");
+                newNumber1 = field1Str.length() > 5 ? field1Str.substring(field1Str.length() - 5) : String.format("%05d", Integer.parseInt(field1Str));
+            } else {
+                newNumber1 = field1Str; // 如果不是纯数字，则保持不变
+            }
+        return newNumber1;
     }
 
 

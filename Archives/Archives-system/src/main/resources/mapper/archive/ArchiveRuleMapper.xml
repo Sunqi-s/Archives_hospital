@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.archive.mapper.ArchiveRuleMapper">
+    
+    <resultMap type="ArchiveRule" id="ArchiveRuleResult">
+        <result property="id"    column="id"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="ruleItem"    column="rule_item"    />
+        <result property="ruleJoin"    column="rule_join"    />
+        <result property="itemName"    column="item_name"    />
+        <result property="numberCount"    column="number_count"    />
+    </resultMap>
+
+    <sql id="selectArchiveRuleVo">
+        select id, category_id, rule_item, rule_join, item_name, number_count from archive_rule
+    </sql>
+
+    <select id="selectArchiveRuleList" parameterType="ArchiveRule" resultMap="ArchiveRuleResult">
+        <include refid="selectArchiveRuleVo"/>
+        <where>  
+            <if test="categoryId != null "> and category_id = #{categoryId}</if>
+            <if test="ruleItem != null  and ruleItem != ''"> and rule_item like concat('%', #{ruleItem}, '%')</if>
+            <if test="ruleJoin != null  and ruleJoin != ''"> and rule_join like concat('%', #{ruleJoin}, '%')</if>
+            <if test="itemName != null  and itemName != ''"> and item_name like concat('%', #{itemName}, '%')</if>
+            <if test="numberCount != null  and numberCount != ''"> and number_count like concat('%', #{numberCount}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectArchiveRuleById" parameterType="Long" resultMap="ArchiveRuleResult">
+        <include refid="selectArchiveRuleVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertArchiveRule" parameterType="ArchiveRule" useGeneratedKeys="true" keyProperty="id">
+        insert into archive_rule
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="categoryId != null">category_id,</if>
+            <if test="ruleItem != null and ruleItem != ''">rule_item,</if>
+            <if test="ruleJoin != null">rule_join,</if>
+            <if test="itemName != null">item_name,</if>
+            <if test="numberCount != null">number_count,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="ruleItem != null and ruleItem != ''">#{ruleItem},</if>
+            <if test="ruleJoin != null">#{ruleJoin},</if>
+            <if test="itemName != null">#{itemName},</if>
+            <if test="numberCount != null">#{numberCount},</if>
+         </trim>
+    </insert>
+
+    <update id="updateArchiveRule" parameterType="ArchiveRule">
+        update archive_rule
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="ruleItem != null and ruleItem != ''">rule_item = #{ruleItem},</if>
+            <if test="ruleJoin != null">rule_join = #{ruleJoin},</if>
+            <if test="itemName != null">item_name = #{itemName},</if>
+            <if test="numberCount != null">number_count = #{numberCount},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveRuleById" parameterType="Long">
+        delete from archive_rule where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveRuleByIds" parameterType="String">
+        delete from archive_rule where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
