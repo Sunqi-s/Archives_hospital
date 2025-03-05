@@ -451,8 +451,15 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             }
             // 更新档案编号
             resultList.forEach(archiveInfo1 -> {
+                String field1Str = String.valueOf(archiveInfo1.getField1());
+                String newNumber1;
+                if (field1Str.matches("\\d+")) { // 检查是否为纯数字
+                    newNumber1 = field1Str.length() > 5 ? field1Str.substring(field1Str.length() - 5) : String.format("%05d", Integer.parseInt(field1Str));
+                } else {
+                    newNumber1 = field1Str; // 如果不是纯数字，则保持不变
+                }
                 String[] newNumber = {
-                        String.valueOf(archiveInfo1.getField1()),
+                        newNumber1,
                         String.valueOf(archiveInfo1.getField2()),
                         String.valueOf(archiveInfo1.getField3()),
                         String.valueOf(archiveInfo1.getField4()),
