@@ -41,9 +41,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     private PlaceonfileLogServiceImpl placeonfileLogService;
 
     @Autowired
-    private SysDeptMapper sysDeptMapper;
-
-    @Autowired
     private final ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
 
     public ArchiveInfoServiceImpl(ArchiveInfoMapper archiveInfoMapper, SysOssMapper sysOssMapper) {
@@ -333,7 +330,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
                 if(archiveInfo.getField29() == null){archiveInfo.setField29("");}
                 if(archiveInfo.getField30() == null){archiveInfo.setField30("");}
 
-                String deptIds = String.valueOf(sysDeptMapper.selectDeptIdByName(archiveInfo.getDepartment()));
+                String deptIds = String.valueOf(archiveInfo.getDepartment());
                 if(deptIds != null&&deptIds != "null"){
                     archiveInfo.setDataPermit(deptIds);
                 }else{
