@@ -137,8 +137,8 @@
           <el-dropdown size="mini" @command="(command) => handleCommand(command, scope.row)" v-hasPermi="['system:role:edit']">
             <el-button size="mini" type="text" icon="el-icon-d-arrow-right">更多</el-button>
             <el-dropdown-menu slot="dropdown">
-<!--              <el-dropdown-item command="handleDataScope" icon="el-icon-circle-check"-->
-<!--                v-hasPermi="['system:role:edit']">数据权限</el-dropdown-item>-->
+             <el-dropdown-item command="handleDataScope" icon="el-icon-circle-check"
+               v-hasPermi="['system:role:edit']">部门权限</el-dropdown-item>
               <el-dropdown-item command="handleAuthUser" icon="el-icon-user"
                 v-hasPermi="['system:role:edit']">分配用户</el-dropdown-item>
             </el-dropdown-menu>
@@ -543,7 +543,7 @@ export default {
             this.$refs.dept.setCheckedKeys(res.checkedKeys);
           });
         });
-        this.title = "分配数据权限";
+        this.title = "分配部门权限";
       });
     },
     /** 分配用户操作 */
