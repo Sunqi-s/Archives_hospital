@@ -47,9 +47,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Autowired
     private final ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
 
-    @Autowired
-    private SysDeptMapper sysDeptMapper;
-
     public ArchiveInfoServiceImpl(ArchiveInfoMapper archiveInfoMapper, SysOssMapper sysOssMapper) {
         this.archiveInfoMapper = archiveInfoMapper;
         this.sysOssMapper = sysOssMapper;
