@@ -566,6 +566,7 @@
             <if test="field29 != null">field29 = #{field29},</if>
             <if test="field30 != null">field30 = #{field30},</if>
             <if test="ossStatus != null">oss_status = #{ossStatus},</if>
+            <if test="dataPermit != null">data_permit = #{dataPermit},</if>
         </trim>
         where id = #{id}
     </update>
