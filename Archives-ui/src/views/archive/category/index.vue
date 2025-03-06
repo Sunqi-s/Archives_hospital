@@ -160,18 +160,16 @@
     </el-dialog>
     <el-dialog title="档号规则" :visible.sync="isRule" width="500px" append-to-body>
       <el-select v-model="archiveItem" placeholder="请选择字段">
-                            <el-option v-for="item in selection" :key="item" :label="item"
-                                :value="item">
-                            </el-option>
-                        </el-select>
-                        <el-select v-model="joinItem" placeholder="请选择间隔符">
-                            <el-option v-for="item in joinSelection" :key="item" :label="item"
-                                :value="item">
-                            </el-option>
-                        </el-select>
-                        <el-button type="primary" @click="addRule">添加</el-button>
-                        <el-input v-model="numberRule" placeholder="结果" />
-                        <el-button type="primary" @click="updateRule">确定</el-button>
+        <el-option v-for="item in selection" :key="item" :label="item" :value="item">
+        </el-option>
+      </el-select>
+      <el-select v-model="joinItem" placeholder="请选择间隔符">
+        <el-option v-for="item in joinSelection" :key="item" :label="item" :value="item">
+        </el-option>
+      </el-select>
+      <el-button type="primary" @click="addRule">添加</el-button>
+      <el-input v-model="numberRule" readonly placeholder="结果" />
+      <el-button type="primary" @click="updateRule">确定</el-button>
     </el-dialog>
   </div>
 </template>
@@ -384,10 +382,8 @@ export default {
       this.$tab.openPage("设置[" + categoryName + "]项目模板", '/system/biz-settings/item-edit/index/' + categoryId);
     },
     handleNumberRule(row){
+      this.reSetRule();
       this.ruleForm.categoryId = row.id;
-      this.isRule = true;
-      this.archiveItem = "";
-      this.numberRule = "";
       this.isRule = true;
     },
     addRule(){
@@ -405,10 +401,14 @@ export default {
       addRule(this.ruleForm).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.isRule = false;
+              this.reSetRule();
+            });
+    },
+    reSetRule(){
               this.numberRule = "";
               this.trueRule = [];
               this.trueItem = [];
-              ruleForm = {
+              this.ruleForm = {
         id: null,
         categoryId: null,
         ruleItem: null,
@@ -416,7 +416,6 @@ export default {
         itemName: null,
         numberCount: null
       };
-            });
     },
   }
 };
