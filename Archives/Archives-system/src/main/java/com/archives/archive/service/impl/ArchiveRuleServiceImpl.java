@@ -52,11 +52,10 @@ public class ArchiveRuleServiceImpl implements IArchiveRuleService
     @Override
     public int insertArchiveRule(ArchiveRule archiveRule)
     {
-        System.out.println("      insertArchiveRule      "+archiveRule);
         ArchiveRule archiveRule1 = new ArchiveRule();
         archiveRule1.setCategoryId(archiveRule.getCategoryId());
         List<ArchiveRule> list = archiveRuleMapper.selectArchiveRuleList(archiveRule1);
-        if (list.size() > 0){
+        if (!list.isEmpty()){
             archiveRule.setId(list.get(0).getId());
             return archiveRuleMapper.updateArchiveRule(archiveRule);
         }else {

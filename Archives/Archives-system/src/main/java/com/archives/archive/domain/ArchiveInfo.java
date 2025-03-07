@@ -578,6 +578,79 @@ public class ArchiveInfo extends BaseEntity
         this.dataPermit = dataPermit;
     }
 
+    public String getField(int fieldIndex) {
+        switch (fieldIndex) {
+            case 1: return getField1();
+            case 2: return getField2();
+            case 3: return getField3();
+            case 4: return getField4();
+            case 5: return getField5();
+            case 6: return getField6();
+            case 7: return getField7();
+            case 8: return getField8();
+            case 9: return getField9();
+            case 10: return getField10();
+            case 11: return getField11();
+            case 12: return getField12();
+            case 13: return getField13();
+            case 14: return getField14();
+            case 15: return getField15();
+            case 16: return getField16();
+            case 17: return getField17();
+            case 18: return getField18();
+            case 19: return getField19();
+            case 20: return getField20();
+            case 21: return getField21();
+            case 22: return getField22();
+            case 23: return getField23();
+            case 24: return getField24();
+            case 25: return getField25();
+            case 26: return getField26();
+            case 27: return getField27();
+            case 28: return getField28();
+            case 29: return getField29();
+            case 30: return getField30();
+            default: throw new IllegalArgumentException("Invalid field index: " + fieldIndex);
+        }
+    }
+
+    public void setField(int fieldIndex, String value) {
+        switch (fieldIndex) {
+            case 1: setField1(value); break;
+            case 2: setField2(value); break;
+            case 3: setField3(value); break;
+            case 4: setField4(value); break;
+            case 5: setField5(value); break;
+            case 6: setField6(value); break;
+            case 7: setField7(value); break;
+            case 8: setField8(value); break;
+            case 9: setField9(value); break;
+            case 10: setField10(value); break;
+            case 11: setField11(value); break;
+            case 12: setField12(value); break;
+            case 13: setField13(value); break;
+            case 14: setField14(value); break;
+            case 15: setField15(value); break;
+            case 16: setField16(value); break;
+            case 17: setField17(value); break;
+            case 18: setField18(value); break;
+            case 19: setField19(value); break;
+            case 20: setField20(value); break;
+            case 21: setField21(value); break;
+            case 22: setField22(value); break;
+            case 23: setField23(value); break;
+            case 24: setField24(value); break;
+            case 25: setField25(value); break;
+            case 26: setField26(value); break;
+            case 27: setField27(value); break;
+            case 28: setField28(value); break;
+            case 29: setField29(value); break;
+            case 30: setField30(value); break;
+            default: throw new IllegalArgumentException("Invalid field index: " + fieldIndex);
+        }
+    }
+
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)

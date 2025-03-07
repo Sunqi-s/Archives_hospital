@@ -421,7 +421,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             ArchiveRule archiveRule = new ArchiveRule();
             archiveRule.setCategoryId(archiveInfo.getCategoryId());
             List<ArchiveRule> ruleList = archiveRuleMapper.selectArchiveRuleList(archiveRule);
-//        System.out.println("ruleList:" + ruleList);
             if (ruleList.isEmpty()) {
                 throw new ServiceException("档号规则不存在！");
             }
@@ -429,56 +428,36 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             // 定义需要获取的列
             List<String> columns = Arrays.asList(archiveRule1.getRuleItem().split(","));
             String[] rule = archiveRule1.getRuleJoin().split(",");
-//            String[] item = archiveRule1.getItemName().split(",");
-//            String[] count = archiveRule1.getNumberCount().split(",");
-
+            String[] item = archiveRule1.getItemName().split(",");
+            String[] count = archiveRule1.getNumberCount().split(",");
             List<ArchiveInfo> archiveInfoList = columns.stream()
                     .map(column -> archiveInfoMapper.getColumn(column, archiveInfo.getCategoryId()))
                     .collect(Collectors.toList());
-//        System.out.println("archiveInfoList:" + archiveInfoList);
-            // 构建mapList
-            List<ArchiveInfo> mapList = IntStream.range(0, columns.size())
-                    .mapToObj(i -> {
-                        ArchiveInfo archive = new ArchiveInfo();
-                        archive.setField1("field" + (i + 1));
-                        archive.setField2(archiveInfoList.get(i).getField2());
-                        archive.setField3(archiveInfoList.get(i).getField1());
-                        return archive;
-                    })
-                    .collect(Collectors.toList());
+        for (int i = 0; i < columns.size(); i++) {
+            archiveInfoList.get(i).setField3("field" + (i + 1));
+        }
 
             // 获取查询结果
             List<ArchiveInfo> resultList;
             if (archiveInfo.getSearchValue() != null && !archiveInfo.getSearchValue().isEmpty()) {
                 resultList = archiveInfoMapper.getNumberByKeyword(
-                        mapList,
+                        archiveInfoList,
                         archiveInfo.getSearchValue(),
                         archiveInfo.getCategoryId(),
                         archiveInfo.getArchiveStatus(),
                         dataPermiList
                 );
             } else {
-                resultList = archiveInfoMapper.getNumberBeachSearch(mapList, archiveInfo, dataPermiList);
+                resultList = archiveInfoMapper.getNumberBeachSearch(archiveInfoList, archiveInfo, dataPermiList);
             }
             if (resultList.isEmpty()) {
                 return 1;
             }
-//        System.out.println("resultList:" + resultList.get(0));
             // 更新档案编号
-            resultList.forEach(archiveInfo1 -> {
-
-                String[] newNumber = {
-                        getString(mapList, String.valueOf(archiveInfo1.getField1()),0),
-                        getString(mapList, String.valueOf(archiveInfo1.getField2()),1),
-                        getString(mapList, String.valueOf(archiveInfo1.getField3()),2),
-                        getString(mapList, String.valueOf(archiveInfo1.getField4()),3),
-                        getString(mapList, String.valueOf(archiveInfo1.getField5()),4),
-                        getString(mapList, String.valueOf(archiveInfo1.getField6()),5)
-                };
-                String newNumberStr =  newNumber[0]+rule[0]+ newNumber[1] + rule[1] + newNumber[2] + rule[2] + newNumber[3] + rule[3] + newNumber[4] + rule[4] + newNumber[5];
-                archiveInfo1.setArchiveNumber(newNumberStr);
-            });
-//        System.out.println("newNumberStr:" + resultList.get(0));
+        resultList.forEach(archiveInfo1 -> {
+            String newNumberStr = buildArchiveNumber(archiveInfoList, archiveInfo1, rule, item, count);
+            archiveInfo1.setArchiveNumber(newNumberStr);
+        });
             // 更新数据库中的档案编号
             return archiveInfoMapper.updateArchiveNumber(resultList);
 //        } catch (Exception e) {
@@ -487,17 +466,24 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 //        }
     }
 
-    private static String getString(List<ArchiveInfo> mapList, String field1Str, int index) {
-        String newNumber1 = "";
-//        System.out.println("field1Str:" + field1Str);
-//        System.out.println("全宗号:" + mapList.get(index).getField3());
-            if (Objects.equals(mapList.get(index).getField3(), "全宗号") && field1Str.matches("\\d+")) { // 检查是否为纯数字
-//                System.out.println("\n纯数字\n");
-                newNumber1 = field1Str.length() > 5 ? field1Str.substring(field1Str.length() - 5) : String.format("%05d", Integer.parseInt(field1Str));
-            } else {
-                newNumber1 = field1Str; // 如果不是纯数字，则保持不变
-            }
-        return newNumber1;
+    private String buildArchiveNumber(List<ArchiveInfo> mapList, ArchiveInfo archiveInfo, String[] rule, String[] item, String[] count) {
+        StringBuilder newNumberStrBuilder = new StringBuilder();
+        for (int i = 0; i < rule.length; i++) {
+            String fieldStr = String.valueOf(archiveInfo.getField(i + 1));
+            String newNumber1 = getString(fieldStr, item[i],count[i]);
+            newNumberStrBuilder.append(newNumber1).append(rule[i]);
+        }
+        return newNumberStrBuilder.toString();
+    }
+
+    private static String getString(String fieldStr, String item, String count) {
+        if (Objects.equals(item, "1") && fieldStr.matches("\\d+")) { // 检查是否为纯数字
+            int length = fieldStr.length();
+            int countInt = Integer.parseInt(count);
+            return length > countInt ? fieldStr.substring(length - countInt) : String.format("%0" + countInt + "d", Integer.parseInt(fieldStr));
+        } else {
+            return fieldStr; // 如果不是纯数字，则保持不变
+        }
     }
 
 

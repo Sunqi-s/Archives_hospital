@@ -685,7 +685,7 @@
         select id,
         <foreach collection="map" item="entry" separator=",">
             <if test="entry != null">
-                ${entry.field2} as ${entry.field1}
+                ${entry.field2} as ${entry.field3}
             </if>
         </foreach>
         from archive_info
