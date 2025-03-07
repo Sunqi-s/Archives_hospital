@@ -578,9 +578,7 @@ export default {
         rows = rows.filter(row => row.length !== 0);
         rows.forEach(row => {
           const idd = headers.indexOf("档号");
-          if (this.exportList.indexOf(row[idd]) === -1) {
-            this.exportList.push(row[idd])
-          }
+          this.exportList.push(row[idd])
         });
         this.tableData = rows.map(row => {
           const rowData = { validationErrors: [], categoryId: this.queryCategoryId };
@@ -636,13 +634,11 @@ export default {
 
       }
       if (prop === 'archiveNumber') {
-        const idx = this.exportList.findIndex(item => item === value)
-        if (idx === -1) {
+        const count = this.exportList.filter(v => v === value).length;
+        if (count > 1) {
           return '档号重复';
-        } else {
-          this.exportList.splice(idx, 1)
-          return null;
         }
+        return null;
       }
 
       if(prop === 'department'){

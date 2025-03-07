@@ -181,6 +181,8 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             int ossStatus = 2;
             archiveInfo.setOssStatus(ossStatus);
         }
+
+        archiveInfo.setDataPermit(archiveInfo.getDepartment());
         // 更新归档信息
         return archiveInfoMapper.updateArchiveInfo(archiveInfo);
     }
