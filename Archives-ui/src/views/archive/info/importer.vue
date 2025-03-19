@@ -653,8 +653,9 @@ export default {
 
       // 添加对 field3 的特殊验证
       if (prop === 'field3') {
-        const regex = /^[0-9\u4e00-\u9fa5a-zA-Z\s\p{P}IVXLCDMivxlcdmⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫ+-·~～《》<>＜＞〇]+$/u; // 允许数字、汉字、字母、标点符号和空格
-        if (!regex.test(value)) {
+        const XRegExp = require('xregexp');
+        const forbiddenCharsRegex = XRegExp('\\p{C}', 'u');
+        if (forbiddenCharsRegex.test(value)) {
           return '包含不允许的字符';
         }
       }
