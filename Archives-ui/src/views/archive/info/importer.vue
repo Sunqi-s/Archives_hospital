@@ -654,8 +654,24 @@ export default {
       // 添加对 field3 的特殊验证
       if (prop === 'field3') {
         const XRegExp = require('xregexp');
-        const forbiddenCharsRegex = XRegExp('\\p{C}', 'u');
-        if (forbiddenCharsRegex.test(value)) {
+        // 步骤1：删除所有控制字符（Unicode 类别 Cc）
+        const cleanedValue = XRegExp.replace(value, XRegExp('\\p{C}', 'gu'), '');
+        // 定义允许的 Unicode 类别（每类单独列出）
+        const allowedCategories = [
+          'L',    // 所有字母（拉丁、希腊、中文等）
+          'N',    // 数字（包括罗马数字）
+          'P',    // 标点符号（中英文标点）
+          'S',    // 符号（数学符号、单位符号）
+          'Zs'    // 空格（可选）
+        ];
+
+        // 构造正则表达式：匹配不属于任何允许类别的字符
+        const forbiddenCharsRegex = XRegExp(
+          `[^${allowedCategories.map(cat => `\\p{${cat}}`).join('')}]`,
+          'u'
+        );
+
+        if (XRegExp.test(cleanedValue, forbiddenCharsRegex)) {
           return '包含不允许的字符';
         }
       }
