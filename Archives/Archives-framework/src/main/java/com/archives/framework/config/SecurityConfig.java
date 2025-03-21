@@ -2,7 +2,11 @@ package com.archives.framework.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -10,8 +14,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.filter.CorsFilter;
@@ -26,6 +32,8 @@ import com.archives.framework.security.handle.LogoutSuccessHandlerImpl;
  * @author archives
  */
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@Configuration
+@EnableAsync
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
     /**
@@ -137,6 +145,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     public BCryptPasswordEncoder bCryptPasswordEncoder()
     {
         return new BCryptPasswordEncoder();
+    }
+
+    // 配置支持 SecurityContext 传播的异步执行器
+    @Bean(name = "asyncSecurityTaskExecutor")
+    public TaskExecutor asyncSecurityTaskExecutor() {
+        // 设置上下文继承模式
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(20);
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("AsyncSecurity-");
+        executor.initialize();
+
+        // 包装执行器以传递 SecurityContext
+        return new DelegatingSecurityContextAsyncTaskExecutor(executor);
     }
 
     /**

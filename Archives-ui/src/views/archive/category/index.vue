@@ -247,7 +247,7 @@ export default {
         trueItem:[],
         dealItem:[],
         dealRule:[],
-        dealNumber:"",
+        dealNumber:"0",
         ruleNumber:""
     };
   },
@@ -450,7 +450,7 @@ export default {
       this.trueItem = [];
       this.dealItem = [];
       this.dealRule = [];
-      this.dealNumber = "";
+      this.dealNumber = "0";
       this.ruleNumber = "";
       this.ruleForm = {
         id: null,

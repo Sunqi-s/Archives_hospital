@@ -105,5 +105,7 @@ public interface IArchiveInfoService
 
     public List<ArchiveInfo> selectArchiveInfoByIds(List<Long> ids);
 
-    public int updateArchiveNumber(ArchiveInfo archiveInfo);
+    public void updateArchiveNumber(ArchiveInfo archiveInfo);
+
+    String getUpdateStatus();
 }

@@ -172,8 +172,13 @@ public class ArchiveInfoController extends BaseController
     }
 
     @PostMapping("/updateArchiveNumber")
-    public int updateArchiveNumber(@RequestBody ArchiveInfo archiveInfo) {
-        return archiveInfoService.updateArchiveNumber(archiveInfo);
+    public void updateArchiveNumber(@RequestBody ArchiveInfo archiveInfo) {
+        archiveInfoService.updateArchiveNumber(archiveInfo);
+    }
+
+    @PostMapping("/getUpdateStatus")
+    public String getUpdateStatus() {
+        return archiveInfoService.getUpdateStatus();
     }
 
 }
