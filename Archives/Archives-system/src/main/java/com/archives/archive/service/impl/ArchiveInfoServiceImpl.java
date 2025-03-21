@@ -4,6 +4,7 @@ import com.archives.archive.domain.*;
 import com.archives.archive.mapper.ArchiveInfoMapper;
 import com.archives.archive.mapper.ArchiveRuleMapper;
 import com.archives.archive.service.IArchiveInfoService;
+import com.archives.common.core.domain.entity.SysDept;
 import com.archives.common.core.domain.entity.SysUser;
 import com.archives.common.core.domain.model.LoginUser;
 import com.archives.common.core.redis.RedisCache;
@@ -291,6 +292,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public CompletableFuture<List<ArchiveInfo>> insertArchiveInfoList(List<ArchiveInfo> archiveInfoList) {
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        List<SysDept> deptList = sysDeptMapper.selectDeptList(new SysDept());
 
         //拿到数据权限
         return CompletableFuture.supplyAsync(() -> {
@@ -301,8 +303,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
             for (ArchiveInfo archiveInfo : archiveInfoList) {
                 if(archiveInfo.getCategoryId() == null) {archiveInfo.setCategoryId(Long.valueOf(0));}
-                if(archiveInfo.getArchiveStatus() == null) {archiveInfo.setArchiveStatus(Long.valueOf(0));}
-                if(archiveInfo.getArchiveDate() == null) {archiveInfo.setArchiveDate(DateUtils.getNowDate());}
                 if(archiveInfo.getArchiver() == null) {archiveInfo.setArchiver("");}
                 if(archiveInfo.getFondsNumber() == null){archiveInfo.setFondsNumber("");}
                 if(archiveInfo.getFondsName() == null){archiveInfo.setFondsName("");}
@@ -344,7 +344,8 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
                 if(archiveInfo.getField29() == null){archiveInfo.setField29("");}
                 if(archiveInfo.getField30() == null){archiveInfo.setField30("");}
 
-                String deptIds = String.valueOf(sysDeptMapper.selectDeptIdByName(archiveInfo.getDepartment()));
+                String deptIds = String.valueOf(deptList.stream().filter(dept -> dept.getDeptName().equals(archiveInfo.getDepartment())).findFirst().map(SysDept::getDeptId).orElse(null));
+
                 if(deptIds != null&&deptIds != "null"){
                     archiveInfo.setDataPermit(deptIds);
                     archiveInfo.setDepartment(deptIds);
