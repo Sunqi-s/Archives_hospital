@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * 启动程序
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.ImportResource;
 
 @ImportResource("classpath:ureport-console-context.xml")
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+@EnableAsync
 public class ArchivesApplication
 {
     public static void main(String[] args)

@@ -159,3 +159,10 @@ export function updateArchiveNumber(query) {
     data: query
   })
 }
+
+export function getUpdateStatus(){
+  return request({
+    url: '/archive/info/getUpdateStatus',
+    method: 'post',
+  })
+}

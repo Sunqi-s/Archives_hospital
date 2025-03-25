@@ -4,7 +4,10 @@ import com.archives.archive.domain.*;
 import com.archives.archive.mapper.ArchiveInfoMapper;
 import com.archives.archive.mapper.ArchiveRuleMapper;
 import com.archives.archive.service.IArchiveInfoService;
+import com.archives.common.core.domain.entity.SysDept;
 import com.archives.common.core.domain.entity.SysUser;
+import com.archives.common.core.domain.model.LoginUser;
+import com.archives.common.core.redis.RedisCache;
 import com.archives.common.exception.ServiceException;
 import com.archives.common.utils.DateUtils;
 import com.archives.common.utils.SecurityUtils;
@@ -12,6 +15,10 @@ import com.archives.system.domain.SysOss;
 import com.archives.system.mapper.SysDeptMapper;
 import com.archives.system.mapper.SysOssMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -46,6 +53,8 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Autowired
     private final ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
+    @Autowired
+    private RedisCache redisCache;
 
     public ArchiveInfoServiceImpl(ArchiveInfoMapper archiveInfoMapper, SysOssMapper sysOssMapper) {
         this.archiveInfoMapper = archiveInfoMapper;
@@ -283,6 +292,7 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
     @Override
     public CompletableFuture<List<ArchiveInfo>> insertArchiveInfoList(List<ArchiveInfo> archiveInfoList) {
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        List<SysDept> deptList = sysDeptMapper.selectDeptList(new SysDept());
 
         //拿到数据权限
         return CompletableFuture.supplyAsync(() -> {
@@ -334,7 +344,8 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
                 if(archiveInfo.getField29() == null){archiveInfo.setField29("");}
                 if(archiveInfo.getField30() == null){archiveInfo.setField30("");}
 
-                String deptIds = String.valueOf(sysDeptMapper.selectDeptIdByName(archiveInfo.getDepartment()));
+                String deptIds = String.valueOf(deptList.stream().filter(dept -> dept.getDeptName().equals(archiveInfo.getDepartment())).findFirst().map(SysDept::getDeptId).orElse(null));
+
                 if(deptIds != null&&deptIds != "null"){
                     archiveInfo.setDataPermit(deptIds);
                     archiveInfo.setDepartment(deptIds);
@@ -414,10 +425,23 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         return archiveInfoMapper.selectArchiveInfoByIds(ids);
     }
 
+    @Async("asyncSecurityTaskExecutor") // 标记为异步方法
     @Override
-    public int updateArchiveNumber(ArchiveInfo archiveInfo) {
-//        try {
-            String[] dataPermiList = getDataPermit();
+    public void updateArchiveNumber(ArchiveInfo archiveInfo) {
+        try {
+        redisCache.setCacheObject("updateArchiveNumber", String.valueOf(archiveInfo.getCategoryId()));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        SysUser currentUser = loginUser.getUser();
+        String[] dataPermiList;
+        if ("all".equals(currentUser.getDataPermi())) {
+            dataPermiList = new String[0];
+        } else {
+            dataPermiList = (currentUser.getDataPermi().split(","));
+            for (int i = 0; i < dataPermiList.length; i++) {
+                dataPermiList[i] = "%" + dataPermiList[i] + "%";
+            }
+        }
             ArchiveRule archiveRule = new ArchiveRule();
             archiveRule.setCategoryId(archiveInfo.getCategoryId());
             List<ArchiveRule> ruleList = archiveRuleMapper.selectArchiveRuleList(archiveRule);
@@ -433,9 +457,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
             List<ArchiveInfo> archiveInfoList = columns.stream()
                     .map(column -> archiveInfoMapper.getColumn(column, archiveInfo.getCategoryId()))
                     .collect(Collectors.toList());
-        for (int i = 0; i < columns.size(); i++) {
-            archiveInfoList.get(i).setField3("field" + (i + 1));
-        }
+            for (int i = 0; i < columns.size(); i++) {
+                archiveInfoList.get(i).setField3("field" + (i + 1));
+            }
 
             // 获取查询结果
             List<ArchiveInfo> resultList;
@@ -451,19 +475,26 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
                 resultList = archiveInfoMapper.getNumberBeachSearch(archiveInfoList, archiveInfo, dataPermiList);
             }
             if (resultList.isEmpty()) {
-                return 1;
+                redisCache.deleteObject("updateArchiveNumber");
             }
             // 更新档案编号
-        resultList.forEach(archiveInfo1 -> {
-            String newNumberStr = buildArchiveNumber(archiveInfoList, archiveInfo1, rule, item, count);
-            archiveInfo1.setArchiveNumber(newNumberStr);
-        });
+            resultList.forEach(archiveInfo1 -> {
+                String newNumberStr = buildArchiveNumber(archiveInfoList, archiveInfo1, rule, item, count);
+                archiveInfo1.setArchiveNumber(newNumberStr);
+            });
             // 更新数据库中的档案编号
-            return archiveInfoMapper.updateArchiveNumber(resultList);
-//        } catch (Exception e) {
-//            System.err.println("Error updating archive number: " + e.getMessage());
-//            throw new ServiceException("更新档号时发生错误");
-//        }
+            int updateResult = archiveInfoMapper.updateArchiveNumber(resultList);
+            redisCache.deleteObject("updateArchiveNumber");
+        } catch (Exception e) {
+            System.err.println("Error updating archive number: " + e.getMessage());
+            throw new ServiceException("更新档号时发生错误");
+        }
+    }
+
+    @Override
+    public String getUpdateStatus() {
+        String updateStatus = (String) redisCache.getCacheObject("updateArchiveNumber");
+        return updateStatus;
     }
 
     private String buildArchiveNumber(List<ArchiveInfo> mapList, ArchiveInfo archiveInfo, String[] rule, String[] item, String[] count) {

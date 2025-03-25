@@ -279,7 +279,7 @@
 
 <script>
 import categoryTree from '@/views/archive/category/categoryTree.vue';
-import { addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo, getBeachList, getDelCount, updateArchiveNumber,updatAarchiveStatusAll,updateArchiveStatusById } from "@/api/archive/info";
+import { addInfo, delInfo, getInfo, listInfo, updatAarchiveStatus, updateInfo, getBeachList, getDelCount, updateArchiveNumber,updatAarchiveStatusAll,updateArchiveStatusById,getUpdateStatus } from "@/api/archive/info";
 import { getCategory, listCategory } from '@/api/archive/category'
 import { getItemByCategoryId } from "@/api/archive/item";
 import { getDicts } from "@/api/system/dict/data";
@@ -292,7 +292,6 @@ import { pointRelation } from "@/api/archive/relation";
 import { Base64 } from "js-base64";
 import { addImportLog, updateImportLog } from "@/api/archive/importLog";
 import { listFit } from "@/api/archive/fit";
-import { addPlaceonlog, delPlaceonlog, getPlaceonlog, listPlaceonlog, updatePlaceonlog } from "@/api/archive/placeonlog";
 export default {
   name: "Info",
   components: {
@@ -376,6 +375,7 @@ export default {
       isSubmit: false,
       placeon: {},//归档信息
       lastDept: [],//最后一级部门
+      updateStatus:true,//重整档号状态
     };
   },
   created() {
@@ -589,8 +589,30 @@ export default {
         this.clearSearch()
         //选择档案节点不显示列表页面
         if (nodeData.type === 1) {
-          this.categoryId = nodeData.id;
-          this.isClick = false;
+          if(this.updateStatus){
+            this.updateStatus = false;
+            getUpdateStatus().then(response => {
+            const status = Number(response)
+            if(status === nodeData.id){
+              this.$alert('该节点正在更新，请稍后再试！', '提示', {
+          confirmButtonText: '确定',
+          callback: action => {
+            this.isClick = true;
+                this.categoryId = null;
+                setTimeout(() => {
+                  this.updateStatus = true;
+                }, 1000)
+                return;
+              }
+            });
+            }else{
+              this.categoryId = nodeData.id;
+              this.isClick = false;
+            }
+          })
+          }else{
+            return;
+          }
           if (nodeData.password !== null) {
             this.loading = false;
             this.isClick = true;
@@ -727,6 +749,7 @@ export default {
         this.$nextTick(() => {
           setTimeout(() => {
             this.isClick = true;
+            this.updateStatus = true;
             this.loading = false;
           }, 400);
         })
@@ -1307,25 +1330,14 @@ export default {
     },
     updateArchiveNumber(){
       this.$modal.confirm('确认重整档号？').then(async () => {
-          this.$modal.loading("正在处理中");
+          this.$modal.msgSuccess("正在处理中");
           const ExportQueryParams = {
             categoryId: this.categoryId,
             archiveStatus: 0,
             ...this.queryParams
           };
           ExportQueryParams.archiveStatus = 0;
-          updateArchiveNumber(ExportQueryParams).then((res) => {
-            if (res>0) {
-              this.$modal.closeLoading();
-              this.getList();
-              this.$modal.msgSuccess("重整档号成功");
-              return;
-            } else {
-              this.$modal.closeLoading();
-              this.$modal.msgError("重整档号失败：" + error.message);
-              console.error("重整档号失败：", error);
-            }
-          })
+          updateArchiveNumber(ExportQueryParams)
         })
     },
     clearSearch() {
