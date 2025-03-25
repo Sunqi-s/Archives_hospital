@@ -293,8 +293,6 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
             for (ArchiveInfo archiveInfo : archiveInfoList) {
                 if(archiveInfo.getCategoryId() == null) {archiveInfo.setCategoryId(Long.valueOf(0));}
-                if(archiveInfo.getArchiveStatus() == null) {archiveInfo.setArchiveStatus(Long.valueOf(0));}
-                if(archiveInfo.getArchiveDate() == null) {archiveInfo.setArchiveDate(DateUtils.getNowDate());}
                 if(archiveInfo.getArchiver() == null) {archiveInfo.setArchiver("");}
                 if(archiveInfo.getFondsNumber() == null){archiveInfo.setFondsNumber("");}
                 if(archiveInfo.getFondsName() == null){archiveInfo.setFondsName("");}
