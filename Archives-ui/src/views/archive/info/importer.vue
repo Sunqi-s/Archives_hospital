@@ -641,13 +641,51 @@ export default {
         return null;
       }
 
-      if(prop === 'department'){
+      if (prop === 'department') {
         const trimmedValue = value ? value.toString().trim() : '';
         if (!trimmedValue) {
           return '归档部门不能为空';
         }
-        if(!this.deptOptions.some(dept => dept.label === trimmedValue)) {
+        if (!this.deptOptions.some(dept => dept.label === trimmedValue)) {
           return '归档部门不存在或不为最后一级部门';
+        }
+      }
+
+      if (this.queryCategoryId === 36) {
+        if (prop === 'field30') {
+          if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) {
+            return null;
+          } else {
+            // 提取数字部分（兼容任意分隔符）
+            const parts = String(value).match(/\d+/g) || [];
+            if (parts.length !== 3) {
+              return '日期格式无效'; // 格式错误提示
+            }
+
+            // 尝试三种常见日期顺序
+            const orders = [
+              [0, 1, 2], // 年-月-日
+              [2, 0, 1], // 月-日-年（美式）
+              [2, 1, 0]  // 日-月-年（欧式）
+            ];
+
+            const isValid = orders.some(([yIdx, mIdx, dIdx]) => {
+              const year = parseInt(parts[yIdx], 10);
+              const month = parseInt(parts[mIdx], 10);
+              const day = parseInt(parts[dIdx], 10);
+
+              // 基础范围检查
+              if (year < 1 || month < 1 || month > 12) return false;
+
+              // 计算当月最大天数（自动处理闰年）
+              const maxDay = new Date(year, month, 0).getDate();
+              return day >= 1 && day <= maxDay;
+            });
+
+            if (!isValid) {
+              return '日期无效，请检查年、月、日'; // 内容错误提示
+            }
+          }
         }
       }
 
@@ -690,9 +728,9 @@ export default {
 
     // 导入文件表单和文件挂接列表
     submitFileForm() {
-        this.isSubmitDateTriggered = false;
-        this.importChoice = 1;
-        this.submitData(); // 提交数据
+      this.isSubmitDateTriggered = false;
+      this.importChoice = 1;
+      this.submitData(); // 提交数据
     },
     // 批量上传数据
     async batchInsertData(data) {
