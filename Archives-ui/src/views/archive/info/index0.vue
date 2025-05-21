@@ -292,6 +292,8 @@ import { pointRelation } from "@/api/archive/relation";
 import { Base64 } from "js-base64";
 import { addImportLog, updateImportLog } from "@/api/archive/importLog";
 import { listFit } from "@/api/archive/fit";
+import { getPreviewUrl } from '@/api/archive/filePreview'
+import { addPlaceonlog, delPlaceonlog, getPlaceonlog, listPlaceonlog, updatePlaceonlog } from "@/api/archive/placeonlog";
 export default {
   name: "Info",
   components: {
@@ -606,8 +608,8 @@ export default {
               }
             });
             }else{
-              this.categoryId = nodeData.id;
-              this.isClick = false;
+          this.categoryId = nodeData.id;
+          this.isClick = false;
             }
           })
           }else{
@@ -1108,14 +1110,19 @@ export default {
       });
     },
     //文件预览
-    handleFilePreview(url) {
-      // this.previewUrl = url;
-      // this.showPreview = true;
-      const fullUrl = process.env.VUE_APP_FILE_SERVER_BASE_URL + url.substring(1);
-      const encodedUrl = encodeURIComponent(Base64.encode(fullUrl));
-      // 打开新页面并调用在线预览接口
-      const previewUrl = process.env.VUE_APP_KKFILEVIEW_BASE_URL + '/onlinePreview?url=' + encodedUrl;
-      window.open(process.env.VUE_APP_KKFILEVIEW_BASE_URL + '/onlinePreview?url=' + encodedUrl);
+    async handleFilePreview(filePath) {
+      try {
+        const response = await getPreviewUrl(filePath);
+        if (response.code === 200) {
+          const previewUrl = response.msg;
+          // 在新标签页中打开预览链接（_blank 为浏览器默认新标签页）
+          window.open(previewUrl);
+        } else {
+          this.$message.error(response.msg);
+        }
+      } catch (error) {
+        this.$message.error('文件预览失败，请检查路径或权限');
+      }
     },
 
     //获取索引

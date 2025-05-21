@@ -129,3 +129,13 @@ xss:
   excludes: /system/notice
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
+
+# 文件服务器配置
+file:
+  server:
+    base-url: http://localhost:8080  # 文件访问的基础URL 用于kkFileView
+
+# 文件预览插件kkFileView配置
+kkfileview:
+  server-url: http://localhost:8012  # kkFileView服务地址
+  allowed-file-types: pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,txt,md,xml

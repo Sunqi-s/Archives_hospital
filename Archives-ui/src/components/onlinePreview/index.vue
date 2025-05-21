@@ -1,3 +1,4 @@
+<!--废弃组件-->
 <template>
   <div>
     <div v-if="showIframe">

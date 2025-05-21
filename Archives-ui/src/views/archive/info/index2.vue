@@ -241,6 +241,7 @@ import { listDept } from "@/api/system/dept";
 import { pointRelation } from "@/api/archive/relation";
 import { Base64 } from "js-base64";
 import { addPlaceonlog, delPlaceonlog, getPlaceonlog, listPlaceonlog, updatePlaceonlog } from "@/api/archive/placeonlog";
+import {getPreviewUrl} from "@/api/archive/filePreview";
 export default {
   name: "Resources",
   components: { 'file-tree': categoryTree, Treeselect },
@@ -649,12 +650,19 @@ export default {
       });
     },
     //文件预览
-    handleFilePreview(url) {
-      // this.previewUrl = url;
-      // this.showPreview = true;
-      const encodedUrl = encodeURIComponent(Base64.encode(process.env.VUE_APP_FILE_SERVER_BASE_URL + url));
-      // 打开新页面并调用在线预览接口
-      window.open(process.env.VUE_APP_KKFILEVIEW_BASE_URL + '/onlinePreview?url=' + encodedUrl);
+    async handleFilePreview(filePath) {
+      try {
+        const response = await getPreviewUrl(filePath);
+        if (response.code === 200) {
+          const previewUrl = response.msg;
+          // 在新标签页中打开预览链接（_blank 为浏览器默认新标签页）
+          window.open(previewUrl);
+        } else {
+          this.$message.error(response.msg);
+        }
+      } catch (error) {
+        this.$message.error('文件预览失败，请检查路径或权限');
+      }
     },
     handleBatchDownload() {
       // 批量下载逻辑
