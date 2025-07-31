@@ -26,7 +26,10 @@
         <span >
           <i class="el-icon-document" v-if="data.parentId!==0"></i>
           <i class="el-icon-folder" v-else></i>
-          <span :style="clickNode === data.id && data.parentId>0? 'color:#409eff':''">{{ data.label }}</span>
+          <span :style="clickNode === data.id && data.parentId>0? 'color:#409eff':''">{{ data.label }} </span>
+          <!-- 添加展开按钮 -->
+          &nbsp;
+          <el-button v-if="(!data.children || data.children.length === 0) && (showFit === true && data.type === 1)" icon="el-icon-arrow-down" size="mini" style="border: none;" @click="handleExpand(data)"></el-button>
         </span>
       </span>
     </el-tree>
@@ -37,6 +40,7 @@
 
 <script>
 import { debounce } from 'lodash';
+import { listFit } from '@/api/archive/fit'
 
 export default {
   name: 'categoryTree',
@@ -58,7 +62,10 @@ export default {
       type: Boolean,
       default:false,
     },
-
+    showFit: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
@@ -114,6 +121,34 @@ export default {
     },
     setNode(id){
       this.clickNode = id;
+    },
+    // 处理展开按钮点击事件
+    async handleExpand(data) {
+      if (!data.children || data.children.length === 0) {
+        let newData = {};
+        const response = await listFit({categoryId: data.id});
+        if (response.rows.length > 0){
+          newData = response.rows.map(item => ({
+            id: `${data.id}-${item.syllable}`,
+            label: item.syllable,
+            parentId: data.id,
+            categoryId: data.id,
+            query: item.query,
+            type: 3
+          }));
+        }else {
+          newData = {
+            id: `${data.id}-null`,
+            label: '无数据',
+            parentId: data.id,
+            categoryId: data.id,
+            query: null,
+            type: 3
+          }
+        }
+
+        this.$refs.tree.updateKeyChildren(data.id, newData);
+      }
     }
   },
 };

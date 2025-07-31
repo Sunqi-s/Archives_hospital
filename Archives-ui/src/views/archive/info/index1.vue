@@ -4,7 +4,7 @@
       <!-- 档案分类树形结构 -->
       <el-col :span="4" :xs="24">
         <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree"
-          :isClick="isClick"></file-tree>
+          :isClick="isClick" :showFit = "true"></file-tree>
       </el-col>
 
       <!-- 未选择档案库时显示该画面 -->
@@ -498,7 +498,14 @@ export default {
             this.showPasswordPrompt = false;
             this.doList(nodeData)
           }
-        } else {
+        }else if (nodeData.type === 3) {
+          const [categoryId, syllable] = nodeData.id.split('-');
+          this.categoryId = Number(categoryId);
+          this.queryParams[nodeData.query] = syllable;
+          console.log(this.queryParams);
+          this.showPasswordPrompt = false;
+          this.getList();
+        }else {
           this.categoryId = null;
         }
       }

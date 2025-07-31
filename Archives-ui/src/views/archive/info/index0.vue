@@ -4,7 +4,7 @@
       <!-- 档案分类树形结构 -->
       <el-col :span="4" :xs="24">
         <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree"
-          :isClick="isClick"></file-tree>
+          :isClick="isClick" :showFit = "true"></file-tree>
       </el-col>
 
       <!-- 未选择档案库时显示该画面 -->
@@ -587,6 +587,7 @@ export default {
       return tree;
     },
     handleNodeClick(nodeData) {
+      console.log("nodeDate", nodeData)
       if (this.isClick) {
         this.clearSearch()
         //选择档案节点不显示列表页面
@@ -626,6 +627,13 @@ export default {
         } else if (nodeData.type === 0) {
           this.categoryId = null;
           this.showPasswordPrompt = false;
+        } else if (nodeData.type === 3) {
+          const [categoryId, syllable] = nodeData.id.split('-');
+          this.categoryId = Number(categoryId);
+          this.queryParams[nodeData.query] = syllable;
+          console.log(this.queryParams);
+          this.showPasswordPrompt = false;
+          this.getList();
         } else {
           this.categoryId = nodeData.parentId;
           if (this.optionsPass.find(t => t.id === nodeData.parentId)) {
