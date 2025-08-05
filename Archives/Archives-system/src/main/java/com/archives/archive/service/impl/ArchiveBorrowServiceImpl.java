@@ -1,5 +1,6 @@
 package com.archives.archive.service.impl;
 
+import com.archives.archive.domain.ArchiveBorrow;
 import com.archives.archive.domain.ArchiveInfo;
 import com.archives.archive.domain.SearchJson;
 import com.archives.archive.mapper.ArchiveBorrowMapper;
@@ -15,6 +16,78 @@ import java.util.List;
 public class ArchiveBorrowServiceImpl implements IArchiveBorrowService {
     @Autowired
     private ArchiveBorrowMapper archiveBorrowMapper;
+
+    /**
+     * 查询ArchiveBorrow
+     *
+     * @param id ArchiveBorrow主键
+     * @return ArchiveBorrow
+     */
+    @Override
+    public ArchiveBorrow selectArchiveBorrowById(Long id)
+    {
+        return archiveBorrowMapper.selectArchiveBorrowById(id);
+    }
+
+    /**
+     * 查询ArchiveBorrow列表
+     *
+     * @param archiveBorrow ArchiveBorrow
+     * @return ArchiveBorrow
+     */
+    @Override
+    public List<ArchiveBorrow> selectArchiveBorrowList(ArchiveBorrow archiveBorrow)
+    {
+        return archiveBorrowMapper.selectArchiveBorrowList(archiveBorrow);
+    }
+
+    /**
+     * 新增ArchiveBorrow
+     *
+     * @param archiveBorrow ArchiveBorrow
+     * @return 结果
+     */
+    @Override
+    public int insertArchiveBorrow(ArchiveBorrow archiveBorrow)
+    {
+        return archiveBorrowMapper.insertArchiveBorrow(archiveBorrow);
+    }
+
+    /**
+     * 修改ArchiveBorrow
+     *
+     * @param archiveBorrow ArchiveBorrow
+     * @return 结果
+     */
+    @Override
+    public int updateArchiveBorrow(ArchiveBorrow archiveBorrow)
+    {
+        return archiveBorrowMapper.updateArchiveBorrow(archiveBorrow);
+    }
+
+    /**
+     * 批量删除ArchiveBorrow
+     *
+     * @param ids 需要删除的ArchiveBorrow主键
+     * @return 结果
+     */
+    @Override
+    public int deleteArchiveBorrowByIds(Long[] ids)
+    {
+        return archiveBorrowMapper.deleteArchiveBorrowByIds(ids);
+    }
+
+    /**
+     * 删除ArchiveBorrow信息
+     *
+     * @param id ArchiveBorrow主键
+     * @return 结果
+     */
+    @Override
+    public int deleteArchiveBorrowById(Long id)
+    {
+        return archiveBorrowMapper.deleteArchiveBorrowById(id);
+    }
 
     @Override
     public List<Long> getArchiveBorrowList(ArchiveInfo archiveInfo) {

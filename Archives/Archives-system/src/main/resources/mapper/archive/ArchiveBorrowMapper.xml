@@ -54,30 +54,118 @@
         <result property="ossStatus" column="oss_status"/>
     </resultMap>
 
+    <resultMap type="ArchiveBorrow" id="ArchiveBorrowResult">
+        <result property="id"    column="id"    />
+        <result property="borrower"    column="borrower"    />
+        <result property="applicant"    column="applicant"    />
+        <result property="borrowingTime"    column="borrowing_time"    />
+        <result property="archiveNumber"    column="archive_number"    />
+        <result property="title"    column="title"    />
+        <result property="borrowingPurpose"    column="borrowing_purpose"    />
+        <result property="returnTime"    column="return_time"    />
+    </resultMap>
+
     <sql id="selectArchiveInfoVo"> select id, category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, remarks, archive_status, create_by, create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status from archive_info </sql>
+
     <sql id="selectSearchListBydataPermiList">
         <if test="dataPermiList.length > 0">
-            and data_permit in
-            <foreach collection="dataPermiList" item="itemDataPermi" open="(" separator="," close=")"> #{itemDataPermi} </foreach>
+            and (
+            <foreach collection="dataPermiList" item="itemDataPermi" open="(" separator="," close=")">
+                CONCAT(',', data_permit, ',') LIKE CONCAT('%,', #{itemDataPermi}, ',%')
+            </foreach>
+
+            or CONCAT(',', data_permit, ',') LIKE '%,all,%'
+            )
         </if>
     </sql>
+
+    <sql id="selectArchiveBorrowVo">
+        select id, borrower, applicant, borrowing_time, archive_number, title, borrowing_purpose, return_time from archive_borrow
+    </sql>
+
+    <select id="selectArchiveBorrowList" parameterType="ArchiveBorrow" resultMap="ArchiveBorrowResult">
+        <include refid="selectArchiveBorrowVo"/>
+        <where>
+            <if test="borrower != null  and borrower != ''"> and borrower like CONCAT('%', #{borrower} ,'%')</if>
+            <if test="applicant != null  and applicant != ''"> and applicant like CONCAT('%', #{applicant} ,'%')</if>
+            <if test="borrowingTime != null "> and borrowing_time = #{borrowingTime}</if>
+            <if test="archiveNumber != null  and archiveNumber != ''"> and archive_number = #{archiveNumber}</if>
+            <if test="title != null  and title != ''"> and title like CONCAT('%', #{title} ,'%')</if>
+            <if test="borrowingPurpose != null  and borrowingPurpose != ''"> and borrowing_purpose like CONCAT('%', #{borrowingPurpose} ,'%')</if>
+            <if test="returnTime != null "> and return_time = #{returnTime}</if>
+        </where>
+    </select>
+
+    <select id="selectArchiveBorrowById" parameterType="Long" resultMap="ArchiveBorrowResult">
+        <include refid="selectArchiveBorrowVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertArchiveBorrow" parameterType="ArchiveBorrow" useGeneratedKeys="true" keyProperty="id">
+        insert into archive_borrow
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="borrower != null and borrower != ''">borrower,</if>
+            <if test="applicant != null">applicant,</if>
+            <if test="borrowingTime != null">borrowing_time,</if>
+            <if test="archiveNumber != null">archive_number,</if>
+            <if test="title != null">title,</if>
+            <if test="borrowingPurpose != null">borrowing_purpose,</if>
+            <if test="returnTime != null">return_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="borrower != null and borrower != ''">#{borrower},</if>
+            <if test="applicant != null">#{applicant},</if>
+            <if test="borrowingTime != null">#{borrowingTime},</if>
+            <if test="archiveNumber != null">#{archiveNumber},</if>
+            <if test="title != null">#{title},</if>
+            <if test="borrowingPurpose != null">#{borrowingPurpose},</if>
+            <if test="returnTime != null">#{returnTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateArchiveBorrow" parameterType="ArchiveBorrow">
+        update archive_borrow
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="borrower != null and borrower != ''">borrower = #{borrower},</if>
+            <if test="applicant != null">applicant = #{applicant},</if>
+            <if test="borrowingTime != null">borrowing_time = #{borrowingTime},</if>
+            <if test="archiveNumber != null">archive_number = #{archiveNumber},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="borrowingPurpose != null">borrowing_purpose = #{borrowingPurpose},</if>
+            <if test="returnTime != null">return_time = #{returnTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveBorrowById" parameterType="Long">
+        delete from archive_borrow where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveBorrowByIds" parameterType="String">
+        delete from archive_borrow where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
     <select id="getArchiveBorrowList" resultType="Long" parameterType="ArchiveInfo">
         select category_id from archive_info
         <where>
             <if test="archiveInfo.archiveNumber != null and archiveInfo.archiveNumber != ''">and archive_number = #{archiveInfo.archiveNumber}</if>
             <if test="archiveInfo.field9 != null and archiveInfo.field9 != ''">and field9 like CONCAT('%', #{archiveInfo.field9}, '%')</if>
-            and archive_status in ('1','2')
+            and archive_status in ('2')
             <include refid="selectSearchListBydataPermiList"/>
         </where>
         group by category_id
     </select>
+
     <select id="getArchiveBorrowListAll" resultMap="ArchiveInfoResult">
         <include refid="selectArchiveInfoVo" />
         <where>
             <if test="categoryId != null and categoryId != ''">and category_id = #{categoryId}</if>
             <if test="archiveNumber != null and archiveNumber != ''">and archive_number = #{archiveNumber}</if>
             <if test="field9 != null and field9 != ''">and field9 like CONCAT('%', #{field9}, '%')</if>
-            and archive_status in ('1','2')
+            and archive_status in ('2')
             <include refid="selectSearchListBydataPermiList"/>
         </where>
         LIMIT #{pageSize} OFFSET #{offset}
@@ -89,9 +177,10 @@
             <if test="categoryId != null and categoryId != ''">and category_id = #{categoryId}</if>
             <if test="archiveNumber != null and archiveNumber != ''">and archive_number = #{archiveNumber}</if>
             <if test="field9 != null and field9 != ''">and field9 like CONCAT('%', #{field9}, '%')</if>
-            and archive_status in ('1','2')
+            and archive_status in ('2')
             <include refid="selectSearchListBydataPermiList"/>
         </where>
         group by category_id
     </select>
+
 </mapper>
