@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.archive.mapper.ArchiveOpenMapper">
+
+    <resultMap type="ArchiveOpen" id="ArchiveOpenResult">
+        <result property="id"    column="id"    />
+        <result property="archiveId"    column="archive_id"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="title"    column="title"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="archiveNumber"    column="archive_number"    />
+    </resultMap>
+
+    <sql id="selectArchiveOpenVo">
+        select id, archive_id, category_id, title, create_by, create_time, update_by, update_time, archive_number from archive_open
+    </sql>
+
+    <select id="selectArchiveOpenList" parameterType="ArchiveOpen" resultMap="ArchiveOpenResult">
+        select o.*, c.name as categoryName
+        from archive_open o
+        left join archive_category c on o.category_id = c.id
+        <where>
+            <if test="archiveId != null "> and archive_id = #{archiveId}</if>
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="createBy != null  and createBy != ''"> and create_by = #{createBy}</if>
+            <if test="createTime != null "> and create_time = #{createTime}</if>
+            <if test="archiveNumber != null  and archiveNumber != ''"> and archive_number = #{archiveNumber}</if>
+        </where>
+    </select>
+
+    <select id="selectArchiveOpenById" parameterType="Long" resultMap="ArchiveOpenResult">
+        <include refid="selectArchiveOpenVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertArchiveOpen" parameterType="ArchiveOpen" useGeneratedKeys="true" keyProperty="id">
+        insert into archive_open
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">archive_id,</if>
+            <if test="categoryId != null">category_id,</if>
+            <if test="title != null">title,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="archiveNumber != null">archive_number,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="archiveNumber != null">#{archiveNumber},</if>
+         </trim>
+    </insert>
+
+    <update id="updateArchiveOpen" parameterType="ArchiveOpen">
+        update archive_open
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="archiveNumber != null">archive_number = #{archiveNumber},</if>
+        </trim>
+        where id = #{id}
+    </update>
+    <update id="openArchiveInfo">
+        update archive_info set data_permit = #{newPermit} where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveOpenById" parameterType="Long">
+        delete from archive_open where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveOpenByIds" parameterType="String">
+        delete from archive_open where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
