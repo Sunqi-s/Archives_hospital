@@ -239,8 +239,6 @@ import { treeselect } from "@/api/system/menu";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import { listDept } from "@/api/system/dept";
 import { pointRelation } from "@/api/archive/relation";
-import { Base64 } from "js-base64";
-import { addPlaceonlog, delPlaceonlog, getPlaceonlog, listPlaceonlog, updatePlaceonlog } from "@/api/archive/placeonlog";
 import {getPreviewUrl} from "@/api/archive/filePreview";
 export default {
   name: "Resources",
