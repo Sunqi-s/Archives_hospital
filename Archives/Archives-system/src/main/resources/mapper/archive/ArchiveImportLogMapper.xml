@@ -27,11 +27,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </sql>
 
     <sql id="selectSearchListBydataPermiList">
-        <if test="dataPermiList.length > 0" >
-            and data_permit in
+        <if test="dataPermiList.length > 0">
+            and (
             <foreach collection="dataPermiList" item="itemDataPermi" open="(" separator="," close=")">
-                #{itemDataPermi}
+                CONCAT(',', data_permit, ',') LIKE CONCAT('%,', #{itemDataPermi}, ',%')
             </foreach>
+
+            or CONCAT(',', data_permit, ',') LIKE '%,all,%'
+            )
         </if>
     </sql>
 

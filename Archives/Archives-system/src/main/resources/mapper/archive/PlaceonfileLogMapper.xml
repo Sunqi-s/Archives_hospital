@@ -3,7 +3,7 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.archives.archive.mapper.PlaceonfileLogMapper">
-    
+
     <resultMap type="PlaceonfileLog" id="PlaceonfileLogResult">
         <result property="placeonfileId"    column="placeonfile_id"    />
         <result property="placeonfileInfo"    column="placeonfile_info"    />
@@ -22,11 +22,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </sql>
 
     <sql id="selectSearchListBydataPermiList">
-        <if test="dataPermiList.length > 0" >
-            and data_permit in
+        <if test="dataPermiList.length > 0">
+            and (
             <foreach collection="dataPermiList" item="itemDataPermi" open="(" separator="," close=")">
-                #{itemDataPermi}
+                CONCAT(',', data_permit, ',') LIKE CONCAT('%,', #{itemDataPermi}, ',%')
             </foreach>
+
+            or CONCAT(',', data_permit, ',') LIKE '%,all,%'
+            )
         </if>
     </sql>
 
@@ -48,7 +51,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         group by odd_numbers,placeonfile_by, create_time
         order by create_time desc
     </select>
-    
+
     <select id="selectPlaceonfileLogByPlaceonfileId" parameterType="Long" resultMap="PlaceonfileLogResult">
         <include refid="selectPlaceonfileLogVo"/>
         where placeonfile_id = #{placeonfileId}
@@ -108,7 +111,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deletePlaceonfileLogByPlaceonfileIds" parameterType="String">
-        delete from placeonfile_log where placeonfile_id in 
+        delete from placeonfile_log where placeonfile_id in
         <foreach item="placeonfileId" collection="array" open="(" separator="," close=")">
             #{placeonfileId}
         </foreach>

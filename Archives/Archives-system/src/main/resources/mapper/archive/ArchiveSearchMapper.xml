@@ -66,10 +66,14 @@
     </sql>
 
     <sql id="selectSearchListBydataPermiList">
-        <if test="dataPermiList.length > 0">and
-            <foreach collection="dataPermiList" item="item" open="(" separator=" or " close=")">
-                data_permit like #{item}
+        <if test="dataPermiList.length > 0">
+            and (
+            <foreach collection="dataPermiList" item="itemDataPermi" open="(" separator="," close=")">
+                CONCAT(',', data_permit, ',') LIKE CONCAT('%,', #{itemDataPermi}, ',%')
             </foreach>
+
+            or CONCAT(',', data_permit, ',') LIKE '%,all,%'
+            )
         </if>
     </sql>
 

@@ -61,10 +61,16 @@
     </sql>
 
     <sql id="selectArchiveInfoDataPermit">
-        <if test="dataPermit.length > 0">and
+        <if test="dataPermit != null and dataPermit.length > 0">and
+            (
+            <!-- 1. 匹配包含指定部门ID的记录 -->
             <foreach collection="dataPermit" item="item" open="(" separator=" or " close=")">
-                data_permit like #{item}
+                CONCAT(',', data_permit, ',') LIKE CONCAT('%,', #{item}, ',%')
             </foreach>
+
+            <!-- 2. 新增匹配包含"all"的记录 -->
+            or CONCAT(',', data_permit, ',') LIKE '%,all,%'
+            )
         </if>
     </sql>
 
