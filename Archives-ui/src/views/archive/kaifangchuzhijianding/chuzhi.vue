@@ -6,7 +6,7 @@
           <file-tree :file-options="fileOptions" @node-click="handleNodeClick" :default-expand-all="false" ref="fileTree"
             :isClick="isClick"></file-tree>
         </el-col>
-  
+
         <!-- 未选择档案库时显示该画面 -->
         <el-col :span="20" :xs="24" v-show="isselect">
           <div class="no-selection">
@@ -14,7 +14,7 @@
             <p class="file-fontcenter">请选择左侧档案库</p>
           </div>
         </el-col>
-  
+
         <el-col :span="20" :xs="24" v-show="showPasswordPrompt">
           <div class="password-prompt">
             <div>
@@ -28,7 +28,7 @@
             </div>
           </div>
         </el-col>
-  
+
         <!-- 档案信息展示 -->
         <el-col :span="20" :xs="24" v-show="categoryId && !showPasswordPrompt">
           <!-- 单一框的搜索条件 -->
@@ -40,7 +40,7 @@
             <el-button @click="drawer = true" plain class="Senior-button" icon="el-icon-arrow-down" type="success"
               size="small">高级搜索</el-button>
           </div>
-  
+
           <!-- 高级搜索抽屉 -->
           <el-drawer class="search-drawer" title="高级搜索" :visible.sync="drawer" :with-header="true">
             <el-form :model="saveSearch" ref="queryForm" size="small" :inline="true" v-show="showSearch"
@@ -57,14 +57,14 @@
                 </component>
               </el-form-item>
             </el-form>
-  
+
             <div class="form-button-wrapper">
               <el-button type="primary" icon="el-icon-search" size="small" @click="handleQueryBeach" :disabled="!isClick">搜索</el-button>
               <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
             </div>
-  
+
           </el-drawer>
-  
+
           <!-- 功能按钮区 -->
           <el-row :gutter="10" class="mb8">
             <!-- <el-col :span="1.5">
@@ -77,7 +77,7 @@
               <el-button type="success" icon="el-icon-s-flag" size="small" @click="handelChuzhi">处置</el-button>
             </el-col>
           </el-row>
-  
+
           <!-- 动态生成的表格 -->
           <div class="fixed-table-container">
             <el-table :data="infoList" v-loading="loading" element-loading-background="rgba(255,255,255,1)"
@@ -110,7 +110,7 @@
           </div>
         </el-col>
       </el-row>
-  
+
       <!-- 添加或修改对话框 -->
       <el-dialog :title="title" :visible.sync="open" append-to-body class="dialog-container" :before-close="handleClose"
         style="text-align: left;" fullscreen>
@@ -186,7 +186,7 @@
                   </el-descriptions-item>
                 </el-descriptions>
                 <el-divider dashed v-if="insertFieldsGroup3.length"></el-divider>
-  
+
                 <el-row>
                   <el-col :span="24">
                     <div>
@@ -222,14 +222,14 @@
           <el-button @click="close">关 闭</el-button>
         </div>
       </el-dialog>
-  
+
       <!--文件预览对话框
       <el-dialog title="文件预览" :visible.sync="showPreview" fullscreen>
         <onlinePreview v-if="showPreview" :initialUrl="previewUrl"/>
       </el-dialog>-->
     </div>
   </template>
-  
+
   <script>
   import { getDicts } from "@/api/system/dict/data";
   import { getItemByCategoryId } from "@/api/archive/item";
@@ -244,6 +244,7 @@
   import { pointRelation } from "@/api/archive/relation";
   import { Base64 } from "js-base64";
   import { addPlaceonlog, delPlaceonlog, getPlaceonlog, listPlaceonlog, updatePlaceonlog } from "@/api/archive/placeonlog";
+  import { addDispose } from '@/api/archive/dispose'
   export default {
     name: "Resources",
     components: { 'file-tree': categoryTree, Treeselect },
@@ -263,7 +264,7 @@
           pageNum: 1,
           pageSize: 10,
           categoryId: null,
-          archiveStatus: 1, //默认显示已归档数据
+          archiveStatus: 2, //默认显示已归档数据
           searchValue: ''
         },
         ids: [],
@@ -300,7 +301,7 @@
           pageNum: 1,
           pageSize: 10,
           categoryId: null,
-          archiveStatus: 1, //默认显示待归档数据
+          archiveStatus: 2, //默认显示待归档数据
           searchValue: ''
         },//搜索框内容
         showPasswordPrompt: false,//是否显示密码输入框
@@ -363,7 +364,7 @@
               options: field.options || [],
               default: null
             };
-  
+
           case 'treeselect':
             if (field.dictType === 'sys_dept_list') {
               return {
@@ -405,7 +406,7 @@
           dictType: field.dictType,
           options: []
         };
-  
+
         if (field.dictType) {
           getDicts(field.dictType).then(response => {
             const options = response.data.map(item => ({
@@ -419,7 +420,7 @@
         }
         return fieldData;
       },
-  
+
       toCamelCase(columnName) {
         return columnName.replace(/_([a-z])/g, (match, p1) => p1.toUpperCase());
       },
@@ -454,11 +455,11 @@
       handleFileOptions(data, idKey, parentKey) {
         const tree = [];
         const idMap = {};
-  
+
         data.forEach(item => {
           idMap[item[idKey]] = { ...item, label: item.name, children: [] };
         });
-  
+
         data.forEach(item => {
           const parent = idMap[item[parentKey]];
           if (parent) {
@@ -467,7 +468,7 @@
             tree.push(idMap[item[idKey]]);
           }
         });
-  
+
         return tree;
       },
       handleNodeClick(nodeData) {
@@ -516,7 +517,7 @@
           this.isClick = false;
           this.queryParams = {
             categoryId: this.categoryId,
-            archiveStatus: 1,
+            archiveStatus: 2,
             searchValue: this.saveSearch.searchValue,
             pageNum: 1,
             pageSize: this.queryParams.pageSize
@@ -525,7 +526,7 @@
             searchValue: this.saveSearch.searchValue,
             pageNum: 1,
             pageSize: 10,
-            archiveStatus: 1,
+            archiveStatus: 2,
             categoryId: this.categoryId
           }
           this.getList();
@@ -536,7 +537,7 @@
           this.isClick = false;
           this.queryParams.categoryId = this.categoryId;
           this.queryParams.pageNum = this.queryParams.pageNum;
-          this.queryParams.archiveStatus = 1;
+          this.queryParams.archiveStatus = 2;
           this.queryFields.forEach(field => {
             this.$set(this.queryParams, field.name, this.saveSearch[field.name]);
           });
@@ -561,7 +562,7 @@
             categoryId: this.categoryId,
             pageNum: 1,
             pageSize: 10,
-            archiveStatus: 1,
+            archiveStatus: 2,
             searchValue: ''
           };
           this.saveSearch = this.queryParams;
@@ -578,7 +579,7 @@
           ...this.queryParams, // 保留现有的查询参数
           pageNum: this.queryParams.pageNum, // 当前页码
           pageSize: this.queryParams.pageSize, // 每页显示条数
-          archiveStatus: 1 // 归档状态
+          archiveStatus: 2 // 归档状态
         };
         listInfo(params).then(response => {
           if (this.queryParams.searchValue) {
@@ -593,7 +594,7 @@
               this.loading = false;
             }, 400);
           })
-  
+
         });
       },
       markMatches(data) {
@@ -738,7 +739,7 @@
                 categoryId: this.categoryId,
                 ...this.queryParams
               }
-              ExportQueryParams.archiveStatus = 1;
+              ExportQueryParams.archiveStatus = 2;
               ExportQueryParams.pageNum = 1;
               ExportQueryParams.pageSize = 10000000;
               listInfo(ExportQueryParams).then(res => {
@@ -811,7 +812,7 @@
             const pageTotal = Math.ceil(this.total / 3000);
             const ExportQueryParams = {
               categoryId: this.categoryId,
-              archiveStatus: 1,
+              archiveStatus: 2,
               ...this.queryParams
             };
             ExportQueryParams.pageNum = 1;
@@ -829,7 +830,7 @@
                   return;
                 }
                 ExportQueryParams.pageNum = pageNum;
-                ExportQueryParams.archiveStatus = 1;
+                ExportQueryParams.archiveStatus = 2;
                 const res = await listInfo(ExportQueryParams);
                 const ids = res.rows ? res.rows.map(item => item.id) : [];
                 const batchSize = 400;
@@ -875,7 +876,7 @@
                 console.error("退回失败：", error);
               }
             };
-  
+
             // 调用递归函数，从第1页开始
             await sendPageData(1, pageTotal);
           })
@@ -896,7 +897,7 @@
           pageNum: 1,
           pageSize: 10,
           categoryId: null,
-          archiveStatus: 1, //默认显示已归档数据
+          archiveStatus: 2, //默认显示已归档数据
           searchValue: ''
         }
         this.passwordInput = '';
@@ -906,7 +907,24 @@
         });
       },
       handelChuzhi(){
-        this.$message.warning("功能开发中，敬请期待！");
+        if (this.selectedItems.length === 0){
+          this.$message.warning("请选择要处理的数据！");
+          return;
+        } else {
+          let items = [];
+          for (let i = 0; i < this.selectedItems.length; i++){
+            let item = this.selectedItems[i];
+            items.push(item);
+          }
+          addDispose(items).then(res => {
+            if (res.code === 200){
+              this.$message.success(res.msg);
+              this.getList();
+            } else {
+              this.$message.error(res.msg);
+            }
+          })
+        }
       }
     }
   };
@@ -929,7 +947,7 @@
     min-height: 500px;
     /* 设置最小高度，以确保居中效果 */
   }
-  
+
   /* 未选择分类图片居中并具有适当的大小 */
   .file-center {
     width: 200px;
@@ -939,7 +957,7 @@
     margin-bottom: 20px;
     /* 在图片和文本之间添加间距 */
   }
-  
+
   /* 未选择分类 */
   .file-fontcenter {
     color: #414141;
@@ -949,25 +967,25 @@
     margin-top: 10px;
     /* 在文本和前面的元素（如图片）之间添加间距 */
   }
-  
+
   /* 高级搜索 按钮 */
   .form-button-wrapper {
     text-align: center;
     margin-top: 10px;
   }
-  
+
   /* 添加编辑画面 */
   .dialog-container {
     padding: 0 !important;
     margin-top: 0 !important;
   }
-  
+
   .required-label::after {
     content: '*';
     color: #F56C6C;
     margin-right: 4px;
   }
-  
+
   .truncate-text {
     display: block;
     white-space: nowrap;
@@ -976,23 +994,23 @@
     max-width: 100%;
     /* Adjust as needed */
   }
-  
+
   .item {
     display: inline-block;
   }
-  
+
   .butten-column {
     display: flex;
     flex-direction: column;
     gap: 10px;
     align-items: center;
   }
-  
+
   .butten-column button {
     margin: 0;
     padding: 10px;
   }
-  
+
   .fixed-table-container {
     top: 200px;
     width: auto;
@@ -1001,7 +1019,7 @@
     overflow-x: auto;
     position: fixed;
   }
-  
+
   .password-prompt {
     display: flex;
     /* 使用Flexbox布局 */
@@ -1019,4 +1037,3 @@
     /* 设置最小高度，以确保居中效果 */
   }
   </style>
-  

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.archive.mapper.ArchiveDisposeMapper">
+
+    <resultMap type="ArchiveDispose" id="ArchiveDisposeResult">
+        <result property="id"    column="id"    />
+        <result property="archiveId"    column="archive_id"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="title"    column="title"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="archiveNumber"    column="archive_number"    />
+    </resultMap>
+
+    <sql id="selectArchiveDisposeVo">
+        select id, archive_id, category_id, title, create_by, create_time, update_by, update_time, archive_number from archive_dispose
+    </sql>
+
+    <select id="selectArchiveDisposeList" parameterType="ArchiveDispose" resultMap="ArchiveDisposeResult">
+        select d.*,
+        c.name as categoryName
+        from archive_dispose d
+        left join archive_category c on d.category_id = c.id
+        <where>
+            <if test="archiveId != null ">and archive_id = #{archiveId}</if>
+            <if test="title != null  and title != ''">and title like concat('%',#{ #{title} },'%')</if>
+            <if test="createBy != null  and createBy != ''">and create_by like concat('%',#{ #{createBy} },'%')</if>
+            <if test="createTime != null ">and create_time = #{createTime}</if>
+            <if test="archiveNumber != null  and archiveNumber != ''">and archive_number = #{archiveNumber}</if>
+        </where>
+    </select>
+
+    <select id="selectArchiveDisposeById" parameterType="Long" resultMap="ArchiveDisposeResult">
+        <include refid="selectArchiveDisposeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertArchiveDispose" parameterType="ArchiveDispose" useGeneratedKeys="true" keyProperty="id">
+        insert into archive_dispose
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">archive_id,</if>
+            <if test="categoryId != null">category_id,</if>
+            <if test="title != null">title,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="archiveNumber != null">archive_number,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="archiveNumber != null">#{archiveNumber},</if>
+         </trim>
+    </insert>
+
+    <update id="updateArchiveDispose" parameterType="ArchiveDispose">
+        update archive_dispose
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="archiveNumber != null">archive_number = #{archiveNumber},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveDisposeById" parameterType="Long">
+        delete from archive_dispose where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveDisposeByIds" parameterType="String">
+        delete from archive_dispose where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
