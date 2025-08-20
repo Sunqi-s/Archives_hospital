@@ -158,28 +158,63 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
-    <el-dialog title="档号规则" :visible.sync="isRule" width="100vh" append-to-body>
+    <el-dialog title="档号规则" :visible.sync="isRule" width="110vh" append-to-body>
       <el-row>
-          <el-select v-model="archiveItem" placeholder="请选择字段">
-        <el-option v-for="item in selection" :key="item" :label="item" :value="item">
-        </el-option>
-      </el-select>
-          <el-select v-model="joinItem" placeholder="请选择间隔符">
-        <el-option v-for="item in joinSelection" :key="item" :label="item" :value="item">
-        </el-option>
-      </el-select>
+        <el-col :span="3" class="vertical-center">
+          <span style="font-size: 17px;">字段:</span>
+        </el-col>
+        <el-col :span="9">
+          <el-select v-model="archiveRuleItem.ruleItem" placeholder="请选择字段">
+            <el-option v-for="item in selection" :key="item" :label="item" :value="item">
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="2" class="vertical-center">
+          <span style="font-size: 17px;">间隔符:</span>
+        </el-col>
+        <el-col :span="9">
+          <el-select v-model="archiveRuleItem.ruleJoin" placeholder="请选择间隔符">
+            <el-option v-for="item in joinSelection" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+          </el-select>
+        </el-col>
       </el-row>
-      <el-row>
-          <el-select v-model="dealNumber" placeholder="请选择处理方式">
-        <el-option v-for="item in dealSelection" :key="item.label" :label="item.label" :value="item.value">
-        </el-option>
-      </el-select>
-      <el-input v-model="ruleNumber" placeholder="请输入位数" />
+      <el-row style="margin-top: 7px">
+        <el-col :span="3" class="vertical-center">
+          <span style="font-size: 17px;">处理方式:</span>
+        </el-col>
+        <el-col :span="9">
+          <el-select v-model="archiveRuleItem.dealMethod" placeholder="请选择处理方式">
+            <el-option v-for="item in dealSelection" :key="item.label" :label="item.label" :value="item.value">
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="2" class="vertical-center">
+          <span style="font-size: 17px;">位数:</span>
+        </el-col>
+        <el-col :span="9">
+          <el-input v-model="archiveRuleItem.dealDetail" placeholder="请输入位数" />
+        </el-col>
       </el-row>
-
-      <el-button type="primary" @click="addRule">添加</el-button>
-      <el-input v-model="numberRule" readonly placeholder="结果" />
-      <el-button type="primary" @click="updateRule">确定</el-button>
+      <el-row style="margin-top: 7px" type="flex" justify="end">
+        <el-col :span="21">
+          <el-button type="primary" @click="addRule">添加</el-button>
+          <el-button type="primary" @click="deleteRule" style="margin-left: 30px">撤销</el-button>
+        </el-col>
+      </el-row>
+      <el-row style="margin-top: 7px">
+        <el-col :span="3" class="vertical-center">
+          <span style="font-size: 17px;">结果:</span>
+        </el-col>
+        <el-col :span="21">
+          <el-input v-model="numberRule" readonly placeholder="结果" />
+        </el-col>
+      </el-row>
+      <el-row style="margin-top: 7px" type="flex" justify="end">
+        <el-col :span="21">
+          <el-button type="primary" @click="updateRule">确定</el-button>
+        </el-col>
+      </el-row>
     </el-dialog>
   </div>
 </template>
@@ -228,27 +263,22 @@ export default {
         ],        isActive: [
           { required: true, message: "显示状态不能为空", trigger: "change" }
         ],      },
-        ruleForm : {
-        id: null,
-        categoryId: null,
-        ruleItem: null,
-        ruleJoin: null,
-        itemName: null,
-        numberCount: null
-      },
         isRule: false,
         dealSelection: [{label:"无处理",value:"0"},{label:"数字统一位数",value:"1"}],
         selection:["全宗号", "门类代码", "年度", "保管期限", "机构或问题", "件号", "保管期限缩写", "机构或问题缩写"],
-        archiveItem:'',
         numberRule:'',
-        joinSelection:["","-", "·"],
-        joinItem:'',
-        trueRule:[],
-        trueItem:[],
-        dealItem:[],
-        dealRule:[],
-        dealNumber:"0",
-        ruleNumber:""
+        joinSelection:[{label:"无",value:""},{label:"-",value:"-"},{label:"·",value:"·"}],
+        ruleList:[],
+        ruleItemList:[],
+        archiveRuleItem: {
+          id: null,
+          categoryId: null,
+          ruleNumber: 0,
+          ruleItem: "",
+          ruleJoin: "",
+          dealMethod: "0",
+          dealDetail: ""
+        },
     };
   },
   created() {
@@ -398,69 +428,75 @@ export default {
     },
     handleNumberRule(row){
       this.reSetRule();
-      this.ruleForm.categoryId = row.id;
+      this.archiveRuleItem.categoryId = row.id;
       this.isRule = true;
     },
     addRule(){
-      if(this.archiveItem == ""){
+      if(this.archiveRuleItem.ruleItem == "" || this.archiveRuleItem.ruleItem == null){
         this.$modal.msgError("请选择字段");
         return;
       }
-      this.numberRule = this.numberRule + this.archiveItem + this.joinItem;
-      this.trueRule.push(this.joinItem);
-      this.trueItem.push(this.archiveItem);
-      this.dealRule.push(this.dealNumber=="0"?"0":this.ruleNumber);
-      this.dealItem.push(this.dealNumber);
+      if(this.archiveRuleItem.ruleJoin == null){
+        this.$modal.msgError("请选择间隔符");
+        return;
+      }
+      this.archiveRuleItem.dealDetail = this.archiveRuleItem.dealMethod == "0" ? "" : this.archiveRuleItem.dealDetail;
+      this.ruleList.push(this.archiveRuleItem.ruleItem + this.archiveRuleItem.ruleJoin);
+      this.numberRule = this.ruleList.join("");
+      this.ruleItemList.push({...this.archiveRuleItem});
+    },
+    deleteRule(){
+      this.ruleList.pop();
+      this.ruleItemList.pop();
+      this.numberRule = this.ruleList.join("");
     },
     updateRule(){
-      if(this.trueItem.length < 2 ){
+      if(this.ruleItemList.length < 2 ){
         this.$modal.msgError("请至少选择两个字段");
         return;
       }
-      if(this.trueItem.length > 20 ){
+      if(this.ruleItemList.length > 20 ){
         this.$modal.msgError("至多选择二十个字段");
         return;
       }
-      if(this.trueRule.length != this.trueItem.length){
-        this.$modal.msgError("字段数与间隔符数不匹配");
-        return;
-      }
-      for(let i=0;i<this.trueRule.length-1;i++){
-        if(this.trueRule[i] == ""){
+      for(let i=0;i<this.ruleItemList.length-1;i++){
+        this.ruleItemList[i].ruleNumber = i;
+        if(this.ruleItemList[i].ruleJoin == ""){
           this.$modal.msgError("请在字段之间添加间隔符");
           return;
         }
       }
-      this.trueRule[this.trueRule.length-1] = "";
-      this.ruleForm.ruleJoin = this.trueRule.join(",");
-      this.ruleForm.ruleItem = this.trueItem.join(",");
-      this.ruleForm.itemName = this.dealItem.join(",");
-      this.ruleForm.numberCount = this.dealRule.join(",");
-      addRule(this.ruleForm).then(response => {
+      for(let i=0;i<this.ruleItemList.length;i++){
+        this.ruleItemList[i].ruleNumber = i+1;
+      }
+      this.ruleItemList[this.ruleItemList.length-1].ruleJoin = "";
+      addRule(this.ruleItemList).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.isRule = false;
               this.reSetRule();
             });
     },
     reSetRule(){
-      this.archiveItem = "";
-      this.joinItem = "";
       this.numberRule = "";
-      this.trueRule = [];
-      this.trueItem = [];
-      this.dealItem = [];
-      this.dealRule = [];
-      this.dealNumber = "0";
-      this.ruleNumber = "";
-      this.ruleForm = {
-        id: null,
-        categoryId: null,
-        ruleItem: null,
-        ruleJoin: null,
-        itemName: null,
-        numberCount: null
-      };
+      this.ruleList = [];
+      this.ruleItemList = [];
+        this.archiveRuleItem = {
+          id: null,
+          categoryId: null,
+          ruleNumber: 0,
+          ruleItem: "",
+          ruleJoin: "",
+          dealMethod: "0",
+          dealDetail: ""
+        }
     },
   }
 };
 </script>
+<style scoped>
+.vertical-center {
+  height: 32px; /* 根据需要调整高度 */
+  line-height: 32px; /* 与高度一致 */
+}
+</style>
+

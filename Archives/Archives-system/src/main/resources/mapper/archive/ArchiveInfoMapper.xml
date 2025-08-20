@@ -623,18 +623,12 @@
         </foreach>
     </delete>
 
-    <select id="getColumn" resultMap="ArchiveInfoResult">
-        SELECT item_name AS field1,column_name AS field2
-        FROM archive_item
-        WHERE item_name = #{itemName}
-        AND category_id = #{categoryId}
-    </select>
 
-    <select id="getNumberByKeyword"  resultMap="ArchiveInfoResult">
+    <select id="getNumberByKeyword" resultMap="ArchiveInfoResult">
         select id,
         <foreach collection="map" item="entry" separator=",">
             <if test="entry != null">
-                ${entry.field2} as ${entry.field1}
+                ${entry.ruleColumn} as field${entry.ruleNumber}
             </if>
         </foreach>
         from archive_info
@@ -680,8 +674,7 @@
             field28,
             field29,
             field30,
-            oss_status
-            ) LIKE CONCAT('%', #{keyword}, '%')
+            oss_status ) LIKE CONCAT('%', #{keyword}, '%')
             and category_id = #{categoryId}
             and archive_status = #{archiveStatus}
             <include refid="selectArchiveInfoDataPermit" />
@@ -692,7 +685,7 @@
         select id,
         <foreach collection="map" item="entry" separator=",">
             <if test="entry != null">
-                ${entry.field2} as ${entry.field3}
+                ${entry.ruleColumn} as field${entry.ruleNumber}
             </if>
         </foreach>
         from archive_info
@@ -764,5 +757,32 @@
         <foreach collection="list" item="value" index="key" open="(" separator="," close=")">
             #{value.id}
         </foreach>
+    </update>
+
+    <update id="createTempTable">
+        CREATE TEMPORARY TABLE IF NOT EXISTS temp_archive_update (
+        id INT PRIMARY KEY,
+        new_archive_number VARCHAR(100)
+    ) ENGINE=InnoDB
+    </update>
+    <insert id="batchInsertTempTable" parameterType="object">
+        INSERT INTO temp_archive_update (id, new_archive_number) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.archiveNumber})
+        </foreach>
+    </insert>
+
+    <update id="batchUpdateFromTempTable">
+        UPDATE archive_info a
+            JOIN temp_archive_update t ON a.id = t.id
+            SET a.archive_number = t.new_archive_number
+    </update>
+
+    <update id="clearTempTable">
+        TRUNCATE TABLE temp_archive_update
+    </update>
+
+    <update id="dropTempTable">
+        DROP TEMPORARY TABLE IF EXISTS temp_archive_update
     </update>
 </mapper>

@@ -71,9 +71,9 @@ public class ArchiveRuleController extends BaseController
      */
     @Log(title = "档号规则", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody ArchiveRule archiveRule)
+    public AjaxResult add(@RequestBody List<ArchiveRule> archiveRuleList)
     {
-        return toAjax(archiveRuleService.insertArchiveRule(archiveRule));
+        return toAjax(archiveRuleService.insertArchiveRule(archiveRuleList));
     }
 
     /**
@@ -81,9 +81,9 @@ public class ArchiveRuleController extends BaseController
      */
     @Log(title = "档号规则", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody ArchiveRule archiveRule)
+    public AjaxResult edit(@RequestBody List<ArchiveRule> archiveRuleList)
     {
-        return toAjax(archiveRuleService.updateArchiveRule(archiveRule));
+        return toAjax(archiveRuleService.updateArchiveRule(archiveRuleList));
     }
 
     /**

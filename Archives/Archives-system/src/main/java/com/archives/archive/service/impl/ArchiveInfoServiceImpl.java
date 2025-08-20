@@ -11,6 +11,7 @@ import com.archives.common.core.redis.RedisCache;
 import com.archives.common.exception.ServiceException;
 import com.archives.common.utils.DateUtils;
 import com.archives.common.utils.SecurityUtils;
+import com.archives.common.utils.StringUtils;
 import com.archives.system.domain.SysOss;
 import com.archives.system.mapper.SysDeptMapper;
 import com.archives.system.mapper.SysOssMapper;
@@ -20,6 +21,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -425,97 +429,188 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         return archiveInfoMapper.selectArchiveInfoByIds(ids);
     }
 
-    @Async("asyncSecurityTaskExecutor") // 标记为异步方法
+    @Async("asyncSecurityTaskExecutor")
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @Override
     public void updateArchiveNumber(ArchiveInfo archiveInfo) {
         try {
-        redisCache.setCacheObject("updateArchiveNumber", String.valueOf(archiveInfo.getCategoryId()));
+
+            // 1. 设置处理标记
+            redisCache.setCacheObject("updateArchiveNumber", String.valueOf(archiveInfo.getCategoryId()));
+
+            // 2. 获取用户权限
+            String[] dataPermiList = getCurrentUserDataPermi();
+
+            // 3. 获取规则(带缓存)
+            List<ArchiveRule> ruleList = getCachedRules(archiveInfo.getCategoryId());
+            if (ruleList.isEmpty()) {
+                throw new RuntimeException("档号规则不存在！");
+            }
+
+            // 4. 批量查询列名映射
+            Map<Integer, String> ruleColumnMap = batchGetRuleColumns(ruleList, archiveInfo.getCategoryId());
+            ruleList.forEach(rule -> rule.setRuleColumn(ruleColumnMap.get(rule.getRuleNumber())));
+
+            // 5. 查询数据(带分页限制)
+            List<ArchiveInfo> resultList = queryArchiveData(archiveInfo, ruleList, dataPermiList);
+            if (resultList.isEmpty()) {
+                return;
+            }
+
+            // 6. 并行处理数据
+            processArchiveNumbersInParallel(resultList, ruleList);
+
+            // 7. 批量更新(分批+临时表)
+            batchUpdateArchiveNumbers(resultList);
+            System.out.println("档案编号更新完成, 处理数量: {"+resultList.size()+"}");
+//            System.out.println("档案编号更新完成, 处理数量: {"+resultList.size()+"}, 耗时: {"+watch.getTotalTimeMillis()+"} ms, 详情: {"+watch.prettyPrint()+"}");
+        } catch (Exception e) {
+//            System.out.println("更新档案编号失败, 已处理时间: {"+watch.getTotalTimeMillis()+"} ms, 错误: {"+e.getMessage()+"}");
+            throw new RuntimeException("更新档号失败: " + e.getMessage());
+        } finally {
+            redisCache.deleteObject("updateArchiveNumber");
+        }
+    }
+
+    /**
+     * 获取当前用户数据权限
+     */
+    private String[] getCurrentUserDataPermi() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         SysUser currentUser = loginUser.getUser();
-        String[] dataPermiList;
-        if ("all".equals(currentUser.getDataPermi())) {
-            dataPermiList = new String[0];
-        } else {
-            dataPermiList = (currentUser.getDataPermi().split(","));
-            for (int i = 0; i < dataPermiList.length; i++) {
-                dataPermiList[i] = "%" + dataPermiList[i] + "%";
-            }
-        }
-            ArchiveRule archiveRule = new ArchiveRule();
-            archiveRule.setCategoryId(archiveInfo.getCategoryId());
-            List<ArchiveRule> ruleList = archiveRuleMapper.selectArchiveRuleList(archiveRule);
-            if (ruleList.isEmpty()) {
-                throw new ServiceException("档号规则不存在！");
-            }
-            ArchiveRule archiveRule1 = ruleList.get(0);
-            // 定义需要获取的列
-            List<String> columns = Arrays.asList(archiveRule1.getRuleItem().split(","));
-            String[] rule = archiveRule1.getRuleJoin().split(",");
-            String[] item = archiveRule1.getItemName().split(",");
-            String[] count = archiveRule1.getNumberCount().split(",");
-            List<ArchiveInfo> archiveInfoList = columns.stream()
-                    .map(column -> archiveInfoMapper.getColumn(column, archiveInfo.getCategoryId()))
-                    .collect(Collectors.toList());
-            for (int i = 0; i < columns.size(); i++) {
-                archiveInfoList.get(i).setField3("field" + (i + 1));
-            }
 
-            // 获取查询结果
-            List<ArchiveInfo> resultList;
-            if (archiveInfo.getSearchValue() != null && !archiveInfo.getSearchValue().isEmpty()) {
-                resultList = archiveInfoMapper.getNumberByKeyword(
-                        archiveInfoList,
-                        archiveInfo.getSearchValue(),
-                        archiveInfo.getCategoryId(),
-                        archiveInfo.getArchiveStatus(),
-                        dataPermiList
-                );
-            } else {
-                resultList = archiveInfoMapper.getNumberBeachSearch(archiveInfoList, archiveInfo, dataPermiList);
-            }
-            if (resultList.isEmpty()) {
-                redisCache.deleteObject("updateArchiveNumber");
-            }
-            // 更新档案编号
-            resultList.forEach(archiveInfo1 -> {
-                String newNumberStr = buildArchiveNumber(archiveInfoList, archiveInfo1, rule, item, count);
-                archiveInfo1.setArchiveNumber(newNumberStr);
-            });
-            // 更新数据库中的档案编号
-            int updateResult = archiveInfoMapper.updateArchiveNumber(resultList);
-            redisCache.deleteObject("updateArchiveNumber");
-        } catch (Exception e) {
-            System.err.println("Error updating archive number: " + e.getMessage());
-            throw new ServiceException("更新档号时发生错误");
+        if ("all".equals(currentUser.getDataPermi())) {
+            return new String[0];
         }
+        return Arrays.stream(currentUser.getDataPermi().split(","))
+                .map(perm -> "%" + perm + "%")
+                .toArray(String[]::new);
+    }
+
+    /**
+     * 获取缓存中的规则
+     */
+    public List<ArchiveRule> getCachedRules(Long categoryId) {
+        ArchiveRule archiveRule = new ArchiveRule();
+        archiveRule.setCategoryId(categoryId);
+        return archiveRuleMapper.selectArchiveRuleList(archiveRule);
+    }
+
+    /**
+     * 批量获取规则列名映射
+     */
+    private Map<Integer, String> batchGetRuleColumns(List<ArchiveRule> ruleList, Long categoryId) {
+        List<String> itemNames = ruleList.stream()
+                .map(ArchiveRule::getRuleItem)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<ArchiveRule> columns = archiveRuleMapper.batchGetColumns(itemNames, categoryId);
+        // 创建ruleItem到ruleNumber的映射
+        Map<String, Integer> itemToNumberMap = ruleList.stream()
+                .collect(Collectors.toMap(
+                        ArchiveRule::getRuleItem,
+                        ArchiveRule::getRuleNumber
+                ));
+
+        return columns.stream()
+                .collect(Collectors.toMap(
+                        column -> itemToNumberMap.getOrDefault(column.getRuleItem(), 0),
+                        ArchiveRule::getRuleColumn
+                ));
+    }
+
+    /**
+     * 查询档案数据
+     */
+    private List<ArchiveInfo> queryArchiveData(ArchiveInfo archiveInfo,
+                                               List<ArchiveRule> ruleList,
+                                               String[] dataPermiList) {
+        if (StringUtils.isNotBlank(archiveInfo.getSearchValue())) {
+            return archiveInfoMapper.getNumberByKeyword(
+                    ruleList,
+                    archiveInfo.getSearchValue(),
+                    archiveInfo.getCategoryId(),
+                    archiveInfo.getArchiveStatus(),
+                    dataPermiList
+            );
+        }
+        return archiveInfoMapper.getNumberBeachSearch(
+                ruleList,
+                archiveInfo,
+                dataPermiList
+        );
+    }
+
+    /**
+     * 并行处理档案编号生成
+     */
+    private void processArchiveNumbersInParallel(List<ArchiveInfo> resultList,
+                                                 List<ArchiveRule> ruleList) {
+        // 设置合理的并行度
+        int parallelism = Math.min(4, Runtime.getRuntime().availableProcessors());
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+                String.valueOf(parallelism));
+
+        resultList.parallelStream().forEach(archiveInfo -> {
+            StringBuilder newNumberStr = new StringBuilder();
+            for (ArchiveRule rule : ruleList) {
+                String fieldValue = String.valueOf(archiveInfo.getField(rule.getRuleNumber()));
+
+                if ("1".equals(rule.getDealMethod()) && fieldValue.matches("\\d+")) {
+                    int length = fieldValue.length();
+                    int countInt = Integer.parseInt(rule.getDealDetail());
+                    fieldValue = length > countInt
+                            ? fieldValue.substring(length - countInt)
+                            : String.format("%0" + countInt + "d", Integer.parseInt(fieldValue));
+                }
+                newNumberStr.append(fieldValue).append(rule.getRuleJoin());
+            }
+            archiveInfo.setArchiveNumber(newNumberStr.toString());
+        });
+    }
+
+    /**
+     * 批量更新档案编号(使用临时表)
+     */
+    private void batchUpdateArchiveNumbers(List<ArchiveInfo> resultList) {
+        // 创建临时表
+        archiveInfoMapper.createTempTable();
+
+        try {
+            // 分批处理，每批1000条
+            partitionList(resultList, 1000).forEach(batch -> {
+                // 批量插入临时表
+                archiveInfoMapper.batchInsertTempTable(batch);
+
+                // 从临时表更新
+                archiveInfoMapper.batchUpdateFromTempTable();
+
+                // 清空临时表
+                archiveInfoMapper.clearTempTable();
+            });
+        } finally {
+            // 确保临时表被删除
+            archiveInfoMapper.dropTempTable();
+        }
+    }
+
+    private <T> List<List<T>> partitionList(List<T> list, int batchSize) {
+        List<List<T>> batches = new ArrayList<>();
+        int length = list.size();
+        for (int i = 0; i < length; i += batchSize) {
+            batches.add(list.subList(i, Math.min(length, i + batchSize)));
+        }
+        return batches;
     }
 
     @Override
     public String getUpdateStatus() {
-        String updateStatus = (String) redisCache.getCacheObject("updateArchiveNumber");
+        String updateStatus = (String) redisCache.getCacheObject("updateArchiveNumber") == null ? "1234" : redisCache.getCacheObject("updateArchiveNumber");
         return updateStatus;
     }
 
-    private String buildArchiveNumber(List<ArchiveInfo> mapList, ArchiveInfo archiveInfo, String[] rule, String[] item, String[] count) {
-        StringBuilder newNumberStrBuilder = new StringBuilder();
-        for (int i = 0; i < rule.length; i++) {
-            String fieldStr = String.valueOf(archiveInfo.getField(i + 1));
-            String newNumber1 = getString(fieldStr, item[i],count[i]);
-            newNumberStrBuilder.append(newNumber1).append(rule[i]);
-        }
-        return newNumberStrBuilder.toString();
-    }
-
-    private static String getString(String fieldStr, String item, String count) {
-        if (Objects.equals(item, "1") && fieldStr.matches("\\d+")) { // 检查是否为纯数字
-            int length = fieldStr.length();
-            int countInt = Integer.parseInt(count);
-            return length > countInt ? fieldStr.substring(length - countInt) : String.format("%0" + countInt + "d", Integer.parseInt(fieldStr));
-        } else {
-            return fieldStr; // 如果不是纯数字，则保持不变
-        }
-    }
 
 
     // 根据搜索条件获取需要归档的档案ID列表
