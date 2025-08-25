@@ -1341,17 +1341,25 @@ export default {
             }, 2000));
       })
     },
-    updateArchiveNumber(){
+    updateArchiveNumber() {
       this.$modal.confirm('确认重整档号？').then(async () => {
-          this.$modal.msgSuccess("正在处理中");
-          const ExportQueryParams = {
-            categoryId: this.categoryId,
-            archiveStatus: 0,
-            ...this.queryParams
-          };
-          ExportQueryParams.archiveStatus = 0;
-          updateArchiveNumber(ExportQueryParams)
-        })
+        getUpdateStatus().then(response => {
+          const status = Number(response)
+          if (status === 1234) {
+            this.$modal.msgSuccess("正在处理中");
+            const ExportQueryParams = {
+              categoryId: this.categoryId,
+              archiveStatus: 0,
+              ...this.queryParams
+            };
+            ExportQueryParams.archiveStatus = 0;
+            updateArchiveNumber(ExportQueryParams)
+          } else {
+            this.$modal.msgError("已经有正在更新的档号，请稍后再试！");
+          }
+        });
+
+      })
     },
     clearSearch() {
       this.categoryId = null;

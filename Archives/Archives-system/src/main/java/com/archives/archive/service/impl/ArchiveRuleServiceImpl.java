@@ -46,33 +46,32 @@ public class ArchiveRuleServiceImpl implements IArchiveRuleService
     /**
      * 新增档号规则
      *
-     * @param archiveRule 档号规则
+     * @param archiveRuleList 档号规则
      * @return 结果
      */
     @Override
-    public int insertArchiveRule(ArchiveRule archiveRule)
+    public int insertArchiveRule(List<ArchiveRule> archiveRuleList)
     {
         ArchiveRule archiveRule1 = new ArchiveRule();
-        archiveRule1.setCategoryId(archiveRule.getCategoryId());
+        archiveRule1.setCategoryId(archiveRuleList.get(0).getCategoryId());
         List<ArchiveRule> list = archiveRuleMapper.selectArchiveRuleList(archiveRule1);
         if (!list.isEmpty()){
-            archiveRule.setId(list.get(0).getId());
-            return archiveRuleMapper.updateArchiveRule(archiveRule);
-        }else {
-            return archiveRuleMapper.insertArchiveRule(archiveRule);
+            archiveRuleMapper.deleteArchiveRuleByCategoryId(archiveRuleList.get(0).getCategoryId());
         }
+            return archiveRuleMapper.insertArchiveRule(archiveRuleList);
     }
 
     /**
      * 修改档号规则
      *
-     * @param archiveRule 档号规则
+     * @param archiveRuleList 档号规则
      * @return 结果
      */
     @Override
-    public int updateArchiveRule(ArchiveRule archiveRule)
+    public int updateArchiveRule(List<ArchiveRule> archiveRuleList)
     {
-        return archiveRuleMapper.updateArchiveRule(archiveRule);
+        archiveRuleMapper.deleteArchiveRuleByCategoryId(archiveRuleList.get(0).getCategoryId());
+        return archiveRuleMapper.insertArchiveRule(archiveRuleList);
     }
 
     /**

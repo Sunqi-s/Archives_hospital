@@ -2,6 +2,7 @@ package com.archives.archive.mapper;
 
 import java.util.List;
 import com.archives.archive.domain.ArchiveRule;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 档号规则Mapper接口
@@ -30,18 +31,18 @@ public interface ArchiveRuleMapper
     /**
      * 新增档号规则
      *
-     * @param archiveRule 档号规则
+     * @param archiveRuleList 档号规则
      * @return 结果
      */
-    public int insertArchiveRule(ArchiveRule archiveRule);
+    public int insertArchiveRule(@Param("archiveRuleList") List<ArchiveRule> archiveRuleList);
 
     /**
      * 修改档号规则
      *
-     * @param archiveRule 档号规则
+     * @param categoryId 档号规则
      * @return 结果
      */
-    public int updateArchiveRule(ArchiveRule archiveRule);
+    public int deleteArchiveRuleByCategoryId(Long categoryId);
 
     /**
      * 删除档号规则
@@ -58,6 +59,9 @@ public interface ArchiveRuleMapper
      * @return 结果
      */
     public int deleteArchiveRuleByIds(Long[] ids);
+
+
+    List<ArchiveRule> batchGetColumns(@Param("itemNames") List<String> itemNames,@Param("categoryId") Long categoryId);
 
     ArchiveRule selectOneArchiveRule(ArchiveRule query);
 }

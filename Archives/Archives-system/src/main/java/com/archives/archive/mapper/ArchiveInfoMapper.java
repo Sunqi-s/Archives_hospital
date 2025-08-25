@@ -1,6 +1,8 @@
 package com.archives.archive.mapper;
 
 import com.archives.archive.domain.ArchiveInfo;
+import com.archives.archive.domain.ArchiveRule;
+import com.archives.archive.domain.SearchJson;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -134,14 +136,23 @@ public interface ArchiveInfoMapper
 
     public List<ArchiveInfo> selectArchiveInfoByIds(@Param("ids") List<Long> ids);
 
-    public ArchiveInfo getColumn(@Param("itemName") String list,@Param("categoryId") Long categoryId);
 
-    public List<ArchiveInfo> getNumberByKeyword(@Param("map") List<ArchiveInfo> list, @Param("keyword") String keyword, @Param("categoryId")Long categoryId, @Param("archiveStatus")Long archiveStatus, @Param("dataPermit") String[] dataPermiList);
 
-    public List<ArchiveInfo> getNumberBeachSearch(@Param("map") List<ArchiveInfo> list,@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
+    public List<ArchiveInfo> getNumberByKeyword(@Param("map") List<ArchiveRule> list, @Param("keyword") String keyword, @Param("categoryId")Long categoryId, @Param("archiveStatus")Long archiveStatus, @Param("dataPermit") String[] dataPermiList);
+
+    public List<ArchiveInfo> getNumberBeachSearch(@Param("map") List<ArchiveRule> list,@Param("archiveInfo") ArchiveInfo archiveInfo,@Param("dataPermit") String[] dataPermiList);
 
     public int updateArchiveNumber(@Param("list") List<ArchiveInfo> list);
 
+    void createTempTable();
+
+    void batchInsertTempTable(@Param("list")Object batch);
+
+    void batchUpdateFromTempTable();
+
+    void clearTempTable();
+
+    void dropTempTable();
     public Map<String, List<String>> batchGetColumns(List<String> columns, Long categoryId);
 
     List<ArchiveInfo> getNumberBatchSearch(Map<String, List<String>> columnDataMap, ArchiveInfo archiveInfo, String[] dataPermiList);
