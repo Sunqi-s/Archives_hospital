@@ -2,8 +2,10 @@ package com.archives.archive.service.impl;
 
 import com.archives.archive.domain.ArchiveCategory;
 import com.archives.archive.domain.ArchiveImportLog;
+import com.archives.archive.domain.ArchiveItem;
 import com.archives.archive.domain.HomeData;
 import com.archives.archive.mapper.ArchiveCategoryMapper;
+import com.archives.archive.mapper.ArchiveItemMapper;
 import com.archives.archive.mapper.HomePageMapper;
 import com.archives.archive.service.IHomePageService;
 import com.archives.common.core.domain.entity.SysUser;
@@ -11,10 +13,7 @@ import com.archives.common.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class HomePageServiceImpl implements IHomePageService {
@@ -23,6 +22,8 @@ public class HomePageServiceImpl implements IHomePageService {
     private HomePageMapper homePageMapper;
     @Autowired
     private ArchiveCategoryMapper archiveCategoryMapper;
+    @Autowired
+    private ArchiveItemMapper archiveItemMapper;
 
     @Override
     public int getData(HomeData homeData) {
@@ -138,26 +139,28 @@ public class HomePageServiceImpl implements IHomePageService {
     }
 
     @Override
-    public int getHeTong(HomeData homeData) {
-        String[] dataPermiList = selectSearchByDataPermit();
+    public int getHeTong() {
         int data = 0;
-
-        switch (homeData.getTime()){
-            case "上月":
-                data = homePageMapper.lastMonthHeTong(dataPermiList);
-                break;
-            case "本月":
-                data = homePageMapper.thisMonthHeTong(dataPermiList);
-                break;
-            case "本年":
-                data = homePageMapper.thisYearHeTong(dataPermiList);
-                break;
-            case "全部":
-                data = homePageMapper.allHeTong(dataPermiList);
-                break;
-            default:
-                System.out.println("Invalid time!");
+        String[] dataPermiList = selectSearchByDataPermit();
+        ArchiveItem archiveItem = new ArchiveItem();
+        archiveItem.setItemName("合同处置日");
+        List<ArchiveItem> itemList = archiveItemMapper.selectArchiveItemList(archiveItem);
+        Map<Long, String> columnNameMap = new HashMap<>();
+        for (ArchiveItem item : itemList) {
+            if ("合同处置日".equals(item.getItemName())) {
+                columnNameMap.put(item.getCategoryId(), item.getColumnName());
+            }
         }
+
+        // 提取所有categoryId
+        List<Long> categoryIds = new ArrayList<>(columnNameMap.keySet());
+
+        // 如果没有找到任何合同处置日字段，返回0
+        if (categoryIds.isEmpty()) {
+            return 0;
+        }
+
+        data = homePageMapper.allHeTong(dataPermiList, categoryIds, columnNameMap);
 
         return data;
     }

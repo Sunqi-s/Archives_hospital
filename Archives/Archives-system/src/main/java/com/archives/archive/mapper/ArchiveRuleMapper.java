@@ -5,15 +5,15 @@ import com.archives.archive.domain.ArchiveRule;
 
 /**
  * 档号规则Mapper接口
- * 
+ *
  * @author é«å°å·
  * @date 2025-03-05
  */
-public interface ArchiveRuleMapper 
+public interface ArchiveRuleMapper
 {
     /**
      * 查询档号规则
-     * 
+     *
      * @param id 档号规则主键
      * @return 档号规则
      */
@@ -21,7 +21,7 @@ public interface ArchiveRuleMapper
 
     /**
      * 查询档号规则列表
-     * 
+     *
      * @param archiveRule 档号规则
      * @return 档号规则集合
      */
@@ -29,7 +29,7 @@ public interface ArchiveRuleMapper
 
     /**
      * 新增档号规则
-     * 
+     *
      * @param archiveRule 档号规则
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface ArchiveRuleMapper
 
     /**
      * 修改档号规则
-     * 
+     *
      * @param archiveRule 档号规则
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface ArchiveRuleMapper
 
     /**
      * 删除档号规则
-     * 
+     *
      * @param id 档号规则主键
      * @return 结果
      */
@@ -53,9 +53,11 @@ public interface ArchiveRuleMapper
 
     /**
      * 批量删除档号规则
-     * 
+     *
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */
     public int deleteArchiveRuleByIds(Long[] ids);
+
+    ArchiveRule selectOneArchiveRule(ArchiveRule query);
 }

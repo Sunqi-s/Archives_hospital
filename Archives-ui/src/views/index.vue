@@ -4,7 +4,7 @@
       <el-col :span="5" :xs="24">
         <el-card class="box-card">
           <div slot="header" class="clearfix" @click="goToZhengli()">
-            <span >整理库档案统计</span>
+            <span @click="goToZhengli()">整理库档案统计</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
           <el-row>
@@ -54,7 +54,7 @@
       <el-col :span="5" :xs="24">
         <el-card class="box-card">
           <div slot="header" class="clearfix" @click="goToZiyuan">
-            <span >资源库档案统计</span>
+            <span @click="goToZiyuan">资源库档案统计</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
           <el-row>
@@ -103,7 +103,7 @@
       </el-col>
       <el-col :span="5" :xs="24">
         <el-card class="box-card">
-          <div slot="header" class="clearfix">
+          <div slot="header" class="clearfix" @click="goToLiyong">
             <span @click="goToLiyong">利用库档案统计</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
@@ -202,9 +202,9 @@
         </el-card>
       </el-col>
       <el-col :span="5" :xs="24">
-        <el-card class="box-card">
+        <el-card class="box-card" @click.native="goToHeTong">
           <div slot="header" class="clearfix">
-            <span>合同统计</span>
+            <span @click="goToHeTong">合同统计</span>
             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-loading"></el-button>
           </div>
           <el-row>
@@ -215,21 +215,21 @@
             <el-col :span="12">
               <div class="grid-content bg-purple-light">
                 <el-row>
-                  <el-col :span="6">
-                    <div class="grid-content bg-purple" style="float: right">
-                      <el-button type="text" @click="getHeTong('上月')">上月</el-button>
-                    </div>
-                  </el-col>
-                  <el-col :span="6">
-                    <div class="grid-content bg-purple-light" style="float: right">
-                      <el-button type="text" @click="getHeTong('本月')">本月</el-button>
-                    </div>
-                  </el-col>
-                  <el-col :span="6">
-                    <div class="grid-content bg-purple" style="float: right">
-                      <el-button type="text" @click="getHeTong('本年')">本年</el-button>
-                    </div>
-                  </el-col>
+<!--                  <el-col :span="6">-->
+<!--                    <div class="grid-content bg-purple" style="float: right">-->
+<!--                      <el-button type="text" @click="getHeTong('上月')">上月</el-button>-->
+<!--                    </div>-->
+<!--                  </el-col>-->
+<!--                  <el-col :span="6">-->
+<!--                    <div class="grid-content bg-purple-light" style="float: right">-->
+<!--                      <el-button type="text" @click="getHeTong('本月')">本月</el-button>-->
+<!--                    </div>-->
+<!--                  </el-col>-->
+<!--                  <el-col :span="6">-->
+<!--                    <div class="grid-content bg-purple" style="float: right">-->
+<!--                      <el-button type="text" @click="getHeTong('本年')">本年</el-button>-->
+<!--                    </div>-->
+<!--                  </el-col>-->
                   <el-col :span="6">
                     <div class="grid-content bg-purple-light" style="float: right">
                       <el-button type="text" @click="getHeTong('全部')">全部</el-button>
@@ -243,7 +243,7 @@
                 </el-row>
                 <el-row>
                   <el-col :span="10" :offset="14" style="margin-top: 10px;margin-bottom: 5px;">
-                    <span class="grid-content bg-purple" style="float: right;color: #909399;font-size: 15px; width: 60px;">{{ timeClick5 }}数量</span>
+                    <span class="grid-content bg-purple" style="float: right;color: #909399;font-size: 15px; width: 60px;">全部数量</span>
                   </el-col>
                 </el-row>
               </div>
@@ -397,8 +397,20 @@ export default {
       timeClick2: '本月',
       timeClick3: '本月',
       timeClick4: '本月',
-      timeClick5: '本月',
+      timeClick5: '全部',
     };
+  },
+  created() {
+    this.getCount('0','本月');
+    this.getCount('1','本月');
+    this.getCount('2','本月');
+    this.getHeTong('全部');
+  },
+  activated() {
+    this.getCount('0','本月');
+    this.getCount('1','本月');
+    this.getCount('2','本月');
+    this.getHeTong('全部');
   },
   mounted() {
     this.$nextTick(() => {
@@ -410,7 +422,7 @@ export default {
     this.getCount('0','本月');
     this.getCount('1','本月');
     this.getCount('2','本月');
-    this.getHeTong('本月');
+    this.getHeTong('全部');
   },
   methods: {
     goTarget(href) {
@@ -424,14 +436,14 @@ export default {
           this.updateChart1();
         }
       })
-      
+
       this.$nextTick(() => {
         this.chartInstance2 = echarts.init(document.getElementById('main'));
         if (this.chartInstance2) {
           this.updateChart2();
         }
       })
-      
+
     },
     // 更新图表
     updateChart1(){
@@ -563,14 +575,17 @@ export default {
         path: '/ArchiveManagement/info2',
       });
     },
-    getHeTong(time){
-      const params = {
-        time: time
-      }
-      getHeTong(params).then(response => {
+    getHeTong(){
+      getHeTong().then(response => {
+        console.log(response)
         this.contractCount = response.data
-        this.timeClick5 = time
       })
+    },
+    goToHeTong() {
+      console.log('go to he tong')
+      this.$router.push({
+        path: '/ArchiveManagement/DisposeEdit',
+      });
     }
     // 获取oss数据
     // fetchOssData(){

@@ -166,3 +166,19 @@ export function getUpdateStatus(){
     method: 'post',
   })
 }
+
+export function getContractDisposal(query) {
+  return request({
+    url: '/archive/info/getContractDisposal',
+    method: 'get',
+    params: query
+  })
+}
+
+export function disposeContractByIds(ids){
+  return request({
+    url: '/archive/info/disposeContractByIds',
+    method: 'post',
+    data: ids
+  })
+}

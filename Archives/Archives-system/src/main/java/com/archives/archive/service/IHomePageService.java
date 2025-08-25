@@ -19,5 +19,5 @@ public interface IHomePageService {
 
     public List<HomeData> getStatus();
 
-    public int getHeTong(HomeData homeData);
+    public int getHeTong();
 }

@@ -1,11 +1,11 @@
 package com.archives.archive.mapper;
 
 import com.archives.archive.domain.ArchiveInfo;
-import com.archives.archive.domain.SearchJson;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 档案信息Mapper接口
@@ -142,4 +142,15 @@ public interface ArchiveInfoMapper
 
     public int updateArchiveNumber(@Param("list") List<ArchiveInfo> list);
 
+    public Map<String, List<String>> batchGetColumns(List<String> columns, Long categoryId);
+
+    List<ArchiveInfo> getNumberBatchSearch(Map<String, List<String>> columnDataMap, ArchiveInfo archiveInfo, String[] dataPermiList);
+
+    void batchUpdateNumbers(List<ArchiveInfo> batch);
+
+    public List<ArchiveInfo> getContractDisposalByKeyword(@Param("categoryIds") List<Long> categoryIds, @Param("searchValue") String searchValue, @Param("columnNameMap") Map<Long, String> columnNameMap, @Param("dataPermit") String[] dataPermiList);
+
+    public List<ArchiveInfo> getContractDisposal(@Param("categoryIds") List<Long> categoryIds, @Param("columnNameMap") Map<Long, String> columnNameMap, @Param("dataPermit") String[] dataPermiList);
+
+    public int disposeContractByIds(@Param("ids") List<Long> ids);
 }

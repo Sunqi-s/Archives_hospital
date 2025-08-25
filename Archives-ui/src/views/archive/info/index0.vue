@@ -269,10 +269,6 @@
       </div>
     </el-dialog>
 
-    <!--文件预览对话框
-    <el-dialog title="文件预览" :visible.sync="showPreview" fullscreen>
-      <onlinePreview v-if="showPreview" :initialUrl="previewUrl"/>
-    </el-dialog>-->
   </div>
 </template>
 
@@ -865,6 +861,7 @@ export default {
                 this.uploadCount = newSysOssList.length
                 await this.$refs.fileUpload.handleUpload(newSysOssList);
               }
+              console.log("addInfo", this.form)
               await updateInfo(this.form)
                 .then(() => {
                   this.isElCardBodyLoading = true
@@ -907,6 +904,7 @@ export default {
               await addImportLog(this.logQueryParams).then(res => {
                 this.logQueryParams.id = res.data.id;
               });
+              console.log("addInfo", this.form)
               await addInfo(this.form).then(() => {
                 this.isElCardBodyLoading = true
                 this.$modal.msgSuccess("新增成功");

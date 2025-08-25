@@ -108,4 +108,8 @@ public interface IArchiveInfoService
     public void updateArchiveNumber(ArchiveInfo archiveInfo);
 
     String getUpdateStatus();
+
+    List<ArchiveInfo> getContractDisposal(ArchiveInfo archiveInfo);
+
+    public int disposeContractByIds(List<Long> ids);
 }

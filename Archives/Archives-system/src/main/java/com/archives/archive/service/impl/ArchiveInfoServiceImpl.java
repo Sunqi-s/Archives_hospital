@@ -2,6 +2,7 @@ package com.archives.archive.service.impl;
 
 import com.archives.archive.domain.*;
 import com.archives.archive.mapper.ArchiveInfoMapper;
+import com.archives.archive.mapper.ArchiveItemMapper;
 import com.archives.archive.mapper.ArchiveRuleMapper;
 import com.archives.archive.service.IArchiveInfoService;
 import com.archives.common.core.domain.entity.SysDept;
@@ -11,9 +12,12 @@ import com.archives.common.core.redis.RedisCache;
 import com.archives.common.exception.ServiceException;
 import com.archives.common.utils.DateUtils;
 import com.archives.common.utils.SecurityUtils;
+import com.archives.common.utils.StringUtils;
 import com.archives.system.domain.SysOss;
 import com.archives.system.mapper.SysDeptMapper;
 import com.archives.system.mapper.SysOssMapper;
+import com.github.pagehelper.PageHelper;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -25,6 +29,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 /**
@@ -50,6 +55,9 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     @Autowired
     private ArchiveRuleMapper archiveRuleMapper;
+
+    @Autowired
+    private ArchiveItemMapper archiveItemMapper;
 
     @Autowired
     private final ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
@@ -497,6 +505,39 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
         return updateStatus;
     }
 
+    @Override
+    public List<ArchiveInfo> getContractDisposal(ArchiveInfo archiveInfo) {
+        String[] dataPermiList = getDataPermit();
+        String searchValue = archiveInfo.getSearchValue();
+        ArchiveItem archiveItem = new ArchiveItem();
+        archiveItem.setItemName("合同处置日");
+        List<ArchiveItem> itemList = archiveItemMapper.selectArchiveItemList(archiveItem);
+        Map<Long, String> columnNameMap = new HashMap<>();
+        for (ArchiveItem item : itemList) {
+            if ("合同处置日".equals(item.getItemName())) {
+                columnNameMap.put(item.getCategoryId(), item.getColumnName());
+            }
+        }
+
+        // 提取所有categoryId
+        List<Long> categoryIds = new ArrayList<>(columnNameMap.keySet());
+
+        // 如果没有找到任何合同处置日字段，返回0
+        if (categoryIds.isEmpty()) {
+            return new ArrayList<ArchiveInfo>();
+        }
+        if (searchValue != null && !searchValue.isEmpty()) {
+            return archiveInfoMapper.getContractDisposalByKeyword(categoryIds, searchValue, columnNameMap, dataPermiList);
+        }else {
+            return archiveInfoMapper.getContractDisposal(categoryIds, columnNameMap, dataPermiList);
+        }
+    }
+
+    @Override
+    public int disposeContractByIds(List<Long> ids) {
+        return archiveInfoMapper.disposeContractByIds(ids);
+    }
+
     private String buildArchiveNumber(List<ArchiveInfo> mapList, ArchiveInfo archiveInfo, String[] rule, String[] item, String[] count) {
         StringBuilder newNumberStrBuilder = new StringBuilder();
         for (int i = 0; i < rule.length; i++) {
@@ -534,16 +575,15 @@ public class ArchiveInfoServiceImpl implements IArchiveInfoService
 
     public String[] getDataPermit() {
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
-        String[] dataPermiList;
-        if("all".equals(currentUser.getDataPermi())){
-            dataPermiList = new String[0];
-        }else {
-            dataPermiList = (currentUser.getDataPermi().split(","));
-            for (int i = 0; i < dataPermiList.length; i++){
-                dataPermiList[i] = "%" + dataPermiList[i] + "%";
-            }
+        String dataPermi = currentUser.getDataPermi();
+
+        if (StringUtils.isEmpty(dataPermi) || "all".equals(dataPermi)) {
+            return new String[0];
         }
-        return dataPermiList;
+
+        return Arrays.stream(dataPermi.split(","))
+                .map(perm -> "%" + perm + "%")
+                .toArray(String[]::new);
     }
 
     // 构建PlaceonfileLog对象

@@ -34,6 +34,6 @@ public class HomePageController extends BaseController {
     public AjaxResult getStatus() {return AjaxResult.success(homePageService.getStatus());}
 
     @GetMapping("/getHeTong")
-    public AjaxResult getHeTong(HomeData homeData) {return AjaxResult.success(homePageService.getHeTong(homeData));}
+    public AjaxResult getHeTong() {return AjaxResult.success(homePageService.getHeTong());}
 
 }

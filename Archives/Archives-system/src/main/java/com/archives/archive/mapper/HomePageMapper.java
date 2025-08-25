@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface HomePageMapper {
@@ -28,8 +29,8 @@ public interface HomePageMapper {
     public int getStatus3(@Param("dataPermiList") String[] dataPermiList);
 
     public int lastMonthHeTong(@Param("dataPermiList") String[] dataPermiList);
-    public int thisMonthHeTong(@Param("dataPermiList") String[] dataPermiList);
-    public int thisYearHeTong(@Param("dataPermiList") String[] dataPermiList);
-    public int allHeTong(@Param("dataPermiList") String[] dataPermiList);
+    public int thisMonthHeTong(@Param("dataPermiList") String[] dataPermiList, @Param("categoryIds") List<Long> categoryIds, @Param("columnNameMap") Map<Long, String> columnNameMap);
+    public int thisYearHeTong(@Param("dataPermiList") String[] dataPermiList, @Param("categoryIds") List<Long> categoryIds, @Param("columnNameMap") Map<Long, String> columnNameMap);
+    public int allHeTong(@Param("dataPermiList") String[] dataPermiList, @Param("categoryIds") List<Long> categoryIds, @Param("columnNameMap") Map<Long, String> columnNameMap);
 }
 

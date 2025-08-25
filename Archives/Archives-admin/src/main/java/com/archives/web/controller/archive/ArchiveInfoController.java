@@ -181,4 +181,16 @@ public class ArchiveInfoController extends BaseController
         return archiveInfoService.getUpdateStatus();
     }
 
+    @GetMapping("/getContractDisposal")
+    public TableDataInfo getContractDisposal(ArchiveInfo archiveInfo) {
+        startPage();
+        List<ArchiveInfo> list = archiveInfoService.getContractDisposal(archiveInfo);
+        return getDataTable(list);
+    }
+
+    @PostMapping("/disposeContractByIds")
+    public AjaxResult disposeContractByIds(@RequestBody List<Long> ids) {
+        return toAjax(archiveInfoService.disposeContractByIds(ids));
+    }
+
 }

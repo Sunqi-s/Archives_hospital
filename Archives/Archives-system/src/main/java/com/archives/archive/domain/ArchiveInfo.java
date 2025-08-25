@@ -192,6 +192,13 @@ public class ArchiveInfo extends BaseEntity
     @Excel(name = "备用字段30")
     private String field30;
 
+    /** 备用字段31 */
+    @Excel(name = "备用字段31")
+    private String field31;
+
+    /** 是否处置 */
+    private Integer isDispose;
+
     /** 附件 */
     @Excel(name = "附件")
     private int ossStatus;
@@ -578,6 +585,14 @@ public class ArchiveInfo extends BaseEntity
         this.dataPermit = dataPermit;
     }
 
+    public String getField31() { return field31; }
+
+    public void setField31(String field31) { this.field31 = field31; }
+
+    public Integer getIsDispose() { return isDispose; }
+
+    public void setIsDispose(Integer isDispose) { this.isDispose = isDispose; }
+
     public String getField(int fieldIndex) {
         switch (fieldIndex) {
             case 1: return getField1();
@@ -610,6 +625,7 @@ public class ArchiveInfo extends BaseEntity
             case 28: return getField28();
             case 29: return getField29();
             case 30: return getField30();
+            case 31: return getField31();
             default: throw new IllegalArgumentException("Invalid field index: " + fieldIndex);
         }
     }
@@ -646,6 +662,7 @@ public class ArchiveInfo extends BaseEntity
             case 28: setField28(value); break;
             case 29: setField29(value); break;
             case 30: setField30(value); break;
+            case 31: setField31(value); break;
             default: throw new IllegalArgumentException("Invalid field index: " + fieldIndex);
         }
     }
@@ -701,9 +718,11 @@ public class ArchiveInfo extends BaseEntity
             .append("field28", getField28())
             .append("field29", getField29())
             .append("field30", getField30())
+            .append("field31", getField31())
             .append("sysOssList", getSysOssList())
             .append("ossStatus", getOssStatus())
             .append("dataPermit", getDataPermit())
+            .append("isDispose", getIsDispose())
             .toString();
     }
 
