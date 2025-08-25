@@ -58,4 +58,6 @@ public interface ArchiveDisposeMapper
      * @return 结果
      */
     public int deleteArchiveDisposeByIds(Long[] ids);
+
+    public int insertArchiveDisposeBatch(List<ArchiveDispose> archiveDisposes);
 }

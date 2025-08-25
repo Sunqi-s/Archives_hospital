@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.archives.archive.domain.ArchiveInfo;
+import com.archives.archive.mapper.ArchiveInfoMapper;
 import com.archives.common.core.domain.entity.SysUser;
 import com.archives.common.utils.DateUtils;
 import com.archives.common.utils.SecurityUtils;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.archives.archive.mapper.ArchiveDisposeMapper;
 import com.archives.archive.domain.ArchiveDispose;
 import com.archives.archive.service.IArchiveDisposeService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 处置记录Service业务层处理
@@ -25,6 +27,8 @@ public class ArchiveDisposeServiceImpl implements IArchiveDisposeService
 {
     @Autowired
     private ArchiveDisposeMapper archiveDisposeMapper;
+    @Autowired
+    private ArchiveInfoMapper archiveInfoMapper;
 
     /**
      * 查询处置记录
@@ -57,21 +61,41 @@ public class ArchiveDisposeServiceImpl implements IArchiveDisposeService
      * @return 结果
      */
     @Override
-    public int insertArchiveDispose(List<ArchiveInfo> archiveInfos)
-    {
-        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
-        for (ArchiveInfo archiveInfo : archiveInfos) {
-            ArchiveDispose archiveDispose = new ArchiveDispose();
-            archiveDispose.setArchiveId(archiveInfo.getId());
-            archiveDispose.setArchiveNumber(archiveInfo.getArchiveNumber());
-            archiveDispose.setCategoryId(archiveInfo.getCategoryId());
-            archiveDispose.setCreateTime(DateUtils.getNowDate());
-            archiveDispose.setTitle(archiveInfo.getField3());
-            archiveDispose.setCreateBy(currentUser.getNickName());
-            archiveDisposeMapper.insertArchiveDispose(archiveDispose);
+    @Transactional(rollbackFor = Exception.class)
+    public int insertArchiveDispose(List<ArchiveInfo> archiveInfos) {
+        if (archiveInfos == null || archiveInfos.isEmpty()) {
+            return 0;
         }
-        return 1;
+
+        SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        List<Long> ids = new ArrayList<>();
+        List<ArchiveDispose> archiveDisposes = new ArrayList<>();
+
+        for (ArchiveInfo archiveInfo : archiveInfos) {
+            if (archiveInfo != null) {
+                Long id = archiveInfo.getId();
+                ArchiveDispose archiveDispose = new ArchiveDispose();
+                archiveDispose.setArchiveId(archiveInfo.getId());
+                archiveDispose.setArchiveNumber(archiveInfo.getArchiveNumber());
+                archiveDispose.setCategoryId(archiveInfo.getCategoryId());
+                archiveDispose.setCreateTime(DateUtils.getNowDate());
+                archiveDispose.setTitle(archiveInfo.getField3());
+                archiveDispose.setCreateBy(currentUser.getNickName());
+                archiveDisposes.add(archiveDispose);
+                ids.add(id);
+            }
+        }
+
+        if (!archiveDisposes.isEmpty()) {
+            // 批量插入优化性能
+            archiveDisposeMapper.insertArchiveDisposeBatch(archiveDisposes);
+            archiveInfoMapper.disposeContractByIds(ids);
+            return archiveDisposes.size();
+        }
+
+        return 0;
     }
+
 
     /**
      * 修改处置记录

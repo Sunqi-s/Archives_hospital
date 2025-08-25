@@ -63,6 +63,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
+    <insert id="insertArchiveDisposeBatch">
+        insert into archive_dispose
+        (archive_id,category_id,title,create_by,create_time,update_by,update_time,archive_number)
+        values
+            <foreach item="item" collection="list" separator=",">
+                (#{item.archiveId},#{item.categoryId},#{item.title},#{item.createBy},#{item.createTime},#{item.updateBy},#{item.updateTime},#{item.archiveNumber})
+            </foreach>
+    </insert>
+
     <update id="updateArchiveDispose" parameterType="ArchiveDispose">
         update archive_dispose
         <trim prefix="SET" suffixOverrides=",">

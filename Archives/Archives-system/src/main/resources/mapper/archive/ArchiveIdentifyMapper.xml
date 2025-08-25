@@ -60,6 +60,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
+    <insert id="insertArchiveIdentifyBeach">
+        insert into archive_identify
+            (archive_id, category_id, title, create_by, create_time, update_by, update_time, archive_number)
+        values
+        <foreach item="archiveIdentify" collection="archiveIdentifies" separator=",">
+            (#{archiveIdentify.archiveId}, #{archiveIdentify.categoryId}, #{archiveIdentify.title}, #{archiveIdentify.createBy}, #{archiveIdentify.createTime}, #{archiveIdentify.updateBy}, #{archiveIdentify.updateTime}, #{archiveIdentify.archiveNumber})
+        </foreach>
+    </insert>
+
     <update id="updateArchiveIdentify" parameterType="ArchiveIdentify">
         update archive_identify
         <trim prefix="SET" suffixOverrides=",">

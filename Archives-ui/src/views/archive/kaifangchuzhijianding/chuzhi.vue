@@ -579,7 +579,8 @@
           ...this.queryParams, // 保留现有的查询参数
           pageNum: this.queryParams.pageNum, // 当前页码
           pageSize: this.queryParams.pageSize, // 每页显示条数
-          archiveStatus: 2 // 归档状态
+          archiveStatus: 2, // 归档状态
+          isDispose: 0
         };
         listInfo(params).then(response => {
           if (this.queryParams.searchValue) {

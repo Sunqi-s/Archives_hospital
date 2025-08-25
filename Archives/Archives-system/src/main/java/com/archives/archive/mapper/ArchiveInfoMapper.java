@@ -164,4 +164,6 @@ public interface ArchiveInfoMapper
     public List<ArchiveInfo> getContractDisposal(@Param("categoryIds") List<Long> categoryIds, @Param("columnNameMap") Map<Long, String> columnNameMap, @Param("dataPermit") String[] dataPermiList);
 
     public int disposeContractByIds(@Param("ids") List<Long> ids);
+
+    public int identifyContractByIds(@Param("ids") List<Long> ids);
 }

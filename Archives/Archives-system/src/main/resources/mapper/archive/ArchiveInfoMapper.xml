@@ -56,10 +56,12 @@
         <result property="dataPermit" column="data_permit" />
         <result property="field31"  column="field31" />
         <result property="isDispose"  column="is_dispose" />
+        <result property="isOpen" column="is_open" />
+        <result property="isIdentify" column="is_identify"/>
     </resultMap>
 
     <sql id="selectArchiveInfoVo">
-        select id, category_id categoryId, fonds_number fondsNumber, fonds_name fondsName, retention_period retentionPeriod, item_number itemNumber, archive_number archiveNumber, department, archiver, archive_date archiveDate, remarks, archive_status archiveStatus, create_by createBy, create_time createTime, update_by updateBy, update_time updateTime, category_code categoryCode, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status,data_permit, field31, is_dispose isDispose from archive_info
+        select id, category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, archive_date, remarks, archive_status, create_by, create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7, field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status,data_permit, field31, is_dispose, is_open, is_identify from archive_info
     </sql>
 
     <sql id="selectArchiveInfoDataPermit">
@@ -123,7 +125,9 @@
             <if test="archiveInfo.field30 != null  and archiveInfo.field30 != ''"> and field30 Like concat('%', #{archiveInfo.field30}, '%')</if>
             <if test="archiveInfo.ossStatus != null and archiveInfo.ossStatus != 0">and oss_status = #{archiveInfo.ossStatus}</if>
             <if test="archiveInfo.field31 != null  and archiveInfo.field31 != ''"> and field31 Like concat('%', #{archiveInfo.field31}, '%')</if>
-            <if test="archiveInfo.isDispose != null and archiveInfo.isDispose != 0">and is_dispose = #{archiveInfo.isDispose}</if>
+            <if test="archiveInfo.isDispose != null" > and is_dispose = #{archiveInfo.isDispose}</if>
+            <if test="archiveInfo.isOpen != null" > and is_open = #{archiveInfo.isOpen} </if>
+            <if test="archiveInfo.isIdentify != null"> and is_identify = #{archiveInfo.isIdentify}</if>
             <include refid="selectArchiveInfoDataPermit"/>
         </where>
     </select>
@@ -174,7 +178,9 @@
             field30,
             oss_status,
             field31,
-            is_dispose
+            is_dispose,
+            is_open,
+            is_identify
             ) LIKE CONCAT('%', #{keyword}, '%')
             and category_id = #{categoryId}
             and archive_status = #{archiveStatus}
@@ -228,7 +234,9 @@
             field30,
             oss_status,
             field31,
-            is_dispose
+            is_dispose,
+            is_open,
+            is_identify
             ) LIKE CONCAT('%', #{keyword}, '%')
             and category_id = #{categoryId}
             and archive_status = #{archiveStatus}
@@ -287,7 +295,9 @@
             <if test="archiveInfo.field30 != null  and archiveInfo.field30 != ''"> and field30 Like concat('%', #{archiveInfo.field30}, '%')</if>
             <if test="archiveInfo.ossStatus != null and archiveInfo.ossStatus != 0">and oss_status = #{archiveInfo.ossStatus}</if>
             <if test="archiveInfo.field31 != null  and archiveInfo.field31 != ''"> and field31 Like concat('%', #{archiveInfo.field31}, '%')</if>
-            <if test="archiveInfo.isDispose != null and archiveInfo.isDispose != 0">and is_dispose = #{archiveInfo.isDispose}</if>
+            <if test="archiveInfo.isDispose != null">and is_dispose = #{archiveInfo.isDispose}</if>
+            <if test="archiveInfo.isOpen != null" > and is_open = #{archiveInfo.isOpen}</if>
+             <if test="archiveInfo.isIdentify != null"> and is_identify = #{archiveInfo.isIdentify}</if>
             <include refid="selectArchiveInfoDataPermit"/>
         </where>
         <choose>
@@ -346,7 +356,9 @@
             <if test="archiveInfo.field30 != null  and archiveInfo.field30 != ''"> and field30 Like concat('%', #{archiveInfo.field30}, '%')</if>
             <if test="archiveInfo.ossStatus != null and archiveInfo.ossStatus != ''">and oss_status = #{archiveInfo.ossStatus}</if>
             <if test="archiveInfo.field31 != null  and archiveInfo.field31 != ''"> and field31 Like concat('%', #{archiveInfo.field31}, '%')</if>
-            <if test="archiveInfo.isDispose != null and archiveInfo.isDispose != 0">and is_dispose = #{archiveInfo.isDispose}</if>
+            <if test="archiveInfo.isDispose != null">and is_dispose = #{archiveInfo.isDispose}</if>
+               <if test="archiveInfo.isOpen != null"> and is_open = #{archiveInfo.isOpen}</if>
+               <if test="archiveInfo.isIdentify != null" > and is_identify = #{archiveInfo.isIdentify}</if>
             <include refid="selectArchiveInfoDataPermit"/>
         </where>
         <choose>
@@ -404,7 +416,9 @@
         field30,
         oss_status,
             field31,
-            is_dispose
+            is_dispose,
+            is_open,
+            is_identify
             ) LIKE CONCAT('%', #{archiveInfo.searchValue}, '%')
             and category_id = #{archiveInfo.categoryId}
             and archive_status = #{archiveInfo.archiveStatus}
@@ -470,6 +484,8 @@
             <if test="dataPermit != null">data_permit,</if>
             <if test="field31 != null">field31,</if>
             <if test="isDispose != null">is_dispose,</if>
+            <if test="isOpen != null">is_open,</if>
+            <if test="isIdentify != null">is_identify,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="categoryId != null">#{categoryId},</if>
@@ -521,16 +537,18 @@
             <if test="dataPermit != null">#{dataPermit},</if>
             <if test="field31 != null">#{field31},</if>
             <if test="isDispose != null">#{isDispose},</if>
+            <if test="isOpen != null">#{isOpen},</if>}
+            <if test="isIdentify != null">#{isIdentify},</if>
         </trim>
     </insert>
 
     <insert id="insertArchiveInfoList" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO archive_info (
-        category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, remarks, archive_status, create_by,create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7,field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status, data_permit, field31, is_dispose
+        category_id, fonds_number, fonds_name, retention_period, item_number, archive_number, department, archiver, remarks, archive_status, create_by,create_time, update_by, update_time, category_code, field1, field2, field3, field4, field5, field6, field7,field8, field9, field10, field11, field12, field13, field14, field15, field16, field17, field18, field19, field20, field21, field22, field23, field24, field25, field26, field27, field28, field29, field30, oss_status, data_permit, field31, is_dispose, is_open, is_identify
         ) VALUES
         <foreach collection="list" item="item" separator=",">
             (
-            #{item.categoryId}, #{item.fondsNumber}, #{item.fondsName}, #{item.retentionPeriod}, #{item.itemNumber}, #{item.archiveNumber}, #{item.department}, #{item.archiver}, #{item.remarks}, #{item.archiveStatus},#{item.createBy},#{item.createTime},#{item.updateBy},#{item.updateTime}, #{item.categoryCode}, #{item.field1}, #{item.field2}, #{item.field3}, #{item.field4}, #{item.field5}, #{item.field6}, #{item.field7},#{item.field8}, #{item.field9}, #{item.field10}, #{item.field11}, #{item.field12}, #{item.field13}, #{item.field14}, #{item.field15}, #{item.field16}, #{item.field17}, #{item.field18}, #{item.field19}, #{item.field20}, #{item.field21},#{item.field22}, #{item.field23}, #{item.field24}, #{item.field25}, #{item.field26}, #{item.field27}, #{item.field28}, #{item.field29}, #{item.field30}, #{item.ossStatus}, #{item.dataPermit}, #{item.field31}, #{item.isDispose}
+            #{item.categoryId}, #{item.fondsNumber}, #{item.fondsName}, #{item.retentionPeriod}, #{item.itemNumber}, #{item.archiveNumber}, #{item.department}, #{item.archiver}, #{item.remarks}, #{item.archiveStatus},#{item.createBy},#{item.createTime},#{item.updateBy},#{item.updateTime}, #{item.categoryCode}, #{item.field1}, #{item.field2}, #{item.field3}, #{item.field4}, #{item.field5}, #{item.field6}, #{item.field7},#{item.field8}, #{item.field9}, #{item.field10}, #{item.field11}, #{item.field12}, #{item.field13}, #{item.field14}, #{item.field15}, #{item.field16}, #{item.field17}, #{item.field18}, #{item.field19}, #{item.field20}, #{item.field21},#{item.field22}, #{item.field23}, #{item.field24}, #{item.field25}, #{item.field26}, #{item.field27}, #{item.field28}, #{item.field29}, #{item.field30}, #{item.ossStatus}, #{item.dataPermit}, #{item.field31}, #{item.isDispose}, #{item.isOpen}, #{item.isIdentify}
             )
         </foreach>
     </insert>
@@ -593,6 +611,8 @@
             <if test="dataPermit != null">data_permit = #{dataPermit},</if>
             <if test="field31 != null">field31 = #{field31},</if>
             <if test="isDispose != null">is_dispose = #{isDispose},</if>
+            <if test="isOpen != null"> is_open = #{isOpen},</if>
+            <if test="isIdentify != null">is_identify = #{isIdentify},</if>
         </trim>
         where id = #{id}
     </update>
@@ -696,7 +716,9 @@
             field30,
             oss_status,
             field31,
-            is_dispose
+            is_dispose,
+            is_open,
+            is_identify
             ) LIKE CONCAT('%', #{keyword}, '%')
             and category_id = #{categoryId}
             and archive_status = #{archiveStatus}
@@ -757,7 +779,9 @@
             <if test="archiveInfo.field30 != null  and archiveInfo.field30 != ''"> and field30 Like concat('%', #{archiveInfo.field30}, '%')</if>
             <if test="archiveInfo.ossStatus != null and archiveInfo.ossStatus != 0">and oss_status = #{archiveInfo.ossStatus}</if>
             <if test="archiveInfo.field31 != null  and archiveInfo.field31 != ''"> and field31 Like concat('%', #{archiveInfo.field31}, '%')</if>
-            <if test="archiveInfo.isDispose != null and archiveInfo.isDispose != 0">and is_dispose = #{archiveInfo.isDispose}</if>
+            <if test="archiveInfo.isDispose != null">and is_dispose = #{archiveInfo.isDispose}</if>
+            <if test="archiveInfo.isOpen != null"> and is_open = #{archiveInfo.isOpen}</if>
+            <if test="archiveInfo.isIdentify != null"> and is_identify = #{archiveInfo.isIdentify}</if>
             <include refid="selectArchiveInfoDataPermit"/>
         </where>
         <choose>
@@ -818,7 +842,9 @@
             field30,
             oss_status,
             field31,
-            is_dispose
+            is_dispose,
+            is_open,
+            is_identify
             ) LIKE CONCAT('%', #{searchValue}, '%')
             AND is_dispose = 0
             AND archive_status != 0
@@ -898,5 +924,13 @@
 
     <update id="dropTempTable">
         DROP TEMPORARY TABLE IF EXISTS temp_archive_update
+    </update>
+    <update id="identifyContractByIds">
+        update archive_info
+        set is_identify = 1
+        where id in
+        <foreach item="item" collection="ids" index="index" separator="," close=")" open="(">
+            #{item}
+        </foreach>
     </update>
 </mapper>

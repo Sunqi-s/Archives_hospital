@@ -77,7 +77,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </update>
     <update id="openArchiveInfo">
-        update archive_info set data_permit = #{newPermit} where id = #{id}
+        update archive_info set data_permit = #{newPermit}, is_open = 1 where id = #{id}
     </update>
 
     <delete id="deleteArchiveOpenById" parameterType="Long">

@@ -1,8 +1,10 @@
 package com.archives.archive.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.archives.archive.domain.ArchiveInfo;
+import com.archives.archive.mapper.ArchiveInfoMapper;
 import com.archives.common.core.domain.entity.SysUser;
 import com.archives.common.utils.DateUtils;
 import com.archives.common.utils.SecurityUtils;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.archives.archive.mapper.ArchiveIdentifyMapper;
 import com.archives.archive.domain.ArchiveIdentify;
 import com.archives.archive.service.IArchiveIdentifyService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 鉴定记录Service业务层处理
@@ -23,6 +26,8 @@ public class ArchiveIdentifyServiceImpl implements IArchiveIdentifyService
 {
     @Autowired
     private ArchiveIdentifyMapper archiveIdentifyMapper;
+    @Autowired
+    private ArchiveInfoMapper archiveInfoMapper;
 
     /**
      * 查询鉴定记录
@@ -55,10 +60,19 @@ public class ArchiveIdentifyServiceImpl implements IArchiveIdentifyService
      * @return 结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertArchiveIdentify(List<ArchiveInfo> archiveInfos)
     {
+        if (archiveInfos == null || archiveInfos.isEmpty()) {
+            return 0;
+        }
+
         SysUser currentUser = SecurityUtils.getLoginUser().getUser();
+        List<Long> ids = new ArrayList<>();
+        List<ArchiveIdentify> archiveIdentifies = new ArrayList<>();
+
         for (ArchiveInfo archiveInfo : archiveInfos) {
+            Long id = archiveInfo.getId();
             ArchiveIdentify archiveIdentify = new ArchiveIdentify();
             archiveIdentify.setCategoryId(archiveInfo.getCategoryId());
             archiveIdentify.setArchiveNumber(archiveInfo.getArchiveNumber());
@@ -66,7 +80,13 @@ public class ArchiveIdentifyServiceImpl implements IArchiveIdentifyService
             archiveIdentify.setTitle(archiveInfo.getField3());
             archiveIdentify.setCreateBy(currentUser.getNickName());
             archiveIdentify.setCreateTime(DateUtils.getNowDate());
-            archiveIdentifyMapper.insertArchiveIdentify(archiveIdentify);
+            archiveIdentifies.add(archiveIdentify);
+            ids.add(id);
+        }
+
+        if (!archiveIdentifies.isEmpty()) {
+            archiveIdentifyMapper.insertArchiveIdentifyBeach(archiveIdentifies);
+            archiveInfoMapper.identifyContractByIds(ids);
         }
         return 1;
     }

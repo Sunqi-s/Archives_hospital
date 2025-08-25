@@ -2,18 +2,19 @@ package com.archives.archive.mapper;
 
 import java.util.List;
 import com.archives.archive.domain.ArchiveIdentify;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 鉴定记录Mapper接口
- * 
+ *
  * @author é«å°å·
  * @date 2025-08-05
  */
-public interface ArchiveIdentifyMapper 
+public interface ArchiveIdentifyMapper
 {
     /**
      * 查询鉴定记录
-     * 
+     *
      * @param id 鉴定记录主键
      * @return 鉴定记录
      */
@@ -21,7 +22,7 @@ public interface ArchiveIdentifyMapper
 
     /**
      * 查询鉴定记录列表
-     * 
+     *
      * @param archiveIdentify 鉴定记录
      * @return 鉴定记录集合
      */
@@ -29,7 +30,7 @@ public interface ArchiveIdentifyMapper
 
     /**
      * 新增鉴定记录
-     * 
+     *
      * @param archiveIdentify 鉴定记录
      * @return 结果
      */
@@ -37,7 +38,7 @@ public interface ArchiveIdentifyMapper
 
     /**
      * 修改鉴定记录
-     * 
+     *
      * @param archiveIdentify 鉴定记录
      * @return 结果
      */
@@ -45,7 +46,7 @@ public interface ArchiveIdentifyMapper
 
     /**
      * 删除鉴定记录
-     * 
+     *
      * @param id 鉴定记录主键
      * @return 结果
      */
@@ -53,9 +54,11 @@ public interface ArchiveIdentifyMapper
 
     /**
      * 批量删除鉴定记录
-     * 
+     *
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */
     public int deleteArchiveIdentifyByIds(Long[] ids);
+
+    public int insertArchiveIdentifyBeach(@Param("archiveIdentifies") List<ArchiveIdentify> archiveIdentifies);
 }
