@@ -64,38 +64,38 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['archive:borrow:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['archive:borrow:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['archive:borrow:remove']"
-        >删除</el-button>
-      </el-col>
+<!--      <el-col :span="1.5">-->
+<!--        <el-button-->
+<!--          type="primary"-->
+<!--          plain-->
+<!--          icon="el-icon-plus"-->
+<!--          size="mini"-->
+<!--          @click="handleAdd"-->
+<!--          v-hasPermi="['archive:borrow:add']"-->
+<!--        >新增</el-button>-->
+<!--      </el-col>-->
+<!--      <el-col :span="1.5">-->
+<!--        <el-button-->
+<!--          type="success"-->
+<!--          plain-->
+<!--          icon="el-icon-edit"-->
+<!--          size="mini"-->
+<!--          :disabled="single"-->
+<!--          @click="handleUpdate"-->
+<!--          v-hasPermi="['archive:borrow:edit']"-->
+<!--        >修改</el-button>-->
+<!--      </el-col>-->
+<!--      <el-col :span="1.5">-->
+<!--        <el-button-->
+<!--          type="danger"-->
+<!--          plain-->
+<!--          icon="el-icon-delete"-->
+<!--          size="mini"-->
+<!--          :disabled="multiple"-->
+<!--          @click="handleDelete"-->
+<!--          v-hasPermi="['archive:borrow:remove']"-->
+<!--        >删除</el-button>-->
+<!--      </el-col>-->
       <el-col :span="1.5">
         <el-button
           type="warning"
@@ -281,7 +281,7 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加ArchiveBorrow";
+      this.title = "添加借阅记录";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -290,7 +290,7 @@ export default {
       getBorrow(id).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改ArchiveBorrow";
+        this.title = "修改借阅记录";
       });
     },
     /** 提交按钮 */
@@ -316,7 +316,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除ArchiveBorrow编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除借阅编号为"' + ids + '"的数据项？').then(function() {
         return delBorrow(ids);
       }).then(() => {
         this.getList();
