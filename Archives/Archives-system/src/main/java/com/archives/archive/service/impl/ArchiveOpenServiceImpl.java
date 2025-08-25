@@ -3,6 +3,7 @@ package com.archives.archive.service.impl;
 import java.util.List;
 
 import com.archives.archive.domain.ArchiveInfo;
+import com.archives.archive.mapper.ArchiveInfoMapper;
 import com.archives.common.core.domain.entity.SysUser;
 import com.archives.common.utils.DateUtils;
 import com.archives.common.utils.SecurityUtils;
@@ -23,6 +24,8 @@ public class ArchiveOpenServiceImpl implements IArchiveOpenService
 {
     @Autowired
     private ArchiveOpenMapper archiveOpenMapper;
+    @Autowired
+    private ArchiveInfoMapper archiveInfoMapper;
 
     /**
      * 查询公开记录
@@ -109,7 +112,23 @@ public class ArchiveOpenServiceImpl implements IArchiveOpenService
     @Override
     public int deleteArchiveOpenByIds(Long[] ids)
     {
-        return archiveOpenMapper.deleteArchiveOpenByIds(ids);
+        if (ids == null || ids.length == 0) {
+            return 0;
+        }
+
+        Long[] archiveIds = archiveOpenMapper.selectArchiveIdByIds(ids);
+
+        if (archiveIds == null) {
+            archiveIds = new Long[0];
+        }
+
+        int result = archiveOpenMapper.deleteArchiveOpenByIds(ids);
+
+        if(archiveIds.length > 0){
+            archiveInfoMapper.updateIsOpen(archiveIds);
+        }
+
+        return result;
     }
 
     /**

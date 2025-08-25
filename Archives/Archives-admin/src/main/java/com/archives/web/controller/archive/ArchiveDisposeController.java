@@ -98,9 +98,20 @@ public class ArchiveDisposeController extends BaseController
      */
 //    @PreAuthorize("@ss.hasPermi('archive:dispose:remove')")
     @Log(title = "处置记录", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
-        return toAjax(archiveDisposeService.deleteArchiveDisposeByIds(ids));
+        // 参数校验
+        if (ids == null || ids.length == 0) {
+            return AjaxResult.error("删除ID不能为空");
+        }
+
+        try {
+            return toAjax(archiveDisposeService.deleteArchiveDisposeByIds(ids));
+        } catch (Exception e) {
+            logger.error("删除处置记录失败", e);
+            return AjaxResult.error("删除失败：" + e.getMessage());
+        }
     }
+
 }

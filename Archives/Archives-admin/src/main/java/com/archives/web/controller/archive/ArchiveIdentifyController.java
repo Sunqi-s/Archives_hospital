@@ -100,6 +100,15 @@ public class ArchiveIdentifyController extends BaseController
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
-        return toAjax(archiveIdentifyService.deleteArchiveIdentifyByIds(ids));
+        // 参数校验
+        if (ids == null || ids.length == 0) {
+            return AjaxResult.error("删除ID不能为空");
+        }
+        try {
+            return toAjax(archiveIdentifyService.deleteArchiveIdentifyByIds(ids));
+        }catch (Exception e) {
+            logger.error("删除鉴定记录失败", e);
+            return AjaxResult.error("删除失败：" + e.getMessage());
+        }
     }
 }

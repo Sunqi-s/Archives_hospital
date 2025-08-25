@@ -166,4 +166,10 @@ public interface ArchiveInfoMapper
     public int disposeContractByIds(@Param("ids") List<Long> ids);
 
     public int identifyContractByIds(@Param("ids") List<Long> ids);
+
+    public int updateIsDispose(@Param("ids") Long[] ids);
+
+    public int updateIsOpen(@Param("ids") Long[] ids);
+
+    public int updateIsIdentify(@Param("ids") Long[] ids);
 }

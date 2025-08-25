@@ -61,4 +61,6 @@ public interface ArchiveOpenMapper
     public int deleteArchiveOpenByIds(Long[] ids);
 
     public int openArchiveInfo(@Param("id") Long id, @Param("newPermit") String newPermit);
+
+    public Long[] selectArchiveIdByIds(@Param("ids") Long[] ids);
 }

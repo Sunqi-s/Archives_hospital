@@ -118,9 +118,29 @@ public class ArchiveDisposeServiceImpl implements IArchiveDisposeService
      * @return 结果
      */
     @Override
-    public int deleteArchiveDisposeByIds(Long[] ids)
-    {
-        return archiveDisposeMapper.deleteArchiveDisposeByIds(ids);
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteArchiveDisposeByIds(Long[] ids) {
+        if (ids == null || ids.length == 0) {
+            return 0;
+        }
+
+        // 先查询关联的档案ID，避免删除后无法查询
+        Long[] archiveIds = archiveDisposeMapper.selectArchiveIdByIds(ids);
+
+        // 空值检查，避免后续更新操作出现空指针异常
+        if (archiveIds == null) {
+            archiveIds = new Long[0];
+        }
+
+        // 执行删除操作
+        int result = archiveDisposeMapper.deleteArchiveDisposeByIds(ids);
+
+        // 更新档案信息的处理状态
+        if (archiveIds.length > 0) {
+            archiveInfoMapper.updateIsDispose(archiveIds);
+        }
+
+        return result;
     }
 
     /**

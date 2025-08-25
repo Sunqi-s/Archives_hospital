@@ -61,4 +61,6 @@ public interface ArchiveIdentifyMapper
     public int deleteArchiveIdentifyByIds(Long[] ids);
 
     public int insertArchiveIdentifyBeach(@Param("archiveIdentifies") List<ArchiveIdentify> archiveIdentifies);
+
+    public Long[] selectArchiveIdByIds(@Param("ids") Long[] ids);
 }

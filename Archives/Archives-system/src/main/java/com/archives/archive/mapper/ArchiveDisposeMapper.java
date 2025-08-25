@@ -2,6 +2,7 @@ package com.archives.archive.mapper;
 
 import java.util.List;
 import com.archives.archive.domain.ArchiveDispose;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 处置记录Mapper接口
@@ -60,4 +61,6 @@ public interface ArchiveDisposeMapper
     public int deleteArchiveDisposeByIds(Long[] ids);
 
     public int insertArchiveDisposeBatch(List<ArchiveDispose> archiveDisposes);
+
+    public Long[] selectArchiveIdByIds(@Param("ids") Long[] ids);
 }

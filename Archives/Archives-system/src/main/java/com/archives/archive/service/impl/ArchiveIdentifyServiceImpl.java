@@ -114,7 +114,24 @@ public class ArchiveIdentifyServiceImpl implements IArchiveIdentifyService
     @Override
     public int deleteArchiveIdentifyByIds(Long[] ids)
     {
-        return archiveIdentifyMapper.deleteArchiveIdentifyByIds(ids);
+        if (ids == null || ids.length == 0) {
+            return 0;
+        }
+
+        Long[] archiveIds = archiveIdentifyMapper.selectArchiveIdByIds(ids);
+
+        // 空值检查，避免后续更新操作出现空指针异常
+        if (archiveIds == null) {
+            archiveIds = new Long[0];
+        }
+
+        int result = archiveIdentifyMapper.deleteArchiveIdentifyByIds(ids);
+
+        if (archiveIds.length > 0) {
+            archiveInfoMapper.updateIsIdentify(archiveIds);
+        }
+
+        return result;
     }
 
     /**

@@ -101,6 +101,15 @@ public class ArchiveOpenController extends BaseController
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
-        return toAjax(archiveOpenService.deleteArchiveOpenByIds(ids));
+        // 参数校验
+        if (ids == null || ids.length == 0) {
+            return AjaxResult.error("删除ID不能为空");
+        }
+        try {
+            return toAjax(archiveOpenService.deleteArchiveOpenByIds(ids));
+        }catch (Exception e){
+            logger.error("删除公开记录失败", e);
+            return AjaxResult.error("删除失败：" + e.getMessage());
+        }
     }
 }

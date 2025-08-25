@@ -36,6 +36,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
+    <select id="selectArchiveIdByIds" parameterType="Long" resultType="java.lang.Long">
+        select archive_id from archive_identify
+        where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
     <insert id="insertArchiveIdentify" parameterType="ArchiveIdentify" useGeneratedKeys="true" keyProperty="id">
         insert into archive_identify
         <trim prefix="(" suffix=")" suffixOverrides=",">

@@ -933,4 +933,36 @@
             #{item}
         </foreach>
     </update>
+    <update id="updateIsDispose">
+        update archive_info
+        set is_dispose = 0
+        where id in
+        <foreach item="item" collection="ids" index="index" separator="," close=")" open="(">
+            #{item}
+        </foreach>
+    </update>
+    <update id="updateIsOpen">
+        update archive_info
+        set
+        is_open = 0,
+        data_permit = CASE
+        WHEN data_permit IS NOT NULL THEN
+        TRIM(BOTH ',' FROM REPLACE(CONCAT(',', data_permit, ','), ',all', ''))
+        ELSE data_permit
+        END
+        where id in
+        <foreach item="item" collection="ids" index="index" separator="," close=")" open="(">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateIsIdentify">
+        update archive_info
+        set is_identify = 0
+        where id in
+        <foreach item="item" collection="ids" index="index" separator="," close=")" open="(">
+            #{item}
+        </foreach>
+    </update>
+
 </mapper>
