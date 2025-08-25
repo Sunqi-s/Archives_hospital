@@ -605,8 +605,8 @@ export default {
               }
             });
             }else{
+              this.updateStatus = true;
           this.categoryId = nodeData.id;
-          this.isClick = false;
             }
           })
           }else{
@@ -618,6 +618,7 @@ export default {
             this.showPasswordPrompt = true; // 显示密码输入框
           } else {
             this.showPasswordPrompt = false;
+            this.isClick = false;
             this.doList(nodeData)
           }
         } else if (nodeData.type === 0) {
@@ -737,6 +738,7 @@ export default {
     },
     /** 查询档案信息列表 */
     getList() {
+      console.log("getList")
       this.loading = true;
       // 确保保留原有的查询参数，并更新分页信息
       const params = {
