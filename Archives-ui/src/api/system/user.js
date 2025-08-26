@@ -142,3 +142,11 @@ export function updateUserDataPermi(data) {
     data: data
   })
 }
+
+export function getUserList(query) {
+  return request({
+    url: '/system/user/userList',
+    method: 'get',
+    params: query
+  })
+}

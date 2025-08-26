@@ -225,7 +225,9 @@
           <el-input v-model="ruleForm.applicant"></el-input>
         </el-form-item>
         <el-form-item label="借阅人" prop="borrower">
-          <el-input v-model="ruleForm.borrower"></el-input>
+          <el-select placeholder="请选择借阅人" v-model="ruleForm.borrower" filterable clearable reserve-keyword>
+            <el-option v-for="item in userList" :key="item.value" :label="item.label" :value="item.value"/>
+          </el-select>
         </el-form-item>
         <el-form-item label="借阅时间" prop="borrowingTime">
           <el-col :span="11">
@@ -270,7 +272,7 @@
 import { getDicts } from "@/api/system/dict/data";
 import { getItemByCategoryId } from "@/api/archive/item";
 import { listCategory, getCategory } from "@/api/archive/category";
-import { deptTreeSelect } from "@/api/system/user";
+import { deptTreeSelect, getUserList, listUser } from '@/api/system/user'
 import { getBeachList, getInfo, listInfo, sendInfo, sendInfoByIds,sendInfoAll } from '@/api/archive/info'
 import categoryTree from "@/views/archive/category/categoryTree.vue";
 import Treeselect from "@riophae/vue-treeselect";
@@ -278,7 +280,7 @@ import { treeselect } from "@/api/system/menu";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import { listDept } from "@/api/system/dept";
 import {getPreviewUrl} from "@/api/archive/filePreview";
-import { addBorrow, updateBorrow } from '@/api/archive/borrow'
+import { addBorrow, borrowUser, updateBorrow } from '@/api/archive/borrow'
 export default {
   name: "Resources",
   components: { 'file-tree': categoryTree, Treeselect },
@@ -377,6 +379,8 @@ export default {
           { required: true, message: '请填写借阅目的', trigger: 'blur' }
         ]
       },
+      loginUserName: '',
+      userList: [],
     };
   },
   created() {
@@ -384,6 +388,8 @@ export default {
     this.getCategoryTreeList();
     this.getDeptTree();
     this.loadDepartments();
+    this.listUser();
+    this.getLoginUser();
   },
   computed: {
     sortedFields() {
@@ -834,6 +840,7 @@ export default {
       console.log(this.selectedItems)
       const numberList = this.selectedItems.map(item => item.archiveNumber)
       const titleList = this.selectedItems.map(item => item.field3)
+      this.ruleForm.applicant = this.LoginUserName
       this.ruleForm.archiveNumber = numberList.join(',')
       this.ruleForm.title = titleList.join(',' + '\n')
 
@@ -875,6 +882,31 @@ export default {
       this.ruleForm.title = null
       this.ruleForm.borrowingPurpose = null
     },
+    listUser() {
+      listUser().then(response => {
+        console.log(response);
+        if (response && Array.isArray(response.rows)) {
+          console.log(this.userList)
+          this.userList = response.rows.map(item => {
+            return {
+              value: item.userName,
+              label: item.nickName
+            };
+          });
+        } else {
+          this.userList = [];
+        }
+      }).catch(error => {
+        console.error('获取用户列表失败:', error);
+        this.userList = [];
+      });
+    },
+    getLoginUser() {
+      borrowUser().then(response => {
+        this.LoginUserName = response.userName;
+        this.ruleForm.applicant = this.LoginUserName;
+      })
+    }
   }
 };
 </script>
