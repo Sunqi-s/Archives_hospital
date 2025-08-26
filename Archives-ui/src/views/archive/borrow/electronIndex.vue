@@ -79,6 +79,13 @@
                     @selection-change="handleSelectionChange" :default-sort="{ prop: 'id', order: 'descending' }" height="80%"
                     ref="dynamicTable" border>
             <el-table-column type="selection" width="55" align="center" />
+            <el-table-column label="借阅状态" width="120" align="center">
+              <template slot-scope="scope">
+                <el-tag :type="scope.row.isBorrow === 1 ? 'success' : 'info'">
+                  {{ scope.row.isBorrow === 1 ? '已借阅' : '未借阅' }}
+                </el-tag>
+              </template>
+            </el-table-column>
             <el-table-column v-for="field in sortedFields" :key="field.name" :prop="field.name" :label="field.label"
                              :sortable="true" :width="field.label.length * 11 + 65 + 'vh'">
               <template slot-scope="scope">
@@ -394,7 +401,6 @@ export default {
   computed: {
     sortedFields() {
       return this.listFields.filter(field => field.name !== 'archiveStatus')
-      return 0;
     },
     isselect() {
       return this.categoryId === null;
@@ -666,6 +672,7 @@ export default {
         archiveStatus: 2 // 归档状态
       };
       listInfo(params).then(response => {
+        console.log( response)
         if (this.queryParams.searchValue) {
           this.infoList = this.markMatches(response.rows);
         } else {
@@ -835,6 +842,27 @@ export default {
     },
 
     handleBorrow() {
+      // 校验是否有已借阅的档案
+      const borrowedItems = this.selectedItems.filter(item => item.isBorrow == 1);
+
+      if (borrowedItems.length > 0) {
+        // 如果有已借阅的档案，给出具体提示
+        if (borrowedItems.length === this.selectedItems.length) {
+          // 所有选中的档案都已借阅
+          this.$message.warning('所有选中的档案都已借阅，请选择未借阅的档案！');
+        } else {
+          // 部分档案已借阅
+          this.$message.warning(`选中的档案中有${borrowedItems.length}个已借阅，请只选择未借阅的档案！`);
+        }
+        return; // 阻止继续执行
+      }
+
+      // 检查是否选择了档案
+      if (this.selectedItems.length === 0) {
+        this.$message.warning('请先选择要借阅的档案！');
+        return;
+      }
+
       this.savedids = this.savedids.concat(this.ids)
       console.log(this.savedids)
       console.log(this.selectedItems)
@@ -859,6 +887,7 @@ export default {
     submitForm() {
       this.$refs['ruleForm'].validate(valid => {
         if (valid) {
+          console.log(this.ruleForm)
           if (this.ruleForm.id != null) {
             updateBorrow(this.ruleForm).then(response => {
               this.clearBorrowForm()
@@ -884,9 +913,7 @@ export default {
     },
     listUser() {
       listUser().then(response => {
-        console.log(response);
         if (response && Array.isArray(response.rows)) {
-          console.log(this.userList)
           this.userList = response.rows.map(item => {
             return {
               value: item.userName,

@@ -203,6 +203,8 @@ public class ArchiveInfo extends BaseEntity
 
     private Integer isIdentify;
 
+    private Integer isBorrow;
+
     /** 附件 */
     @Excel(name = "附件")
     private int ossStatus;
@@ -613,6 +615,14 @@ public class ArchiveInfo extends BaseEntity
         this.isIdentify = isIdentify;
     }
 
+    public Integer getIsBorrow() {
+        return isBorrow;
+    }
+
+    public void setIsBorrow(Integer isBorrow) {
+        this.isBorrow = isBorrow;
+    }
+
     public String getField(int fieldIndex) {
         switch (fieldIndex) {
             case 1: return getField1();
@@ -743,8 +753,9 @@ public class ArchiveInfo extends BaseEntity
             .append("ossStatus", getOssStatus())
             .append("dataPermit", getDataPermit())
             .append("isDispose", getIsDispose())
-                .append("isOpen", getIsOpen())
-                .append("isIdentify", getIsIdentify())
+            .append("isOpen", getIsOpen())
+            .append("isIdentify", getIsIdentify())
+            .append("isBorrow", getIsBorrow())
             .toString();
     }
 

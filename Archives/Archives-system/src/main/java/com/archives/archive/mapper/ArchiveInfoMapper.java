@@ -172,4 +172,6 @@ public interface ArchiveInfoMapper
     public int updateIsOpen(@Param("ids") Long[] ids);
 
     public int updateIsIdentify(@Param("ids") Long[] ids);
+
+    public int updateIsBorrow(@Param("archiveNumbers") String[] archiveNumbers);
 }

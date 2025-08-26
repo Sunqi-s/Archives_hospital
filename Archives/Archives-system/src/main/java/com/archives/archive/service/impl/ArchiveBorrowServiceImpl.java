@@ -4,11 +4,13 @@ import com.archives.archive.domain.ArchiveBorrow;
 import com.archives.archive.domain.ArchiveInfo;
 import com.archives.archive.domain.SearchJson;
 import com.archives.archive.mapper.ArchiveBorrowMapper;
+import com.archives.archive.mapper.ArchiveInfoMapper;
 import com.archives.archive.service.IArchiveBorrowService;
 import com.archives.common.core.domain.entity.SysUser;
 import com.archives.common.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.List;
 public class ArchiveBorrowServiceImpl implements IArchiveBorrowService {
     @Autowired
     private ArchiveBorrowMapper archiveBorrowMapper;
+    @Autowired
+    private ArchiveInfoMapper archiveInfoMapper;
 
     /**
      * 查询ArchiveBorrow
@@ -48,10 +52,40 @@ public class ArchiveBorrowServiceImpl implements IArchiveBorrowService {
      * @return 结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertArchiveBorrow(ArchiveBorrow archiveBorrow)
     {
+        // 输入参数验证
+        if (archiveBorrow == null) {
+            throw new IllegalArgumentException("archiveBorrow cannot be null");
+        }
+
+        String[] archiveNumbers;
+        String archiveNumber = archiveBorrow.getArchiveNumber();
+
+        // 处理档案号分割逻辑
+        if (archiveNumber != null && !archiveNumber.trim().isEmpty() && archiveNumber.contains(",")) {
+            // 按逗号分割并去除空格
+            archiveNumbers = archiveNumber.split("\\s*,\\s*");
+        } else {
+            // 单个档案号的情况，处理null和空字符串
+            if (archiveNumber == null || archiveNumber.trim().isEmpty()) {
+                archiveNumbers = new String[0]; // 空数组避免null元素
+            } else {
+                archiveNumbers = new String[]{archiveNumber};
+            }
+        }
+
+        // 只有当archiveNumbers不为空时才执行更新操作
+        if (archiveNumbers.length > 0) {
+            archiveInfoMapper.updateIsBorrow(archiveNumbers);
+        }else {
+            throw new IllegalArgumentException("archiveNumber cannot be null or empty");
+        }
+
         return archiveBorrowMapper.insertArchiveBorrow(archiveBorrow);
     }
+
 
     /**
      * 修改ArchiveBorrow
