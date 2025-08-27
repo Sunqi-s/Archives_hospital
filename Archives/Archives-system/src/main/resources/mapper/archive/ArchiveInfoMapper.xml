@@ -986,5 +986,13 @@
             #{item}
         </foreach>
     </update>
+    <update id="restorationsBorrow">
+        update archive_info
+        set is_borrow = 0
+        where id in
+        <foreach item="item" collection="archiveIds" index="index" separator="," close=")" open="(">
+            #{item}
+        </foreach>
+    </update>
 
 </mapper>

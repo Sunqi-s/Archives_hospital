@@ -13,7 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+
 @Service
 public class ArchiveBorrowServiceImpl implements IArchiveBorrowService {
     @Autowired
@@ -53,39 +56,140 @@ public class ArchiveBorrowServiceImpl implements IArchiveBorrowService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertArchiveBorrow(ArchiveBorrow archiveBorrow)
-    {
+    public int insertArchiveBorrow(ArchiveBorrow archiveBorrow) {
         // 输入参数验证
         if (archiveBorrow == null) {
             throw new IllegalArgumentException("archiveBorrow cannot be null");
         }
 
-        String[] archiveNumbers;
         String archiveNumber = archiveBorrow.getArchiveNumber();
+        String title = archiveBorrow.getTitle();
+        String archiveId = archiveBorrow.getArchiveId();
 
         // 处理档案号分割逻辑
-        if (archiveNumber != null && !archiveNumber.trim().isEmpty() && archiveNumber.contains(",")) {
-            // 按逗号分割并去除空格
-            archiveNumbers = archiveNumber.split("\\s*,\\s*");
-        } else {
-            // 单个档案号的情况，处理null和空字符串
-            if (archiveNumber == null || archiveNumber.trim().isEmpty()) {
-                archiveNumbers = new String[0]; // 空数组避免null元素
-            } else {
-                archiveNumbers = new String[]{archiveNumber};
-            }
-        }
+        String[] archiveNumbers = parseArchiveNumbers(archiveNumber);
+        String[] titles = parseTitles(title, archiveNumbers.length);
+        String[] archiveIds = parseArchiveIds(archiveId);
 
-        // 只有当archiveNumbers不为空时才执行更新操作
-        if (archiveNumbers.length > 0) {
-            archiveInfoMapper.updateIsBorrow(archiveNumbers);
-        }else {
+        // 验证档案号不能为空
+        if (archiveNumbers.length == 0) {
             throw new IllegalArgumentException("archiveNumber cannot be null or empty");
         }
 
-        return archiveBorrowMapper.insertArchiveBorrow(archiveBorrow);
+        // 验证标题数量与档案号数量匹配
+        if (titles.length != archiveNumbers.length) {
+            throw new IllegalArgumentException("档案号数量与标题数量不匹配");
+        }
+
+        int insertCount = 0;
+
+        // 为每个档案号创建独立的借阅记录
+        for (int i = 0; i < archiveNumbers.length; i++) {
+            // 创建新的借阅对象
+            ArchiveBorrow singleBorrow = new ArchiveBorrow();
+
+            // 复制公共字段
+            singleBorrow.setBorrower(archiveBorrow.getBorrower());
+            singleBorrow.setApplicant(archiveBorrow.getApplicant());
+            singleBorrow.setBorrowingTime(archiveBorrow.getBorrowingTime());
+            singleBorrow.setBorrowingPurpose(archiveBorrow.getBorrowingPurpose());
+            singleBorrow.setReturnTime(archiveBorrow.getReturnTime());
+            singleBorrow.setCreateBy(archiveBorrow.getCreateBy());
+            singleBorrow.setCreateTime(new Date());
+
+            // 设置当前档案号和标题
+            singleBorrow.setArchiveNumber(archiveNumbers[i]);
+            singleBorrow.setTitle(titles[i]);
+            singleBorrow.setArchiveId(archiveIds[i]);
+
+            // 插入单条记录
+            archiveBorrowMapper.insertArchiveBorrow(singleBorrow);
+            insertCount++;
+        }
+
+        // 更新档案信息表中的is_borrow字段
+        archiveInfoMapper.updateIsBorrow(archiveNumbers);
+
+        return insertCount;
     }
 
+    /**
+     * 解析档案号字符串为数组
+     *
+     * @param archiveNumber 档案号字符串
+     * @return 档案号数组
+     */
+    private String[] parseArchiveNumbers(String archiveNumber) {
+        if (archiveNumber == null || archiveNumber.trim().isEmpty()) {
+            return new String[0];
+        }
+
+        if (archiveNumber.contains(",")) {
+            // 按逗号分割并去除前后空格
+            return Arrays.stream(archiveNumber.split("\\s*,\\s*"))
+                    .filter(s -> !s.isEmpty())
+                    .toArray(String[]::new);
+        } else {
+            return new String[]{archiveNumber.trim()};
+        }
+    }
+
+    /**
+     * 解析标题字符串为数组
+     *
+     * @param title 标题字符串
+     * @param expectedCount 期望的标题数量（与档案号数量一致）
+     * @return 标题数组
+     */
+    private String[] parseTitles(String title, int expectedCount) {
+        if (title == null || title.trim().isEmpty()) {
+            // 如果标题为空，返回相同数量的空字符串
+            return new String[expectedCount];
+        }
+
+        if (title.contains(",")) {
+            // 按逗号分割标题
+            String[] titles = Arrays.stream(title.split("\\s*,\\s*"))
+                    .filter(s -> !s.isEmpty())
+                    .toArray(String[]::new);
+
+            // 如果标题数量与档案号数量不一致，用最后一个标题填充剩余位置
+            if (titles.length < expectedCount) {
+                String[] filledTitles = new String[expectedCount];
+                System.arraycopy(titles, 0, filledTitles, 0, titles.length);
+                // 用最后一个标题填充剩余位置
+                for (int i = titles.length; i < expectedCount; i++) {
+                    filledTitles[i] = titles.length > 0 ? titles[titles.length - 1] : "";
+                }
+                return filledTitles;
+            } else if (titles.length > expectedCount) {
+                // 如果标题数量超过档案号数量，截取前面的部分
+                return Arrays.copyOf(titles, expectedCount);
+            } else {
+                return titles;
+            }
+        } else {
+            // 单个标题，复制到所有档案号
+            String[] titles = new String[expectedCount];
+            Arrays.fill(titles, title.trim());
+            return titles;
+        }
+    }
+
+    private String[] parseArchiveIds(String archiveId) {
+        if (archiveId == null || archiveId.trim().isEmpty()) {
+            return new String[0];
+        }
+
+        if (archiveId.contains(",")) {
+            // 按逗号分割并去除前后空格
+            return Arrays.stream(archiveId.split("\\s*,\\s*"))
+                    .filter(s -> !s.isEmpty())
+                    .toArray(String[]::new);
+        } else {
+            return new String[]{archiveId.trim()};
+        }
+    }
 
     /**
      * 修改ArchiveBorrow

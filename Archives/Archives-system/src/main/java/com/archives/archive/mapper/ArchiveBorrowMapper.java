@@ -64,5 +64,6 @@ public interface ArchiveBorrowMapper {
 
     public int getArchiveBorrowCount(@Param("categoryId") String categoryId,@Param("archiveNumber") String archiveNumber, @Param("field9") String field9, @Param("dataPermiList") String[] dataPermiList);
 
+    public List<ArchiveBorrow> getArchiveBorrowsByArchiveIds(@Param("ids") List<Long> ids);
 
 }

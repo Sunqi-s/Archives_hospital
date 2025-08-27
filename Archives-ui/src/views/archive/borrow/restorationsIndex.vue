@@ -68,8 +68,8 @@
         <!-- 功能按钮区 -->
         <el-row :gutter="10" class="mb8">
           <el-button type="success" icon="el-icon-s-flag" size="small" :disabled="!(savedids.length+ids.length)"
-                     @click="handleBorrow"
-          >申请借阅
+                     @click="handleRestorations"
+          >归还借阅
           </el-button>
         </el-row>
 
@@ -249,7 +249,7 @@
         <el-form-item label="归还时间">
           <el-col :span="11">
             <el-date-picker clearable
-                            v-model="ruleForm.returnTime"
+                            v-model="form.returnTime"
                             type="date"
                             placeholder="请选择归还时间"
             >
@@ -288,6 +288,7 @@ import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import { listDept } from "@/api/system/dept";
 import {getPreviewUrl} from "@/api/archive/filePreview";
 import { addBorrow, borrowUser, updateBorrow } from '@/api/archive/borrow'
+import { addRestorations } from '@/api/archive/restorations'
 export default {
   name: "Resources",
   components: { 'file-tree': categoryTree, Treeselect },
@@ -358,8 +359,7 @@ export default {
         returnTime: null,
         archiveNumber: null,
         title: null,
-        borrowingPurpose: null,
-        archiveId: null
+        borrowingPurpose: null
       },
       borrowRules: {
         applicant: [
@@ -670,7 +670,8 @@ export default {
         ...this.queryParams, // 保留现有的查询参数
         pageNum: this.queryParams.pageNum, // 当前页码
         pageSize: this.queryParams.pageSize, // 每页显示条数
-        archiveStatus: 2 // 归档状态
+        archiveStatus: 2, // 归档状态
+        isBorrow: 1
       };
       listInfo(params).then(response => {
         console.log( response)
@@ -869,11 +870,9 @@ export default {
       console.log(this.selectedItems)
       const numberList = this.selectedItems.map(item => item.archiveNumber)
       const titleList = this.selectedItems.map(item => item.field3)
-      const archiveList = this.selectedItems.map(item => item.id)
       this.ruleForm.applicant = this.LoginUserName
       this.ruleForm.archiveNumber = numberList.join(',')
       this.ruleForm.title = titleList.join(',' + '\n')
-      this.ruleForm.archiveId = archiveList.join(',')
 
       this.showBorrowDialog = true
     },
@@ -890,14 +889,6 @@ export default {
     submitForm() {
       this.$refs['ruleForm'].validate(valid => {
         if (valid) {
-          if (this.ruleForm.borrowingTime) {
-            const d = new Date(this.ruleForm.borrowingTime);
-            this.ruleForm.borrowingTime = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
-          }
-          if (this.ruleForm.returnTime) {
-            const d = new Date(this.ruleForm.returnTime);
-            this.ruleForm.returnTime = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
-          }
           console.log(this.ruleForm)
           if (this.ruleForm.id != null) {
             updateBorrow(this.ruleForm).then(response => {
@@ -943,6 +934,16 @@ export default {
       borrowUser().then(response => {
         this.LoginUserName = response.userName;
         this.ruleForm.applicant = this.LoginUserName;
+      })
+    },
+    handleRestorations() {
+      addRestorations(this.selectedItems).then(response => {
+        if (response.code === 200) {
+          this.$modal.msgSuccess("归还成功");
+          this.getList();
+        }else {
+          this.$modal.msgError(response.msg);
+        }
       })
     }
   }

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.archives.archive.mapper.ArchiveRestorationsMapper">
+
+    <resultMap type="ArchiveRestorations" id="ArchiveRestorationsResult">
+        <result property="id"    column="id"    />
+        <result property="borrower"    column="borrower"    />
+        <result property="applicant"    column="applicant"    />
+        <result property="borrowingTime"    column="borrowing_time"    />
+        <result property="archiveNumber"    column="archive_number"    />
+        <result property="title"    column="title"    />
+        <result property="borrowingPurpose"    column="borrowing_purpose"    />
+        <result property="returnTime"    column="return_time"    />
+    </resultMap>
+
+    <sql id="selectArchiveRestorationsVo">
+        select id, borrower, applicant, borrowing_time, archive_number, title, borrowing_purpose, return_time from archive_restorations
+    </sql>
+
+    <select id="selectArchiveRestorationsList" parameterType="ArchiveRestorations" resultMap="ArchiveRestorationsResult">
+        <include refid="selectArchiveRestorationsVo"/>
+        <where>
+            <if test="borrower != null  and borrower != ''"> and borrower = #{borrower}</if>
+            <if test="applicant != null  and applicant != ''"> and applicant = #{applicant}</if>
+            <if test="borrowingTime != null "> and borrowing_time = #{borrowingTime}</if>
+            <if test="archiveNumber != null  and archiveNumber != ''"> and archive_number = #{archiveNumber}</if>
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="borrowingPurpose != null  and borrowingPurpose != ''"> and borrowing_purpose = #{borrowingPurpose}</if>
+            <if test="returnTime != null "> and return_time = #{returnTime}</if>
+        </where>
+    </select>
+
+    <select id="selectArchiveRestorationsById" parameterType="Long" resultMap="ArchiveRestorationsResult">
+        <include refid="selectArchiveRestorationsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertArchiveRestorations" parameterType="ArchiveRestorations" useGeneratedKeys="true" keyProperty="id">
+        insert into archive_restorations
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="borrower != null and borrower != ''">borrower,</if>
+            <if test="applicant != null">applicant,</if>
+            <if test="borrowingTime != null">borrowing_time,</if>
+            <if test="archiveNumber != null">archive_number,</if>
+            <if test="title != null">title,</if>
+            <if test="borrowingPurpose != null">borrowing_purpose,</if>
+            <if test="returnTime != null">return_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="borrower != null and borrower != ''">#{borrower},</if>
+            <if test="applicant != null">#{applicant},</if>
+            <if test="borrowingTime != null">#{borrowingTime},</if>
+            <if test="archiveNumber != null">#{archiveNumber},</if>
+            <if test="title != null">#{title},</if>
+            <if test="borrowingPurpose != null">#{borrowingPurpose},</if>
+            <if test="returnTime != null">#{returnTime},</if>
+         </trim>
+    </insert>
+
+    <!-- 批量插入归还记录 -->
+    <insert id="batchInsertArchiveRestorations" parameterType="java.util.List">
+        INSERT INTO archive_restorations (
+        borrower,
+        applicant,
+        borrowing_time,
+        archive_number,
+        title,
+        borrowing_purpose,
+        return_time
+        ) VALUES
+        <foreach collection="archiveRestorations" item="item" separator=",">
+            (
+            #{item.borrower},
+            #{item.applicant},
+            #{item.borrowingTime},
+            #{item.archiveNumber},
+            #{item.title},
+            #{item.borrowingPurpose},
+            #{item.returnTime}
+            )
+        </foreach>
+    </insert>
+
+
+    <update id="updateArchiveRestorations" parameterType="ArchiveRestorations">
+        update archive_restorations
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="borrower != null and borrower != ''">borrower = #{borrower},</if>
+            <if test="applicant != null">applicant = #{applicant},</if>
+            <if test="borrowingTime != null">borrowing_time = #{borrowingTime},</if>
+            <if test="archiveNumber != null">archive_number = #{archiveNumber},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="borrowingPurpose != null">borrowing_purpose = #{borrowingPurpose},</if>
+            <if test="returnTime != null">return_time = #{returnTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveRestorationsById" parameterType="Long">
+        delete from archive_restorations where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveRestorationsByIds" parameterType="String">
+        delete from archive_restorations where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

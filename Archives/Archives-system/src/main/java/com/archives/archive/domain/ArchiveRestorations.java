@@ -8,12 +8,12 @@ import com.archives.common.annotation.Excel;
 import com.archives.common.core.domain.BaseEntity;
 
 /**
- * ArchiveBorrow对象 archive_borrow
- *
+ * 归还对象 archive_restorations
+ * 
  * @author é«å°å·
- * @date 2025-07-31
+ * @date 2025-08-26
  */
-public class ArchiveBorrow extends BaseEntity
+public class ArchiveRestorations extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
@@ -29,7 +29,7 @@ public class ArchiveBorrow extends BaseEntity
     private String applicant;
 
     /** 借阅时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Shanghai")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "借阅时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date borrowingTime;
 
@@ -46,105 +46,94 @@ public class ArchiveBorrow extends BaseEntity
     private String borrowingPurpose;
 
     /** 归还时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Shanghai")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "归还时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date returnTime;
 
-    private String archiveId;
-
-    public void setId(Long id)
+    public void setId(Long id) 
     {
         this.id = id;
     }
 
-    public Long getId()
+    public Long getId() 
     {
         return id;
     }
-    public void setBorrower(String borrower)
+    public void setBorrower(String borrower) 
     {
         this.borrower = borrower;
     }
 
-    public String getBorrower()
+    public String getBorrower() 
     {
         return borrower;
     }
-    public void setApplicant(String applicant)
+    public void setApplicant(String applicant) 
     {
         this.applicant = applicant;
     }
 
-    public String getApplicant()
+    public String getApplicant() 
     {
         return applicant;
     }
-    public void setBorrowingTime(Date borrowingTime)
+    public void setBorrowingTime(Date borrowingTime) 
     {
         this.borrowingTime = borrowingTime;
     }
 
-    public Date getBorrowingTime()
+    public Date getBorrowingTime() 
     {
         return borrowingTime;
     }
-    public void setArchiveNumber(String archiveNumber)
+    public void setArchiveNumber(String archiveNumber) 
     {
         this.archiveNumber = archiveNumber;
     }
 
-    public String getArchiveNumber()
+    public String getArchiveNumber() 
     {
         return archiveNumber;
     }
-    public void setTitle(String title)
+    public void setTitle(String title) 
     {
         this.title = title;
     }
 
-    public String getTitle()
+    public String getTitle() 
     {
         return title;
     }
-    public void setBorrowingPurpose(String borrowingPurpose)
+    public void setBorrowingPurpose(String borrowingPurpose) 
     {
         this.borrowingPurpose = borrowingPurpose;
     }
 
-    public String getBorrowingPurpose()
+    public String getBorrowingPurpose() 
     {
         return borrowingPurpose;
     }
-    public void setReturnTime(Date returnTime)
+    public void setReturnTime(Date returnTime) 
     {
         this.returnTime = returnTime;
     }
 
-    public Date getReturnTime()
+    public Date getReturnTime() 
     {
         return returnTime;
-    }
-
-    public String getArchiveId() {
-        return archiveId;
-    }
-
-    public void setArchiveId(String archiveId) {
-        this.archiveId = archiveId;
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-                .append("id", getId())
-                .append("borrower", getBorrower())
-                .append("applicant", getApplicant())
-                .append("borrowingTime", getBorrowingTime())
-                .append("archiveNumber", getArchiveNumber())
-                .append("title", getTitle())
-                .append("borrowingPurpose", getBorrowingPurpose())
-                .append("returnTime", getReturnTime())
-                .append("archiveId", getArchiveId())
-                .toString();
+            .append("id", getId())
+            .append("borrower", getBorrower())
+            .append("applicant", getApplicant())
+            .append("borrowingTime", getBorrowingTime())
+            .append("archiveNumber", getArchiveNumber())
+            .append("title", getTitle())
+            .append("borrowingPurpose", getBorrowingPurpose())
+            .append("returnTime", getReturnTime())
+            .toString();
     }
 }
